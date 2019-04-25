@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import font
+from tkinter.ttk import Progressbar
 #import RPi.GPIO as gpio
 
 # hexadecimal color scheme at www.w3schools.com/colors/colors_picker.asp
@@ -66,16 +67,17 @@ def switch_frame(OPS, f_setting):
     global frame_setting
     #global OPS
     OPS = OPS.get()
-    print("Start")
-    print(OPS)
     if (f_setting=="FIRE" and OPS=="MANUAL"):
         frame1.tkraise()
         frame_setting = "MANUAL"
-        print('manual')
+        fire_ops_switch.config(bg='red', activebackground='red')
+        manual_ops_switch.config(bg='green', activebackground='green')
+
     elif(f_setting=="MANUAL" and OPS=="FIRE"):
         frame4.tkraise()
         frame_setting = "FIRE"
-        print('fire')
+        fire_ops_switch.config(bg='green', activebackground='green')
+        manual_ops_switch.config(bg='red', activebackground='red')
 
 
 # following functions control actuating the button presses (currently turns from red to green)
@@ -171,31 +173,31 @@ root = tk.Tk()
 canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH, bg='black')
 canvas.pack()
 
-# blue (main) nw frame
-frame1 = tk.Frame(root, bg='#0059b3')
+# blue (main) nw frame blue = #0059b3
+frame1 = tk.Frame(root, bg='black')
 frame1.place(relx=0, rely=0.1, relwidth=0.7, relheight=0.6)
 
 # pink e frame
 frame2 = tk.Frame(root, bg='#ff1a8c')
 frame2.place(relx=0.7, rely=0, relwidth=0.3, relheight=1)
 
-#yellow s framce
-frame3 = tk.Frame(root, bg='#ffff4d')
+#yellow s framce  yellow = #ffff4d
+frame3 = tk.Frame(root, bg='black')
 frame3.place(relx=0, rely=0.7, relwidth=0.7, relheight=0.3)
 
 # green (second) nw frame (underneath main frame)
 frame4 = tk.Frame(root, bg='#33ff33')
 frame4.place(relx=0, rely=0.1, relwidth=0.7, relheight=0.60)
 
-# variable to storing OPS setting
-OPS = tk.StringVar()
+# Frame Switching Mechanism
+#-------------------------
+OPS = tk.StringVar()    # variable to storing OPS setting
 
-fr_switch_button1 = tk.Radiobutton(root, text="MANUAL OPS", font=('Courier', 15, 'bold'), bg='green', activebackground='green', variable=OPS, value="MANUAL", command=lambda: switch_frame(OPS, frame_setting)) 
-fr_switch_button1.place(relwidth=0.3, relheight=0.1)
+manual_ops_switch = tk.Radiobutton(root, text="MANUAL OPS", font=('Courier', 15, 'bold'), bg='green', activebackground='green', variable=OPS, value="MANUAL", command=lambda: switch_frame(OPS, frame_setting)) 
+manual_ops_switch.place(relwidth=0.3, relheight=0.1)
 
-fr_switch_button2 = tk.Radiobutton(root, text="FIRE OPS", font=('Courier', 15, 'bold'), bg='red', activebackground='red', variable=OPS, value="FIRE", command=lambda: switch_frame(OPS, frame_setting)) 
-fr_switch_button2.place(relx=0.4, relwidth=0.3, relheight=0.1)
-
+fire_ops_switch = tk.Radiobutton(root, text="FIRE OPS", font=('Courier', 15, 'bold'), bg='red', activebackground='red', variable=OPS, value="FIRE", command=lambda: switch_frame(OPS, frame_setting)) 
+fire_ops_switch.place(relx=0.4, relwidth=0.3, relheight=0.1)
 
 frame1.tkraise()
 
@@ -221,7 +223,8 @@ button_NCIFO.place(relx=0.3433, rely=0.666, relwidth=NC_BUTTONWIDTH, relheight=N
 button_NCIOP = tk.Button(frame1, text="NC-IOP", font=('Courier', 20, 'bold'), bg='red', activebackgroun='red', command=actuate_NCIOP)
 button_NCIOP.place(relx=0.6566, rely=0.666, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
 
-
+arm_man_ops = tk.Checkbutton(frame1, text="Arm Valves")
+arm_man_ops.place(relx=0.333, rely=0.1, relwidth=0.2, relheight=0.2)
 ###################################################################################################
 # Firing Ops 
 ###################################################################################################
@@ -236,6 +239,9 @@ button_NCIOP.place(relx=0.6566, rely=0.666, relwidth=NC_BUTTONWIDTH, relheight=N
 
 # Main labels
 #------------
+firing_sequence_label = tk.Label(frame3, text='Firing Sequence', font=(FS_FONT, '12', 'bold', 'underline'), bg='black', fg='white')
+firing_sequence_label.place(relx=0.04, rely=0, relwidth=FS_WIDTH+0.02, relheight=FS_HEIGHT)
+
 fire_duration_label = tk.Label(frame3, text="Fire Duration [s] ", font=(FS_FONT, '8', 'bold'), bg='black', fg='white')
 fire_duration_label.place(relx=0.05, rely=0.15, relwidth=FS_WIDTH, relheight=FS_HEIGHT)
 
@@ -254,7 +260,7 @@ NCIF_timing_label.place(relx=0.05, rely=0.83, relwidth=FS_WIDTH, relheight=FS_HE
 # Inputs
 #------------
 fire_duration_entry = tk.Entry(frame3, bg='white', justify='center', fg='#5c5c8a', font=('Courier', 10, 'bold', 'italic'))
-fire_duration_entry.place(relx=0.390, rely=0.150, relwidth=0.160, relheight=0.14)
+fire_duration_entry.place(relx=0.390, rely=0.15, relwidth=0.160, relheight=0.14)
 
 spark_freq_entry = tk.Entry(frame3, bg='white', justify='center', fg='#5c5c8a', font=('Courier', 10, 'bold', 'italic'))
 spark_freq_entry.place(relx=0.390, rely=0.32, relwidth=0.160, relheight=0.14)
@@ -309,10 +315,23 @@ NCIF_timing_entry2.insert(0, "End")
 NCIF_timing_entry2.bind('<FocusIn>', lambda event: fs_focusin(1,NCIF_timing_entry2))
 NCIF_timing_entry2.bind('<FocusOut>', lambda event: fs_focusout2(1,NCIF_timing_entry2))
 
+# Progress Bars
+#--------------
 
+fire_duration_bar = Progressbar(frame3, length=200)
+fire_duration_bar.place(relx=0.62, rely=0.16, relwidth=0.36, relheight=0.12)
 
+spark_freq_bar = Progressbar(frame3, length=200)
+spark_freq_bar.place(relx=0.62, rely=0.33, relwidth=0.36, relheight=0.12)
 
+spark_timing_bar = Progressbar(frame3, length=200)
+spark_timing_bar.place(relx=0.62, rely=0.5, relwidth=0.36, relheight=0.12)
 
+NCIO_timing_bar = Progressbar(frame3, length=200)
+NCIO_timing_bar.place(relx=0.62, rely=0.67, relwidth=0.36, relheight=0.12)
+
+NCIF_timing_bar = Progressbar(frame3, length=200)
+NCIF_timing_bar.place(relx=0.62, rely=0.84, relwidth=0.36, relheight=0.12)
 
 
 
