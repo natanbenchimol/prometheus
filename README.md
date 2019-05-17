@@ -8,6 +8,6 @@ Description:
     accessories directory contains images, objects, and other accessories that are called in our system.
 
 Contributers:
-    Sean Lissner, USC B.S. Computer Science, May 2020 (?!?)
-    John Rogers, USC B.S. Astronautical Engineering, GRAD DATE (?!?)
+    Sean Lissner, USC B.S. Computer Science, May 2020
+    John Rogers, USC B.S. Astronautical Engineering, December 2021
     Natan Benchimol, USC B.S. Electrical Engineering, December 2020
