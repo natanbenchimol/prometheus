@@ -20,10 +20,12 @@ FS_FONT = font
 FS_WIDTH = 0.26
 FS_HEIGHT = 0.14
 
-frame_setting = "MANUAL"      # "MANUAL"=manual ops, "FIRE"=fire ops
+frame_setting = "MANUAL"    # Initializes to "MANUAL"
+                            # "MANUAL" = manual ops, "FIRE" = fire ops
 
 
-
+# this function handles functionality of actuating a solenoid with gpio pins
+# we used it for initial testing, and have left it here for syntax reference later on
 def actuate_solenoid():
     global s_flag
     if (s_flag == 0):
@@ -35,13 +37,18 @@ def actuate_solenoid():
         s_flag = 0
         print("SOLENOID HAS BEEN closed")
 
-# test function for text in entry
+# This function handles clearing all the Input fields and preparing them for user input
+# Input boxes are the 8 fields located in the bottom frame
 def fs_focusin(event, entry):
     if (entry.get()=='Start' or entry.get()=='End' or entry.get()=='[seconds]' or entry.get()=='[Hz]'):
         entry.delete(0, 'end')
         entry.insert(0,'')
         entry.config(fg='black')
 
+
+# this function handles resetting the instructions in each of the entry/input fields when the user removes focus from them. Separate functions are needed for each type of field
+# this function handles "fire duration" and "spark frequency" fields
+# Input boxes are the 8 fields located in the bottom frame
 def fs_focusout0(event, entry, check):
     print(entry)
     if (entry.get()==''):
@@ -52,47 +59,57 @@ def fs_focusout0(event, entry, check):
 
         entry.config(fg='#5c5c8a', font=('Courier', 10, 'italic', 'bold'))
 
+
+# this function handles resetting the instructions in each of the entry/input fields when the user removes focus from them. Separate functions are needed for each type of field
+# this function handles "Start" fields
+# Input boxes are the 8 fields located in the bottom frame
 def fs_focusout1(event, entry):
     if(entry.get()==''):
         entry.insert(0,"Start")
         entry.config(fg='green', font=('Courier',10,'italic'))
 
 
+# this function handles resetting the instructions in each of the entry/input fields when the user removes focus from them. Separate functions are needed for each type of field
+# this function handles "End" fields
+# Input boxes are the 8 fields located in the bottom frame
 def fs_focusout2(event, entry):
     if (entry.get()==''):
         entry.insert(0,'End')
         entry.config(fg='red', font=('Courier', 10, 'italic'))
 
-def switch_frame(OPS, f_setting):
+
+# this function handles the control for switching frames. It is called when either of the frame switching buttons is pressed
+# Note: frame_setting and OPS are both used in order to determine previous and current state of frame. This allows us to avoid uneccessary action
+def switch_frame(OPS):
     global frame_setting
-    #global OPS
     OPS = OPS.get()
-    if (f_setting=="FIRE" and OPS=="MANUAL"):
-        frame1.tkraise()
+    if (frame_setting=="FIRE" and OPS=="MANUAL"):   # switches to Manual Ops frame
+        frame1.tkraise()        # switches to Firing Ops by raising Manual Ops frame on top of Firing Ops frame
         frame_setting = "MANUAL"
         fire_ops_switch.config(bg='red', activebackground='red')
         manual_ops_switch.config(bg='green', activebackground='green')
 
-    elif(f_setting=="MANUAL" and OPS=="FIRE"):
-        frame4.tkraise()
+    elif(frame_setting=="MANUAL" and OPS=="FIRE"):  # switches to Firing Ops frame
+        frame4.tkraise()        # switches to Firing Ops by raising Firing Ops frame on top of Manual Ops frame
         frame_setting = "FIRE"
         fire_ops_switch.config(bg='green', activebackground='green')
         manual_ops_switch.config(bg='red', activebackground='red')
 
 
-# following functions control actuating the button presses (currently turns from red to green)
+# the following functions control actuating the button presses (currently turns from red to green)
+# currently, they just change color to indicate button press detection
 def actuate_NCIP():
     if (button_NCIP.cget('bg')=='red'):
-            button_NCIP.configure(bg='green')
-            button_NCIP.configure(activebackground = button_NCIP.cget('bg'))
+        button_NCIP.configure(bg='green')
+        button_NCIP.configure(activebackground = button_NCIP.cget('bg'))
     elif (button_NCIP.cget('bg')=='green'):
         button_NCIP.configure(bg='red')
         button_NCIP.configure(activebackground = button_NCIP.cget('bg'))
 
 def actuate_NCIF():
     if (button_NCIF.cget('bg')=='red'):
-            button_NCIF.configure(bg='green')
-            button_NCIF.configure(activebackground = button_NCIF.cget('bg'))
+        button_NCIF.configure(bg='green')
+        button_NCIF.configure(activebackground = button_NCIF.cget('bg'))
     elif (button_NCIF.cget('bg')=='green'):
         button_NCIF.configure(bg='red')
         button_NCIF.configure(activebackground = button_NCIF.cget('bg'))
@@ -100,8 +117,8 @@ def actuate_NCIF():
 
 def actuate_NCIO():
     if (button_NCIO.cget('bg')=='red'):
-            button_NCIO.configure(bg='green')
-            button_NCIO.configure(activebackground = button_NCIO.cget('bg'))
+        button_NCIO.configure(bg='green')
+        button_NCIO.configure(activebackground = button_NCIO.cget('bg'))
     elif (button_NCIO.cget('bg')=='green'):
         button_NCIO.configure(bg='red')
         button_NCIO.configure(activebackground = button_NCIO.cget('bg'))
@@ -109,8 +126,8 @@ def actuate_NCIO():
 
 def actuate_NOIP():
     if (button_NOIP.cget('bg')=='red'):
-            button_NOIP.configure(bg='green')
-            button_NOIP.configure(activebackground = button_NOIP.cget('bg'))
+        button_NOIP.configure(bg='green')
+        button_NOIP.configure(activebackground = button_NOIP.cget('bg'))
     elif (button_NOIP.cget('bg')=='green'):
         button_NOIP.configure(bg='red')
         button_NOIP.configure(activebackground = button_NOIP.cget('bg'))
@@ -118,8 +135,8 @@ def actuate_NOIP():
 
 def actuate_NCIFO():
     if (button_NCIFO.cget('bg')=='red'):
-            button_NCIFO.configure(bg='green')
-            button_NCIFO.configure(activebackground = button_NCIFO.cget('bg'))
+        button_NCIFO.configure(bg='green')
+        button_NCIFO.configure(activebackground = button_NCIFO.cget('bg'))
     elif (button_NCIFO.cget('bg')=='green'):
         button_NCIFO.configure(bg='red')
         button_NCIFO.configure(activebackground = button_NCIFO.cget('bg'))
@@ -127,8 +144,8 @@ def actuate_NCIFO():
 
 def actuate_NCIOP():
     if (button_NCIOP.cget('bg')=='red'):
-            button_NCIOP.configure(bg='green')
-            button_NCIOP.configure(activebackground = button_NCIOP.cget('bg'))
+        button_NCIOP.configure(bg='green')
+        button_NCIOP.configure(activebackground = button_NCIOP.cget('bg'))
     elif (button_NCIOP.cget('bg')=='green'):
         button_NCIOP.configure(bg='red')
         button_NCIOP.configure(activebackground = button_NCIOP.cget('bg'))
@@ -165,7 +182,7 @@ def actuate_NCIOP():
 #gpio.setup(solenoid_pin, gpio.OUT)
 
 ###################################################################################################
-# Frame Layout 
+# General Frame Setup
 ###################################################################################################
 
 root = tk.Tk()
@@ -173,36 +190,38 @@ root = tk.Tk()
 canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH, bg='black')
 canvas.pack()
 
-# blue (main) nw frame blue = #0059b3
+# blue (main) top frame blue = #0059b3
 frame1 = tk.Frame(root, bg='black')
 frame1.place(relx=0, rely=0.1, relwidth=0.7, relheight=0.6)
 
-# pink e frame
+# pink right frame
 frame2 = tk.Frame(root, bg='#ff1a8c')
 frame2.place(relx=0.7, rely=0, relwidth=0.3, relheight=1)
 
-#yellow s framce  yellow = #ffff4d
-frame3 = tk.Frame(root, bg='black')
+#yellow bottom frame  yellow = #ffff4d
+frame3 = tk.Frame(root, bg='#ffff4d')
 frame3.place(relx=0, rely=0.7, relwidth=0.7, relheight=0.3)
 
-# green (second) nw frame (underneath main frame)
+# green (second) top frame (underneath main frame)
 frame4 = tk.Frame(root, bg='#33ff33')
 frame4.place(relx=0, rely=0.1, relwidth=0.7, relheight=0.60)
 
-# Frame Switching Mechanism
-#-------------------------
-OPS = tk.StringVar()    # variable to storing OPS setting
-
-manual_ops_switch = tk.Radiobutton(root, text="MANUAL OPS", font=('Courier', 15, 'bold'), bg='green', activebackground='green', variable=OPS, value="MANUAL", command=lambda: switch_frame(OPS, frame_setting)) 
-manual_ops_switch.place(relwidth=0.3, relheight=0.1)
-
-fire_ops_switch = tk.Radiobutton(root, text="FIRE OPS", font=('Courier', 15, 'bold'), bg='red', activebackground='red', variable=OPS, value="FIRE", command=lambda: switch_frame(OPS, frame_setting)) 
-fire_ops_switch.place(relx=0.4, relwidth=0.3, relheight=0.1)
-
-frame1.tkraise()
 
 ###################################################################################################
-# Manual Ops 
+# Frame Switching Mechanism
+###################################################################################################
+OPS = tk.StringVar()    # variable to storing OPS setting (either "MANUAL" or "FIRE", depending on the desired frame)
+
+manual_ops_switch = tk.Radiobutton(root, text="MANUAL OPS", font=('Courier', 15, 'bold'), bg='green', activebackground='green', variable=OPS, value="MANUAL", command=lambda: switch_frame(OPS))
+manual_ops_switch.place(relwidth=0.3, relheight=0.1)
+
+fire_ops_switch = tk.Radiobutton(root, text="FIRE OPS", font=('Courier', 15, 'bold'), bg='red', activebackground='red', variable=OPS, value="FIRE", command=lambda: switch_frame(OPS))
+fire_ops_switch.place(relx=0.4, relwidth=0.3, relheight=0.1)
+
+frame1.tkraise()        # raises the Manual Ops frame upon startup
+
+###################################################################################################
+# Manual Ops Frame Layout
 ###################################################################################################
 
 button_NCIP = tk.Button(frame1, text="NC-IP", font=('Courier', 20, 'bold'), bg='red',activebackground='red',  command=actuate_NCIP)
@@ -225,8 +244,9 @@ button_NCIOP.place(relx=0.6566, rely=0.666, relwidth=NC_BUTTONWIDTH, relheight=N
 
 arm_man_ops = tk.Checkbutton(frame1, text="Arm Valves")
 arm_man_ops.place(relx=0.333, rely=0.1, relwidth=0.2, relheight=0.2)
+
 ###################################################################################################
-# Firing Ops 
+# Firing Ops Frame Layout
 ###################################################################################################
 
 
