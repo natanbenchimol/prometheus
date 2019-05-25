@@ -252,29 +252,29 @@ arm_man_ops.place(relx=0.333, rely=0.1, relwidth=0.2, relheight=0.2)
 
 
 
-###################################################################################################
+##################################################################################################
 # Firing Sequence 
 ##################################################################################################
 
 
 # Main labels
 #------------
-firing_sequence_label = tk.Label(frame3, text='Firing Sequence', font=(FS_FONT, '12', 'bold', 'underline'), bg='black', fg='white')
-firing_sequence_label.place(relx=0.04, rely=0, relwidth=FS_WIDTH+0.02, relheight=FS_HEIGHT)
+firing_sequence_label = tk.Label(frame3, text='Firing Sequence', font=(FS_FONT, 17, 'bold', 'underline'), bg='black', fg='white')
+firing_sequence_label.place(relx=0.36, rely=0, relwidth=FS_WIDTH+0.02, relheight=0.11)
 
-fire_duration_label = tk.Label(frame3, text="Fire Duration [s] ", font=(FS_FONT, '8', 'bold'), bg='black', fg='white')
+fire_duration_label = tk.Label(frame3, text="Fire Duration [s] ", font=(FS_FONT, 10, 'bold'), bg='black', fg='white')
 fire_duration_label.place(relx=0.05, rely=0.15, relwidth=FS_WIDTH, relheight=FS_HEIGHT)
 
-spark_timing_label = tk.Label(frame3, text="Spark Timing  [Hz]", font=(FS_FONT, '8', 'bold'), bg='black', fg='white')
+spark_timing_label = tk.Label(frame3, text="Spark Timing  [Hz]", font=(FS_FONT, 10, 'bold'), bg='black', fg='white')
 spark_timing_label.place(relx=0.05, rely=0.32, relwidth=FS_WIDTH, relheight=FS_HEIGHT)
 
-spark_freq_label = tk.Label(frame3, text="Spark Frequency", font=(FS_FONT, '8', 'bold'), bg='black', fg='white')
+spark_freq_label = tk.Label(frame3, text="Spark Frequency", font=(FS_FONT, 10, 'bold'), bg='black', fg='white')
 spark_freq_label.place(relx=0.05, rely=0.49, relwidth=FS_WIDTH, relheight=FS_HEIGHT)
 
-NCIO_timing_label = tk.Label(frame3, text="NC - IO Timing", font=(FS_FONT, '9', 'bold'), bg='black', fg='white')
+NCIO_timing_label = tk.Label(frame3, text="NC - IO Timing", font=(FS_FONT, 10, 'bold'), bg='black', fg='white')
 NCIO_timing_label.place(relx=0.05, rely=0.66, relwidth=FS_WIDTH, relheight=FS_HEIGHT)
 
-NCIF_timing_label = tk.Label(frame3, text="NC - IF Timing", font=(FS_FONT, '9', 'bold'), bg='black', fg='white')
+NCIF_timing_label = tk.Label(frame3, text="NC - IF Timing", font=(FS_FONT, 10, 'bold'), bg='black', fg='white')
 NCIF_timing_label.place(relx=0.05, rely=0.83, relwidth=FS_WIDTH, relheight=FS_HEIGHT)
 
 # Inputs
@@ -355,12 +355,93 @@ NCIF_timing_bar.place(relx=0.62, rely=0.84, relwidth=0.36, relheight=0.12)
 
 
 
+##################################################################################################
+# Sensor Readouts and Warnings (srw)
+##################################################################################################
+# This frame displays the readouts from sensors and displays warning lights of sensors if necessary
+# 8 PT's and 7 TC's
+# PT1_IP_readout, PT2_IP_readout, PT1_IF_readout, PT2_IF_readout, PT_I_readout, PT1_IO_readout, PT2_IO_readout, PT3_IO_readout
+# TC1_IP_readout, TC2_IP_readout, TC1_IF_readout, TC_I_readout, TC1_IO_readout, TC2_IO_readout, TC3_IO_readout
 
+srw_label = tk.Label(frame2, text="Sensor Readouts \n& Warnings", bg='blue', fg='white', justify='center', font=('Courier', 20, 'bold', 'underline'))
+srw_label.place(relwidth=1, relheight=0.08)
 
+PT1_IP_label = tk.Label(frame2, text="PT1-IP", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+PT1_IP_label.place(relx=0.01, rely=0.1, relheight=0.05, relwidth=0.38)
+PT1_IP_readout = tk.Label(frame2, text="123456789", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+PT1_IP_readout.place(relx=0.4, rely=0.1, relheight=0.05, relwidth=0.3)
 
+PT2_IP_label = tk.Label(frame2, text="PT2-IP", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+PT2_IP_label.place(relx=0.01, rely=0.16, relheight=0.05, relwidth=0.38)
+PT2_IP_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+PT2_IP_readout.place(relx=0.4, rely=0.16, relheight=0.05, relwidth=0.3)
 
+PT1_IF_label = tk.Label(frame2, text="PT1-IF", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+PT1_IF_label.place(relx=0.01, rely=0.22, relheight=0.05, relwidth=0.38)
+PT1_IF_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+PT1_IF_readout.place(relx=0.4, rely=0.22, relheight=0.05, relwidth=0.3)
 
+PT2_IF_label = tk.Label(frame2, text="PT2-IF", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+PT2_IF_label.place(relx=0.01, rely=0.28, relheight=0.05, relwidth=0.38)
+PT2_IF_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+PT2_IF_readout.place(relx=0.4, rely=0.28, relheight=0.05, relwidth=0.3)
 
+PT_I_label = tk.Label(frame2, text="PT-I", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+PT_I_label.place(relx=0.01, rely=0.34, relheight=0.05, relwidth=0.38)
+PT_I_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+PT_I_readout.place(relx=0.4, rely=0.34, relheight=0.05, relwidth=0.3)
+
+PT1_IO_label = tk.Label(frame2, text="PT1-IO", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+PT1_IO_label.place(relx=0.01, rely=0.4, relheight=0.05, relwidth=0.38)
+PT1_IO_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+PT1_IO_readout.place(relx=0.4, rely=0.4, relheight=0.05, relwidth=0.3)
+
+PT2_IO_label = tk.Label(frame2, text="PT2-IO", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+PT2_IO_label.place(relx=0.01, rely=0.46, relheight=0.05, relwidth=0.38)
+PT2_IO_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+PT2_IO_readout.place(relx=0.4, rely=0.46, relheight=0.05, relwidth=0.3)
+
+PT3_IO_label = tk.Label(frame2, text="PT3-IO", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+PT3_IO_label.place(relx=0.01, rely=0.52, relheight=0.05, relwidth=0.38)
+PT3_IO_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+PT3_IO_readout.place(relx=0.4, rely=0.52, relheight=0.05, relwidth=0.3)
+
+# TC1_IP_readout, TC2_IP_readout, TC1_IF_readout, TC_I_readout, TC1_IO_readout, TC2_IO_readout, TC3_IO_readout
+
+TC1_IP_label = tk.Label(frame2, text="TC1-IP", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+TC1_IP_label.place(relx=0.01, rely=0.58, relheight=0.05, relwidth=0.38)
+TC1_IP_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+TC1_IP_readout.place(relx=0.4, rely=0.58, relheight=0.05, relwidth=0.3)
+
+TC2_IP_label = tk.Label(frame2, text="TC2-IP", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+TC2_IP_label.place(relx=0.01, rely=0.64, relheight=0.05, relwidth=0.38)
+TC2_IP_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+TC2_IP_readout.place(relx=0.4, rely=0.64, relheight=0.05, relwidth=0.3)
+
+TC1_IF_label = tk.Label(frame2, text="TC1-IF", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+TC1_IF_label.place(relx=0.01, rely=0.7, relheight=0.05, relwidth=0.38)
+TC1_IF_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+TC1_IF_readout.place(relx=0.4, rely=0.7, relheight=0.05, relwidth=0.3)
+
+TC_I_label = tk.Label(frame2, text="TC-I", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+TC_I_label.place(relx=0.01, rely=0.76, relheight=0.05, relwidth=0.38)
+TC_I_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+TC_I_readout.place(relx=0.4, rely=0.76, relheight=0.05, relwidth=0.3)
+
+TC1_IO_label = tk.Label(frame2, text="TC1-IO", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+TC1_IO_label.place(relx=0.01, rely=0.82, relheight=0.05, relwidth=0.38)
+TC1_IO_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+TC1_IO_readout.place(relx=0.4, rely=0.82, relheight=0.05, relwidth=0.3)
+
+TC2_IO_label = tk.Label(frame2, text="TC2-IO", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+TC2_IO_label.place(relx=0.01, rely=0.88, relheight=0.05, relwidth=0.38)
+TC2_IO_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+TC2_IO_readout.place(relx=0.4, rely=0.88, relheight=0.05, relwidth=0.3)
+
+TC3_IO_label = tk.Label(frame2, text="TC3-IO", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
+TC3_IO_label.place(relx=0.01, rely=0.94, relheight=0.05, relwidth=0.38)
+TC3_IO_readout = tk.Label(frame2, text="0", bg='white', fg='black', justify='center', font=('Courier', 23, 'bold'))
+TC3_IO_readout.place(relx=0.4, rely=0.94, relheight=0.05, relwidth=0.3)
 
 
 
