@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import font
 from tkinter.ttk import Progressbar
+from PIL import Image, ImageTk
 #import RPi.GPIO as gpio
 
 # hexadecimal color scheme at www.w3schools.com/colors/colors_picker.asp
@@ -22,7 +23,6 @@ FS_HEIGHT = 0.14
 
 frame_setting = "MANUAL"    # Initializes to "MANUAL"
                             # "MANUAL" = manual ops, "FIRE" = fire ops
-
 
 # this function handles functionality of actuating a solenoid with gpio pins
 # we used it for initial testing, and have left it here for syntax reference later on
@@ -100,19 +100,19 @@ def switch_frame(OPS):
 # currently, they just change color to indicate button press detection
 def actuate_NCIP():
     if (button_NCIP.cget('bg')=='red'):
-        button_NCIP.configure(bg='green')
-        button_NCIP.configure(activebackground = button_NCIP.cget('bg'))
+        button_NCIP.config(bg='green')
+        button_NCIP.config(activebackground = button_NCIP.cget('bg'))
     elif (button_NCIP.cget('bg')=='green'):
-        button_NCIP.configure(bg='red')
-        button_NCIP.configure(activebackground = button_NCIP.cget('bg'))
+        button_NCIP.config(bg='red')
+        button_NCIP.config(activebackground = button_NCIP.cget('bg'))
 
 def actuate_NCIF():
     if (button_NCIF.cget('bg')=='red'):
-        button_NCIF.configure(bg='green')
-        button_NCIF.configure(activebackground = button_NCIF.cget('bg'))
+        button_NCIF.config(bg='green')
+        button_NCIF.config(activebackground = button_NCIF.cget('bg'))
     elif (button_NCIF.cget('bg')=='green'):
-        button_NCIF.configure(bg='red')
-        button_NCIF.configure(activebackground = button_NCIF.cget('bg'))
+        button_NCIF.config(bg='red')
+        button_NCIF.config(activebackground = button_NCIF.cget('bg'))
     print("ncif")
 
 def actuate_NCIO():
@@ -151,32 +151,32 @@ def actuate_NCIOP():
         button_NCIOP.configure(activebackground = button_NCIOP.cget('bg'))
     print("nciop")
 
-#NCIF_FLAG = 0
-#def actuate_NCIF():
-#    global NCIF_FLAG  
+# this functions enables/disables the manual operation buttons when the "arm valves" button is pressed
+#
+def arm_man_ops_func(arm_man_ops_val):
+    if(arm_man_ops_val.get()==1):
+       button_NCIP.config(state='normal')
+       button_NCIF.config(state='normal')
+       button_NCIO.config(state='normal')
+       button_NOIP.config(state='normal')
+       button_NCIFO.config(state='normal')
+       button_NCIOP.config(state='normal')
+       arm_man_ops.config(image=disarming_switch_render)    # switches image to toggled off state
+       arm_man_ops.image = disarming_switch_render          # handles image rendering (necessary for changing images)
+       print("buttons enabled")                             # for debugging
+    else:
+        button_NCIP.config(state='disabled')
+        button_NCIF.config(state='disabled')
+        button_NCIO.config(state='disabled')
+        button_NOIP.config(state='disabled')
+        button_NCIFO.config(state='disabled')
+        button_NCIOP.config(state='disabled')
+        arm_man_ops.config(image=arming_switch_render)      # switches image to toggled on state
+        arm_man_ops.image = arming_switch_render            # handles image rendering (necessary for changing images)
+        print("buttons disabled")                           # for debugging
 
 
-#NCIO_FLAG = 0
-#def actuate_NCIO():
-#    global NCIO_FLAG 
-
-
-#NOIP_FLAG = 0
-#def actuate_NOIP():
-#    global NOIP_FLAG
-
-
-#NCIFO_FLAG = 0
-#def actuate_NCIFO():
-#    global NCIFO_FLAG
-
-
-#NCIOP_FLAG = 0
-#def actuate_NCIOP():
-#    global NCIOP_FLAG
-
-
-
+# these 2 lines below are kept for setting up gpio later on:
 
 #gpio.setmode(gpio.BCM)
 #gpio.setup(solenoid_pin, gpio.OUT)
@@ -191,32 +191,40 @@ canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH, bg='black')
 canvas.pack()
 
 # blue (main) top frame blue = #0059b3
-frame1 = tk.Frame(root, bg='black')
+frame1 = tk.Frame(root, bg='#000033')
 frame1.place(relx=0, rely=0.1, relwidth=0.7, relheight=0.6)
 
-# pink right frame
-frame2 = tk.Frame(root, bg='#ff1a8c')
+# pink right frame pink = #ff1a8c
+frame2 = tk.Frame(root, bg='#000033')
 frame2.place(relx=0.7, rely=0, relwidth=0.3, relheight=1)
 
 #yellow bottom frame  yellow = #ffff4d
-frame3 = tk.Frame(root, bg='#ffff4d')
+frame3 = tk.Frame(root, bg='#000033')
 frame3.place(relx=0, rely=0.7, relwidth=0.7, relheight=0.3)
 
-# green (second) top frame (underneath main frame)
-frame4 = tk.Frame(root, bg='#33ff33')
+# green (second) top frame (underneath main frame) green = #33ff33
+frame4 = tk.Frame(root, bg='#000033')
 frame4.place(relx=0, rely=0.1, relwidth=0.7, relheight=0.60)
 
+# inserts LPL Logo
+logo_load = Image.open('logo.jpg').resize((100,65), Image.ANTIALIAS)    # resize values are experiementally determined based on screen size. Not sure what ANTIALIAS does, but it was in every online example
+logo_render = ImageTk.PhotoImage(logo_load)
+logo = tk.Label(root, image=logo_render)
+logo.image = logo_render
+logo.place(relx=0.25, relwidth=0.2)
+
+#border1 = tk.create_line(400, 401, 0, 400)
 
 ###################################################################################################
 # Frame Switching Mechanism
 ###################################################################################################
 OPS = tk.StringVar()    # variable to storing OPS setting (either "MANUAL" or "FIRE", depending on the desired frame)
 
-manual_ops_switch = tk.Radiobutton(root, text="MANUAL OPS", font=('Courier', 15, 'bold'), bg='green', activebackground='green', variable=OPS, value="MANUAL", command=lambda: switch_frame(OPS))
-manual_ops_switch.place(relwidth=0.3, relheight=0.1)
+manual_ops_switch = tk.Radiobutton(root, text="MANUAL OPS", font=('System', 15, 'bold'), bg='green', activebackground='green', variable=OPS, value="MANUAL", command=lambda: switch_frame(OPS))
+manual_ops_switch.place(relwidth=0.25, relheight=0.1)
 
-fire_ops_switch = tk.Radiobutton(root, text="FIRE OPS", font=('Courier', 15, 'bold'), bg='red', activebackground='red', variable=OPS, value="FIRE", command=lambda: switch_frame(OPS))
-fire_ops_switch.place(relx=0.4, relwidth=0.3, relheight=0.1)
+fire_ops_switch = tk.Radiobutton(root, text="FIRE OPS", font=('System', 15, 'bold'), bg='red', activebackground='red', variable=OPS, value="FIRE", command=lambda: switch_frame(OPS))
+fire_ops_switch.place(relx=0.45, relwidth=0.25, relheight=0.1)
 
 frame1.tkraise()        # raises the Manual Ops frame upon startup
 
@@ -224,26 +232,42 @@ frame1.tkraise()        # raises the Manual Ops frame upon startup
 # Manual Ops Frame Layout
 ###################################################################################################
 
-button_NCIP = tk.Button(frame1, text="NC-IP", font=('Courier', 20, 'bold'), bg='red',activebackground='red',  command=actuate_NCIP)
-button_NCIP.place(relx=0.03, rely=0.333, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
+man_ops_label = tk.Label(frame1, text="Manual Operations", font=('System', 22, 'bold', 'underline'), bg='#000033', fg='white')
+man_ops_label.place(relx=0.25, relwidth=0.5)
 
-button_NCIF = tk.Button(frame1, text="NC-IF", font=('Courier', 20, 'bold'), bg='red', activebackground='red', command=actuate_NCIF)
-button_NCIF.place(relx=0.3433, rely=0.333, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
+arm_man_ops_label = tk.Label(frame1, text="Arm/Disarm Valves", font=('System', 16, 'bold'), bg='#000033', fg='white')
+arm_man_ops_label.place(rely=0.116)
 
-button_NCIO = tk.Button(frame1, text="NC-IO", font=('Courier', 20, 'bold'), bg='red',activebackground='red',  command=actuate_NCIO)
-button_NCIO.place(relx=0.6566, rely=0.333, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
+button_NCIP = tk.Button(frame1, text="NC-IP", font=('Courier', 20, 'bold'), state='disabled', bg='red', activebackground='red', command=lambda: actuate_NCIP())
+button_NCIP.place(relx=0.03, rely=0.4, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
 
-button_NOIP = tk.Button(frame1, text="NO-IP", font=('Courier', 20, 'bold'), bg='red',activebackground='red',  command=actuate_NOIP)
-button_NOIP.place(relx=0.03, rely=0.666, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
+button_NCIF = tk.Button(frame1, text="NC-IF", font=('Courier', 20, 'bold'), state='disabled', bg='red', activebackground='red', command=lambda: actuate_NCIF())
+button_NCIF.place(relx=0.3433, rely=0.4, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
 
-button_NCIFO = tk.Button(frame1, text="NC-IFO", font=('Courier', 20, 'bold'), bg='red',activebackgroun='red', command=actuate_NCIFO)
-button_NCIFO.place(relx=0.3433, rely=0.666, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
+button_NCIO = tk.Button(frame1, text="NC-IO", font=('Courier', 20, 'bold'), state='disabled', bg='red',activebackground='red',  command=actuate_NCIO)
+button_NCIO.place(relx=0.6566, rely=0.4, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
 
-button_NCIOP = tk.Button(frame1, text="NC-IOP", font=('Courier', 20, 'bold'), bg='red', activebackgroun='red', command=actuate_NCIOP)
-button_NCIOP.place(relx=0.6566, rely=0.666, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
+button_NOIP = tk.Button(frame1, text="NO-IP", font=('Courier', 20, 'bold'), state='disabled', bg='red',activebackground='red',  command=actuate_NOIP)
+button_NOIP.place(relx=0.03, rely=0.73, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
 
-arm_man_ops = tk.Checkbutton(frame1, text="Arm Valves")
-arm_man_ops.place(relx=0.333, rely=0.1, relwidth=0.2, relheight=0.2)
+button_NCIFO = tk.Button(frame1, text="NC-IFO", font=('Courier', 20, 'bold'), state='disabled', bg='red',activebackgroun='red', command=actuate_NCIFO)
+button_NCIFO.place(relx=0.3433, rely=0.73, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
+
+button_NCIOP = tk.Button(frame1, text="NC-IOP", font=('Courier', 20, 'bold'), state='disabled', bg='red', activebackgroun='red', command=actuate_NCIOP)
+button_NCIOP.place(relx=0.6566, rely=0.73, relwidth=NC_BUTTONWIDTH, relheight=NC_BUTTONHEIGHT)
+
+# next 4 lines handle image loading for arm/disarm valves switch
+# an image is loaded as the background instead of an actual switch
+arming_switch_load = Image.open('toggle_off.png').resize((100, 100), Image.ANTIALIAS)
+arming_switch_render = ImageTk.PhotoImage(arming_switch_load)
+disarming_switch_load = Image.open('toggle_on.png').resize((100, 100), Image.ANTIALIAS)
+disarming_switch_render = ImageTk.PhotoImage(disarming_switch_load)
+
+arm_man_ops_val = tk.IntVar()
+arm_man_ops = tk.Checkbutton(frame1, text="Arm Valves", image=arming_switch_render, bg='#000033', command=lambda: arm_man_ops_func(arm_man_ops_val), variable=arm_man_ops_val)
+arm_man_ops.image = arming_switch_render
+arm_man_ops.place(rely=0.18, relwidth=0.2, relheight=0.2)
+
 
 ###################################################################################################
 # Firing Ops Frame Layout
@@ -259,7 +283,7 @@ arm_man_ops.place(relx=0.333, rely=0.1, relwidth=0.2, relheight=0.2)
 
 # Main labels
 #------------
-firing_sequence_label = tk.Label(frame3, text='Firing Sequence', font=(FS_FONT, 17, 'bold', 'underline'), bg='black', fg='white')
+firing_sequence_label = tk.Label(frame3, text='Firing Sequence', font=(FS_FONT, 17, 'bold', 'underline'), bg='#000033', fg='white')
 firing_sequence_label.place(relx=0.36, rely=0, relwidth=FS_WIDTH+0.02, relheight=0.11)
 
 fire_duration_label = tk.Label(frame3, text="Fire Duration [s] ", font=(FS_FONT, 10, 'bold'), bg='black', fg='white')
@@ -363,7 +387,7 @@ NCIF_timing_bar.place(relx=0.62, rely=0.84, relwidth=0.36, relheight=0.12)
 # PT1_IP_readout, PT2_IP_readout, PT1_IF_readout, PT2_IF_readout, PT_I_readout, PT1_IO_readout, PT2_IO_readout, PT3_IO_readout
 # TC1_IP_readout, TC2_IP_readout, TC1_IF_readout, TC_I_readout, TC1_IO_readout, TC2_IO_readout, TC3_IO_readout
 
-srw_label = tk.Label(frame2, text="Sensor Readouts \n& Warnings", bg='blue', fg='white', justify='center', font=('Courier', 20, 'bold', 'underline'))
+srw_label = tk.Label(frame2, text="Sensor Readouts \n& Warnings", bg='#000033', fg='white', justify='center', font=('System', 20, 'bold', 'underline'))
 srw_label.place(relwidth=1, relheight=0.08)
 
 PT1_IP_label = tk.Label(frame2, text="PT1-IP", bg='black', fg='white', justify='center', font=('Courier', 20, 'bold'))
