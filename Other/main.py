@@ -5,14 +5,20 @@ import RPi.GPIO as GPIO
 
 import time
 
+#
+#   Authored by Swapnil
+#   Code now depreciated and not used
+#   Kept a part of the project for documentation's sake
+#
+
 
 class PrometheusMain:
     def __init__(self, master):
         self.master = master
-        
+
         if GPIO:
             GPIO.setmode(GPIO.BOARD)
-            
+
         master.title("PROMETHEUS | Liquid Propulsion Lab | USC")
 
         self.label = Label(master, text="Valve Actuators")
