@@ -11,7 +11,7 @@ import csv
 #       Get csv working
 
 
-STATUS = ""
+STATUS = "asdf"
 TC_DATA = []    # to be written to file
 PT_DATA = []
 
@@ -19,22 +19,30 @@ liveData = {}   # contains the most recent reading
 
 MAX_VAL = 700
 
-def readPT(id):
+def readPT(id, resTuple):
     # get result from id from PT protocol
-    return (time.time(), id, 1)
+    resTuple[0] = time.time()
+    resTuple[1] = id
+    resTuple[2] = 1
 
-def readTC(id):
-    # get id from TC protocol
-    return (time.time(), id, 0)
+def readTC(id, resTuple):
+    # get result from id from TC protocol
+    resTuple[0] = time.time()
+    resTuple[1] = id
+    resTuple[2] = 1
 
 def tcReader(hz):
-    print("in TC")
+    global STATUS
+    global TC_DATA
+
     while(STATUS == "FIRE"):
         time.sleep(1 / hz)  # Mimic protocol latency
 
         for i in range(8):
-            t1 = threading.Thread(target=readTC, args=[i])
-            resTuple = t1.start()   # Gets the data
+            resTuple = ()
+            t1 = threading.Thread(target=readPT, args=[i, resTuple])
+            t1.start()  # Gets the data
+            t1.join()
 
             if(resTuple[2] > MAX_VAL):  # Check for abort
                 # ABORT!!!
@@ -45,27 +53,30 @@ def tcReader(hz):
             liveData[i] = resTuple[2]   # Send to val to display on GUI
 
 def ptReader(hz):
-    print("in PT")
-    print(STATUS == "FIRE")
+    global STATUS
+    global PT_DATA
+
     while(STATUS == "FIRE"):
-        print(";")
         time.sleep(1 / hz)  # Mimic protocol latency
 
         for i in range(8):
-            t1 = threading.Thread(target=readPT, args=[i])
-            resTuple = t1.start()   # Gets the data
+            resTuple = ()
+            t1 = threading.Thread(target=readPT, args=[i, resTuple])
+            t1.start()  # Gets the data
+            t1.join()
 
             if(resTuple[2] > MAX_VAL):  # Check for abort
                 # ABORT!!!
                 pass
-
-            print(resTuple[2])
 
             PT_DATA.append(resTuple)    # Save on stack to write to file later
 
             liveData[i] = resTuple[2]   # Send to val to display on GUI
 
 def writeToFile():
+    global TC_DATA
+    global PT_DATA
+
     TC_DATA.sort(key=lambda tup: tup[2])    # Sort data in case threading messed anything up
     PT_DATA.sort(key=lambda tup: tup[2])
 
@@ -98,7 +109,9 @@ def timeFire(timer):
     STATUS = ""
 
 def main():
-    STATUS = ""
+    global STATUS
+
+    STATUS = "a"
     firingTime = 3
 
     while(STATUS.upper() != "FIRE"):
