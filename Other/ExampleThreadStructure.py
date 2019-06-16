@@ -4,14 +4,21 @@ import threading
 import datetime
 import csv
 
+import abort_sequences
 
-#TODO:  Write try/catch block for abort
-#       STATUS update not read inside threads -> while loop condition always false
+#TODO:  PRESSING ISSUES
+#       Learn debugger!!! Important for MT func.
+#       Infnite loop(?)
+#       pass results using res_list not working (deep/shallow issue?)
+
+#TODO:  FUTURE FUNCTIONALITY
+#       Test try/catch block for abort
 #       Move the checks and saving into the single Read thread?!?!?
 #       Get csv working
+#       Are there potentially different aborts?
 
 
-STATUS = "asdf"
+STATUS = "PREFIRE"
 TC_DATA = []    # to be written to file
 PT_DATA = []
 
@@ -19,17 +26,17 @@ liveData = {}   # contains the most recent reading
 
 MAX_VAL = 700
 
-def readPT(id, resTuple):
+def readPT(id, res_list):
     # get result from id from PT protocol
-    resTuple[0] = time.time()
-    resTuple[1] = id
-    resTuple[2] = 1
+    res_list[0] = time.time()
+    res_list[1] = id
+    res_list[2] = 1
 
-def readTC(id, resTuple):
+def readTC(id, res_list):
     # get result from id from TC protocol
-    resTuple[0] = time.time()
-    resTuple[1] = id
-    resTuple[2] = 1
+    res_list[0] = time.time()
+    res_list[1] = id
+    res_list[2] = 1
 
 def tcReader(hz):
     global STATUS
@@ -39,18 +46,18 @@ def tcReader(hz):
         time.sleep(1 / hz)  # Mimic protocol latency
 
         for i in range(8):
-            resTuple = ()
-            t1 = threading.Thread(target=readPT, args=[i, resTuple])
+            res_list = [0.1, -1, -1]
+            t1 = threading.Thread(target=readPT, args=[i, res_list])
             t1.start()  # Gets the data
             t1.join()
 
-            if(resTuple[2] > MAX_VAL):  # Check for abort
+            if(res_list[2] > MAX_VAL):  # Check for abort
                 # ABORT!!!
-                pass
+                raise PressureAbort
 
-            TC_DATA.append(resTuple)    # Save on stack to write to file later
+            TC_DATA.append(res_list)    # Save on stack to write to file later
 
-            liveData[i] = resTuple[2]   # Send to val to display on GUI
+            liveData[i] = res_list[2]   # Send to val to display on GUI
 
 def ptReader(hz):
     global STATUS
@@ -60,18 +67,17 @@ def ptReader(hz):
         time.sleep(1 / hz)  # Mimic protocol latency
 
         for i in range(8):
-            resTuple = ()
-            t1 = threading.Thread(target=readPT, args=[i, resTuple])
+            res_list = [0.1, -1, -1]
+            t1 = threading.Thread(target=readPT, args=[i, res_list])
             t1.start()  # Gets the data
             t1.join()
-
-            if(resTuple[2] > MAX_VAL):  # Check for abort
+            if(res_list[2] > MAX_VAL):  # Check for abort
                 # ABORT!!!
-                pass
+                raise PressureAbort
 
-            PT_DATA.append(resTuple)    # Save on stack to write to file later
+            PT_DATA.append(res_list)    # Save on stack to write to file later
 
-            liveData[i] = resTuple[2]   # Send to val to display on GUI
+            liveData[i] = res_list[2]   # Send to val to display on GUI
 
 def writeToFile():
     global TC_DATA
@@ -106,13 +112,13 @@ def writeToFile():
 
 def timeFire(timer):
     time.sleep(timer)
-    STATUS = ""
+    STATUS = "POSTFIRE"
 
 def main():
     global STATUS
 
-    STATUS = "a"
-    firingTime = 3
+    STATUS = "PREFIRE"
+    firingTime = 1
 
     while(STATUS.upper() != "FIRE"):
         STATUS = input("> ")
@@ -122,15 +128,33 @@ def main():
     stopFireThread = threading.Thread(target=timeFire, args=[firingTime])
     ptThread = threading.Thread(target=ptReader, args=[2])
     tcThread = threading.Thread(target=tcReader, args=[100])
-    ptThread.start()
-    tcThread.start()
-    stopFireThread.start()
 
-    ptThread.join()
-    tcThread.join()
-    stopFireThread.join()
+    try:
+        ptThread.start()
+        tcThread.start()
+        stopFireThread.start()
 
-    writeToFile()
+        ptThread.join()
+        tcThread.join()
+        stopFireThread.join()
+    except Abort:
+        print("Handle Abort")
+        pass
+
+    if len(TC_DATA) > 0:        # FOR TESTING ONLY
+        writeToFile()
 
 
 main()
+
+
+# Base abort class, pure virtual
+class Abort(Exception):
+    # Basic abort
+    pass
+
+
+# Example of how we could make a different exception
+# for each abort scenario and handle it automatically using OOP
+class PressureAbort(Abort):
+    pass
