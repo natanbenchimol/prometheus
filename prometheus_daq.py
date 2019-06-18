@@ -26,13 +26,13 @@ import os
 TC_NAMES = ["TC1_IP", "TC2_IP", "TC1_IF", "TC_I", "TC1_IO", "TC2_IO", "TC3_IO"]
 PT_NAMES = ["PT1_IP", "PT2_IP", "PT1_IF", "PT2_IF", "PT_I", "PT1_IO", "PT2_IO", "PT3_IO"]
 
-TC_HZ = 3
+TC_HZ = 150
 PT_HZ = 150
 
 TC_DATA = []    # to be written to file
 PT_DATA = []
 
-liveData = {}   # contains the most recent reading
+LIVE_DATA = {}   # contains the most recent reading
 
 MAX_VAL = 700   # example for testing
 
@@ -52,7 +52,7 @@ def readPT(data_id, PT_DATA, pt_id):
 
     PT_DATA.append(res_list)  # Save on stack to write to file later
 
-    liveData[pt_id] = res_list[3]  # Send to val to display on GUI
+    LIVE_DATA[pt_id] = res_list[3]  # Send to val to display on GUI
 
 def readTC(data_id, TC_DATA, tc_id):
     res_list = [None] * 4
@@ -70,7 +70,7 @@ def readTC(data_id, TC_DATA, tc_id):
 
     TC_DATA.append(res_list)        # Save on stack to write to file later
 
-    liveData[tc_id] = res_list[3]   # Send to val to display on GUI
+    LIVE_DATA[tc_id] = res_list[3]   # Send to val to display on GUI
 
 def tcReader(hz, prom_status):
     global TC_DATA
@@ -120,14 +120,15 @@ def ptReader(hz, prom_status):
         data_id_count += 1
         time.sleep(1 / hz)      # SET BY USER ON FRONTEND
 
-
 def writeToFile():
     global TC_DATA
     global PT_DATA
 
     # Sort data in case threading messed anything up
-    TC_DATA.sort(key=lambda tup: tup[1])
-    PT_DATA.sort(key=lambda tup: tup[1])
+    TC_DATA.sort(key=lambda tup: tup[2])
+    PT_DATA.sort(key=lambda tup: tup[2])
+    TC_DATA.sort(key=lambda tup: tup[0])
+    PT_DATA.sort(key=lambda tup: tup[0])
 
     # Directory management
     cwd = os.getcwd()
@@ -136,8 +137,8 @@ def writeToFile():
 
     # General housekeeping
     currentDT = datetime.datetime.now()  # Gets current time
-    print("TC len = " + str(len(TC_DATA)))
-    print("PT len = " + str(len(PT_DATA)))
+    print("Num of TC data points = " + str(len(TC_DATA)))
+    print("Num of PT data points = " + str(len(PT_DATA)))
 
     # ----------- Writing Raw Data ----------- #
 
@@ -155,20 +156,49 @@ def writeToFile():
     for list in PT_DATA:
         ptWriter.writerow(list)
 
+    # Close raw files
     raw_tc_file.close()
     raw_pt_file.close()
 
     # ----------- Processing Data ----------- #
 
-    # This will take a lot of thinking
+    header_row_pt = ["num","avgTime"] + PT_NAMES
+    header_row_tc = ["num","avgTime"] + TC_NAMES
 
+    clean_tc_file = open("Data/promCleanTC_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
+    tcWriter = csv.writer(clean_tc_file)
+    tcWriter.writerow(header_row_tc)
+
+    tcAvgTime = {}
+    ptAvgTime = {}
+
+    # For each tc reading
+    for reading in TC_DATA:
+        # Sum up all the times at the same index
+        if reading[0] in tcAvgTime:
+            tcAvgTime[reading[0]] += reading[1]
+        else:
+            tcAvgTime[reading[0]] = reading[1]
+    # Use the sum of the times to calculate average time
+    for total in tcAvgTime:
+        tcAvgTime[total] = tcAvgTime[total]/len(TC_NAMES)
+
+
+    for i in tcAvgTime:
+        to_write = [None] * len(header_row_tc)
+        to_write[0] = i
+        to_write[1] = tcAvgTime[i]
+
+        # This for loop is super confusing, sorry
+        for j in range((i*len(TC_NAMES)) + len(TC_NAMES)):
+            to_write[header_row_tc.index(TC_DATA[j][2])] = TC_DATA[j][3]
+
+        tcWriter.writerow(to_write)
+
+    clean_tc_file.close()
     # ----------- Writing Clean Data ----------- #
 
-    # clean_tc_file = open("Data/promCleanTC_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
     # clean_pt_file = open("Data/promCleanPT_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
-
-    header_row_pt = ["num","avgTime","PT1_IP", "PT2_IP", "PT1_IF", "PT2_IF", "PT_I", "PT1_IO", "PT2_IO", "PT3_IO"]
-    header_row_tc = ["num","avgTime","TC1_IP", "TC2_IP", "TC1_IF", "TC_I", "TC1_IO", "TC2_IO", "TC3_IO"]
 
 
 # Function only for testing
@@ -192,6 +222,7 @@ def main():
 
     prom_status["isFiring"] = True
     stopFireThread = threading.Thread(target=timeFire, args=(firingTime, prom_status))
+
     ptThread = threading.Thread(target=ptReader, args=(PT_HZ, prom_status))
     tcThread = threading.Thread(target=tcReader, args=(TC_HZ, prom_status))
 
