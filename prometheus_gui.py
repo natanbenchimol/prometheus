@@ -207,7 +207,7 @@ frame4 = tk.Frame(root, bg='#000033')
 frame4.place(relx=0, rely=0.1, relwidth=0.7, relheight=0.60)
 
 # inserts LPL Logo
-logo_load = Image.open('logo.jpg').resize((100,65), Image.ANTIALIAS)    # resize values are experiementally determined based on screen size. Not sure what ANTIALIAS does, but it was in every online example
+logo_load = Image.open('Assets/logo.jpg').resize((100,65), Image.ANTIALIAS)    # resize values are experiementally determined based on screen size. Not sure what ANTIALIAS does, but it was in every online example
 logo_render = ImageTk.PhotoImage(logo_load)
 logo = tk.Label(root, image=logo_render)
 logo.image = logo_render
@@ -258,9 +258,9 @@ button_NCIOP.place(relx=0.6566, rely=0.73, relwidth=NC_BUTTONWIDTH, relheight=NC
 
 # next 4 lines handle image loading for arm/disarm valves switch
 # an image is loaded as the background instead of an actual switch
-arming_switch_load = Image.open('toggle_off.png').resize((100, 100), Image.ANTIALIAS)
+arming_switch_load = Image.open('Assets/toggle_off.png').resize((100, 100), Image.ANTIALIAS)
 arming_switch_render = ImageTk.PhotoImage(arming_switch_load)
-disarming_switch_load = Image.open('toggle_on.png').resize((100, 100), Image.ANTIALIAS)
+disarming_switch_load = Image.open('Assets/toggle_on.png').resize((100, 100), Image.ANTIALIAS)
 disarming_switch_render = ImageTk.PhotoImage(disarming_switch_load)
 
 arm_man_ops_val = tk.IntVar()
