@@ -11,3 +11,6 @@ class Abort(Exception):
 # for each abort scenario and handle it automatically using OOP
 class PressureAbort(Abort):
     pass
+
+class TempAbort(Abort):
+    pass

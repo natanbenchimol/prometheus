@@ -4,7 +4,8 @@ import threading
 import datetime
 import csv
 
-import abort_sequences
+from queue import Queue
+from .abort_sequences import Abort
 
 #TODO:  PRESSING ISSUES
 #       Learn debugger!!! Important for MT func.
@@ -17,8 +18,11 @@ import abort_sequences
 #       Get csv working
 #       Are there potentially different aborts?
 
-
 STATUS = "PREFIRE"
+
+TC_NAMES = ["TC1_IP", "TC2_IP", "TC1_IF", "TC_I", "TC1_IO", "TC2_IO", "TC3_IO"]
+PT_NAMES = ["PT1_IP", "PT2_IP", "PT1_IF", "PT2_IF", "PT_I", "PT1_IO", "PT2_IO", "PT3_IO"]
+
 TC_DATA = []    # to be written to file
 PT_DATA = []
 
@@ -38,26 +42,26 @@ def readTC(id, res_list):
     res_list[1] = id
     res_list[2] = 1
 
-def tcReader(hz):
+def tcReader(hz, fireQ):
     global STATUS
     global TC_DATA
 
-    while(STATUS == "FIRE"):
-        time.sleep(1 / hz)  # Mimic protocol latency
+    while(fireQ.get() == "FIRE"):
+        #time.sleep(1 / hz)  # Mimic protocol latency
+        print("IN LOOP: " + STATUS)
+        #for i in range(8):
+        res_list = [-1,-1,-1]
+        t1 = threading.Thread(target=readPT, args=[1, res_list])
+        t1.start()  # Gets the data
+        t1.join()
 
-        for i in range(8):
-            res_list = [0.1, -1, -1]
-            t1 = threading.Thread(target=readPT, args=[i, res_list])
-            t1.start()  # Gets the data
-            t1.join()
+        if(res_list[2] > MAX_VAL):  # Check for abort
+            # ABORT!!!
+            raise PressureAbort
 
-            if(res_list[2] > MAX_VAL):  # Check for abort
-                # ABORT!!!
-                raise PressureAbort
+        TC_DATA.append(res_list)    # Save on stack to write to file later
 
-            TC_DATA.append(res_list)    # Save on stack to write to file later
-
-            liveData[i] = res_list[2]   # Send to val to display on GUI
+        #liveData[i] = res_list[2]   # Send to val to display on GUI
 
 def ptReader(hz):
     global STATUS
@@ -110,12 +114,18 @@ def writeToFile():
     tcFile.close()
     ptFile.close()
 
-def timeFire(timer):
+def timeFire(timer, fireQ):
+    print("Enter time fire")
     time.sleep(timer)
-    STATUS = "POSTFIRE"
+    fireQ.put("POSTFIRE")
+    print("Sleep complete")
 
 def main():
     global STATUS
+    global TC_DATA
+    global PT_DATA
+
+    fireQ = Queue()
 
     STATUS = "PREFIRE"
     firingTime = 1
@@ -123,23 +133,22 @@ def main():
     while(STATUS.upper() != "FIRE"):
         STATUS = input("> ")
 
-
-    # try catch
-    stopFireThread = threading.Thread(target=timeFire, args=[firingTime])
-    ptThread = threading.Thread(target=ptReader, args=[2])
-    tcThread = threading.Thread(target=tcReader, args=[100])
+    fireQ.put("FIRE")
+    stopFireThread = threading.Thread(target=timeFire, args=(firingTime, fireQ))
+    ptThread = threading.Thread(target=ptReader, args=(2, fireQ))
+    tcThread = threading.Thread(target=tcReader, args=(100, fireQ))
 
     try:
-        ptThread.start()
+        #ptThread.start()
         tcThread.start()
         stopFireThread.start()
 
-        ptThread.join()
+        #ptThread.join()
         tcThread.join()
         stopFireThread.join()
+
     except Abort:
         print("Handle Abort")
-        pass
 
     if len(TC_DATA) > 0:        # FOR TESTING ONLY
         writeToFile()
