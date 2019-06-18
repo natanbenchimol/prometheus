@@ -120,7 +120,7 @@ def writeToFile():
     TC_DATA.sort(key=lambda tup: tup[1])    # Sort data in case threading messed anything up
     PT_DATA.sort(key=lambda tup: tup[1])
 
-    cwd = os.getcwd()                       # Creates the data folder if it doesnt exist
+    cwd = os.getcwd()
     if not os.path.exists(cwd + "/Data/"):
         os.makedirs(cwd + "/Data/")
 
