@@ -7,12 +7,20 @@ import os
 
 #from .abort_sequences import Abort
 
+# NOTE!!!!!
+#
+#   The daq is not yet linked to the front end!
+#   Still in testing phase!
+#   Currently using FAKE data to ensure data flow is solid
+#
+# END OF NOTE
+
 #TODO:  PRESSING ISSUES
 #       Learn debugger!!! Important for MT func.
 
 #TODO:  FUTURE FUNCTIONALITY
+#       Write data processing
 #       Test try/catch block for abort
-#       Get csv module working
 #       Reaarange global vars -> which files should they go in
 
 TC_NAMES = ["TC1_IP", "TC2_IP", "TC1_IF", "TC_I", "TC1_IO", "TC2_IO", "TC3_IO"]
@@ -117,19 +125,23 @@ def writeToFile():
     global TC_DATA
     global PT_DATA
 
-    TC_DATA.sort(key=lambda tup: tup[1])    # Sort data in case threading messed anything up
+    # Sort data in case threading messed anything up
+    TC_DATA.sort(key=lambda tup: tup[1])
     PT_DATA.sort(key=lambda tup: tup[1])
 
+    # Directory management
     cwd = os.getcwd()
     if not os.path.exists(cwd + "/Data/"):
         os.makedirs(cwd + "/Data/")
 
+    # General housekeeping
+    currentDT = datetime.datetime.now()  # Gets current time
     print("TC len = " + str(len(TC_DATA)))
     print("PT len = " + str(len(PT_DATA)))
 
-    currentDT = datetime.datetime.now()  # Gets current time
+    # ----------- Writing Raw Data ----------- #
 
-    # Open the files
+    # Open the file
     raw_tc_file = open("Data/promRawTC_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
     raw_pt_file = open("Data/promRawPT_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
 
@@ -138,16 +150,28 @@ def writeToFile():
     ptWriter = csv.writer(raw_pt_file)
 
     # Write the raw data
-    for tup in TC_DATA:
-        tcWriter.writerow(tup)
-    for tup in PT_DATA:
-        ptWriter.writerow(tup)
+    for list in TC_DATA:
+        tcWriter.writerow(list)
+    for list in PT_DATA:
+        ptWriter.writerow(list)
 
     raw_tc_file.close()
     raw_pt_file.close()
 
+    # ----------- Processing Data ----------- #
 
-# Function only
+    # This will take a lot of thinking
+
+    # ----------- Writing Clean Data ----------- #
+
+    # clean_tc_file = open("Data/promCleanTC_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
+    # clean_pt_file = open("Data/promCleanPT_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
+
+    header_row_pt = ["num","avgTime","PT1_IP", "PT2_IP", "PT1_IF", "PT2_IF", "PT_I", "PT1_IO", "PT2_IO", "PT3_IO"]
+    header_row_tc = ["num","avgTime","TC1_IP", "TC2_IP", "TC1_IF", "TC_I", "TC1_IO", "TC2_IO", "TC3_IO"]
+
+
+# Function only for testing
 def timeFire(timer, prom_status):
     time.sleep(timer)
     prom_status["isFiring"] = False
