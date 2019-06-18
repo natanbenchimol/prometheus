@@ -1,5 +1,6 @@
 # Prometheus related Ignores
 .idea/workspace.xml
+/Data
 
 # ---- Below is a standard python .gitignore i found on github ----
 # https://github.com/github/gitignore/blob/master/Python.gitignore

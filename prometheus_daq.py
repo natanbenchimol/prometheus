@@ -130,21 +130,28 @@ def writeToFile():
     TC_DATA.sort(key=lambda tup: tup[0])
     PT_DATA.sort(key=lambda tup: tup[0])
 
-    # Directory management
+    # General housekeeping
     cwd = os.getcwd()
+    currentDT = datetime.datetime.now()  # Gets current time
+
+    dateFormatted = currentDT.strftime("%Y-%m-%d_%H-%M-%S")
+    filePath = cwd + "/Data/" + dateFormatted
+
+    print("Num of TC data points = " + str(len(TC_DATA)))
+    print("Num of PT data points = " + str(len(PT_DATA)))
+
+    # Directory management
     if not os.path.exists(cwd + "/Data/"):
         os.makedirs(cwd + "/Data/")
 
-    # General housekeeping
-    currentDT = datetime.datetime.now()  # Gets current time
-    print("Num of TC data points = " + str(len(TC_DATA)))
-    print("Num of PT data points = " + str(len(PT_DATA)))
+    if not os.path.exists(filePath):
+        os.makedirs(filePath)
 
     # ----------- Writing Raw Data ----------- #
 
     # Open the file
-    raw_tc_file = open("Data/promRawTC_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
-    raw_pt_file = open("Data/promRawPT_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
+    raw_tc_file = open(filePath + "/promRawTC_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
+    raw_pt_file = open(filePath + "/promRawPT_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
 
     # Create the CSV writers
     tcWriter = csv.writer(raw_tc_file)
