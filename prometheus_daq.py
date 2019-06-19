@@ -19,9 +19,9 @@ import os
 #       Learn debugger!!! Important for MT func.
 
 #TODO:  FUTURE FUNCTIONALITY
-#       Write data processing
 #       Test try/catch block for abort
 #       Reaarange global vars -> which files should they go in
+#       Make seperate file for data analysis scripts
 
 TC_NAMES = ["TC1_IP", "TC2_IP", "TC1_IF", "TC_I", "TC1_IO", "TC2_IO", "TC3_IO"]
 PT_NAMES = ["PT1_IP", "PT2_IP", "PT1_IF", "PT2_IF", "PT_I", "PT1_IO", "PT2_IO", "PT3_IO"]
@@ -135,7 +135,7 @@ def writeToFile():
     currentDT = datetime.datetime.now()  # Gets current time
 
     dateFormatted = currentDT.strftime("%Y-%m-%d_%H-%M-%S")
-    filePath = cwd + "/Data/" + dateFormatted
+    base_file_path = cwd + "/Data/" + dateFormatted
 
     print("Num of TC data points = " + str(len(TC_DATA)))
     print("Num of PT data points = " + str(len(PT_DATA)))
@@ -144,14 +144,14 @@ def writeToFile():
     if not os.path.exists(cwd + "/Data/"):
         os.makedirs(cwd + "/Data/")
 
-    if not os.path.exists(filePath):
-        os.makedirs(filePath)
+    if not os.path.exists(base_file_path):
+        os.makedirs(base_file_path)
 
     # ----------- Writing Raw Data ----------- #
 
     # Open the file
-    raw_tc_file = open(filePath + "/promRawTC_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
-    raw_pt_file = open(filePath + "/promRawPT_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
+    raw_tc_file = open(base_file_path + "/promRawTC_" + dateFormatted +".csv", "w")
+    raw_pt_file = open(base_file_path + "/promRawPT_" + dateFormatted +".csv", "w")
 
     # Create the CSV writers
     tcWriter = csv.writer(raw_tc_file)
@@ -167,45 +167,79 @@ def writeToFile():
     raw_tc_file.close()
     raw_pt_file.close()
 
-    # ----------- Processing Data ----------- #
+    # ----------- Processing Data, Write to Clean Files ----------- #
 
     header_row_pt = ["num","avgTime"] + PT_NAMES
     header_row_tc = ["num","avgTime"] + TC_NAMES
 
-    clean_tc_file = open("Data/promCleanTC_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
+    clean_tc_file = open(base_file_path + "/promCleanTC_" + dateFormatted +".csv", "w")
     tcWriter = csv.writer(clean_tc_file)
     tcWriter.writerow(header_row_tc)
 
-    tcAvgTime = {}
-    ptAvgTime = {}
+    clean_pt_file = open(base_file_path + "/promCleanPT_" + dateFormatted +".csv", "w")
+    ptWriter = csv.writer(clean_pt_file)
+    ptWriter.writerow(header_row_pt)
 
+    # ----------- TC File Writing ----------- #
+
+    tcAvgTime = {}
     # For each tc reading
-    for reading in TC_DATA:
-        # Sum up all the times at the same index
-        if reading[0] in tcAvgTime:
-            tcAvgTime[reading[0]] += reading[1]
+    for tc_reading in TC_DATA:
+
+        if tc_reading[0] in tcAvgTime:             # Sum up all the times at the same index
+            tcAvgTime[tc_reading[0]] += tc_reading[1]
         else:
-            tcAvgTime[reading[0]] = reading[1]
-    # Use the sum of the times to calculate average time
-    for total in tcAvgTime:
+            tcAvgTime[tc_reading[0]] = tc_reading[1]
+
+    for total in tcAvgTime:                     # Use the sum of the times to calculate average time
         tcAvgTime[total] = tcAvgTime[total]/len(TC_NAMES)
 
-
+    # Loops one batch at a time, creating a list for the batch, and writing it to the file
     for i in tcAvgTime:
-        to_write = [None] * len(header_row_tc)
-        to_write[0] = i
-        to_write[1] = tcAvgTime[i]
+        to_write = [None] * len(header_row_tc)      # This is the list that will be written to file
+        to_write[0] = i                             # Thread batch number
+        to_write[1] = tcAvgTime[i]                  # Avg time of batch
 
         # This for loop is super confusing, sorry
+        # Essentially it takes the sorted TC_DATA, compresses all of a single
+        # batch into the 'to_write' list. Using .index() to find which index
+        # in 'to_write' corresponds to each tc ID
         for j in range((i*len(TC_NAMES)) + len(TC_NAMES)):
             to_write[header_row_tc.index(TC_DATA[j][2])] = TC_DATA[j][3]
 
-        tcWriter.writerow(to_write)
+        tcWriter.writerow(to_write)                 # Write the list of data to the csv
 
+    # ----------- PT File Writing ----------- #
+    ptAvgTime = {}
+
+    for pt_reading in PT_DATA:      # For each tc reading
+
+        if pt_reading[0] in ptAvgTime:  # Sum up all the times at the same index
+            ptAvgTime[pt_reading[0]] += pt_reading[1]
+        else:
+            ptAvgTime[pt_reading[0]] = pt_reading[1]
+
+    for total in ptAvgTime:  # Use the sum of the times to calculate average time
+        ptAvgTime[total] = ptAvgTime[total] / len(PT_NAMES)
+
+    # Loops one batch at a time, creating a list for the batch, and writing it to the file
+    for i in ptAvgTime:
+        to_write = [None] * len(header_row_pt)      # This is the list that will be written to file
+        to_write[0] = i                             # Thread batch number
+        to_write[1] = ptAvgTime[i]                  # Avg time of batch
+
+        # This for loop is super confusing, sorry
+        # Essentially it takes the sorted TC_DATA, compresses all of a single
+        # batch into the 'to_write' list. Using .index() to find which index
+        # in 'to_write' corresponds to each tc ID
+        for j in range((i * len(PT_NAMES)) + len(PT_NAMES)):
+            to_write[header_row_pt.index(PT_DATA[j][2])] = PT_DATA[j][3]
+
+        ptWriter.writerow(to_write)  # Write the list of data to the csv
+
+    # ----------- Finishing ----------- #
     clean_tc_file.close()
-    # ----------- Writing Clean Data ----------- #
-
-    # clean_pt_file = open("Data/promCleanPT_" + currentDT.strftime("%Y-%m-%d_%H-%M-%S") +".csv", "w")
+    clean_pt_file.close()
 
 
 # Function only for testing
