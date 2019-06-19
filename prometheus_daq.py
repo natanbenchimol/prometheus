@@ -2,11 +2,9 @@
 import time
 import threading
 
-import datetime
-import os
-import csv
+import prometheus_data_processing as data
 
-#from .abort_sequences import Abort
+# from .abort_sequences import Abort
 
 # NOTE!!!!!
 #
@@ -50,11 +48,12 @@ def readPT(data_id, PT_DATA, pt_id):
 
     if (res_list[3] > MAX_VAL):
         PT_DATA.append(res_list)  # So we know what val caused the abort
-        raise PressureAbort     # ABORT!!
+        raise PressureAbort       # ABORT!!
 
     PT_DATA.append(res_list)  # Save on stack to write to file later
 
     LIVE_DATA[pt_id] = res_list[3]  # Send to val to display on GUI
+
 
 def readTC(data_id, TC_DATA, tc_id):
     res_list = [None] * 4
@@ -133,6 +132,7 @@ def timeFire(timer, prom_status):
 def main():
     global TC_DATA
     global PT_DATA
+    import prometheus_data_processing as data
 
     prom_status = {}
     prom_status["isFiring"] = False
@@ -161,7 +161,7 @@ def main():
     except Abort:
         print("Handle Abort")
 
-    writeToFile(TC_DATA, PT_DATA)
+    data.writeToFile(TC_DATA, PT_DATA)
 
 
 main()

@@ -3,14 +3,18 @@ import datetime
 import os
 import csv
 
-from prometheus_daq import CONST_PT_NAMES
-from prometheus_daq import CONST_TC_NAMES
+# from prometheus_daq import CONST_PT_NAMES
+# from prometheus_daq import CONST_TC_NAMES
+
+CONST_TC_NAMES = ["TC1_IP", "TC2_IP", "TC1_IF", "TC_I", "TC1_IO", "TC2_IO", "TC3_IO"]
+CONST_PT_NAMES = ["PT1_IP", "PT2_IP", "PT1_IF", "PT2_IF", "PT_I", "PT1_IO", "PT2_IO", "PT3_IO"]
 
 #TODO : Data Processing Edition
 #   - SAFETY!!! Put everything in a try/catch in case exception thrown
 #   - Break up writeToFile function
 #   - Add launch-relative time to clean data
 #   - Write function for unix->24hr
+
 
 # This sorts the raw data primarily by batch number
 # but each batch is also sorted by instrument ID
@@ -20,7 +24,8 @@ def sort_raw(DATA):
     DATA.sort(key=lambda tup: tup[2])   # Sorting by instrument ID
     DATA.sort(key=lambda tup: tup[0])   # Sorting by batch number
 
-def write_clean(csv_writer, header, RAW_DATA):
+
+def write_clean(csv_writer, header, RAW_DATA, INSTRUMENT_NAMES):
 
     batch_avg_time = {}                 # KEY: batch_number - VALUE: avg time of that batch number
     for reading in RAW_DATA:            # For each instrument reading
@@ -31,7 +36,7 @@ def write_clean(csv_writer, header, RAW_DATA):
             batch_avg_time[reading[0]] = reading[1]
 
     for total in batch_avg_time:                          # Use the sum of the times to calculate average time
-        batch_avg_time[total] = batch_avg_time[total] / len(CONST_PT_NAMES)
+        batch_avg_time[total] = batch_avg_time[total] / len(INSTRUMENT_NAMES)
 
     # Loops one batch at a time, creating a list for the batch, and writing it to the file
     for i in batch_avg_time:
@@ -43,10 +48,11 @@ def write_clean(csv_writer, header, RAW_DATA):
         # Essentially it takes the sorted DATA, compresses all of a single
         # batch into the 'to_write' list. Using .index() to find which index
         # in 'to_write' corresponds to each instrument ID
-        for j in range((i * len(CONST_PT_NAMES)) + len(CONST_PT_NAMES)):
-            to_write[header.index(RAW_DATA[j][2])] = RAW_DATA[j][3]    # I think this is wrong
+        for j in range((i * len(INSTRUMENT_NAMES)) + len(INSTRUMENT_NAMES)):
+            to_write[header.index(RAW_DATA[j][2])] = RAW_DATA[j][3]
 
         csv_writer.writerow(to_write)               # Write the list of data to the csv
+
 
 def writeToFile(TC_DATA, PT_DATA):
 
@@ -63,7 +69,6 @@ def writeToFile(TC_DATA, PT_DATA):
 
     if not os.path.exists(cwd + "/Data/"):                  # Directory management
         os.makedirs(cwd + "/Data/")
-
     if not os.path.exists(base_file_path):
         os.makedirs(base_file_path)
 
@@ -103,8 +108,8 @@ def writeToFile(TC_DATA, PT_DATA):
     ptWriter = csv.writer(clean_pt_file)
     ptWriter.writerow(header_row_pt)
 
-    write_clean(tcWriter, header_row_tc, TC_DATA)   # Write clean TC data to file
-    write_clean(ptWriter, header_row_pt, PT_DATA)   # Write clean PT data to file
+    write_clean(tcWriter, header_row_tc, TC_DATA, CONST_TC_NAMES)   # Write clean TC data to file
+    write_clean(ptWriter, header_row_pt, PT_DATA, CONST_PT_NAMES)   # Write clean PT data to file
 
     # ----------- Finishing ----------- #
 
