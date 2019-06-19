@@ -1,9 +1,10 @@
 
 import time
 import threading
+
 import datetime
-import csv
 import os
+import csv
 
 #from .abort_sequences import Abort
 
@@ -21,10 +22,11 @@ import os
 #TODO:  FUTURE FUNCTIONALITY
 #       Test try/catch block for abort
 #       Reaarange global vars -> which files should they go in
-#       Make seperate file for data analysis scripts
+#       Soleniod actuation to actually launch system
+#       Refactor entire
 
-TC_NAMES = ["TC1_IP", "TC2_IP", "TC1_IF", "TC_I", "TC1_IO", "TC2_IO", "TC3_IO"]
-PT_NAMES = ["PT1_IP", "PT2_IP", "PT1_IF", "PT2_IF", "PT_I", "PT1_IO", "PT2_IO", "PT3_IO"]
+CONST_TC_NAMES = ["TC1_IP", "TC2_IP", "TC1_IF", "TC_I", "TC1_IO", "TC2_IO", "TC3_IO"]
+CONST_PT_NAMES = ["PT1_IP", "PT2_IP", "PT1_IF", "PT2_IF", "PT_I", "PT1_IO", "PT2_IO", "PT3_IO"]
 
 TC_HZ = 150
 PT_HZ = 150
@@ -72,6 +74,7 @@ def readTC(data_id, TC_DATA, tc_id):
 
     LIVE_DATA[tc_id] = res_list[3]   # Send to val to display on GUI
 
+
 def tcReader(hz, prom_status):
     global TC_DATA
 
@@ -81,7 +84,7 @@ def tcReader(hz, prom_status):
         threads = []
 
         # Creates all the threads to be executed, adds them to a list
-        for tc in TC_NAMES:
+        for tc in CONST_TC_NAMES:
             tc_thread = threading.Thread(target=readTC, args=(data_id_count, TC_DATA, tc))
             threads.append(tc_thread)
 
@@ -107,7 +110,7 @@ def ptReader(hz, prom_status):
         threads = []
 
         # Creates all the threads to be executed, adds them to a list, runs them
-        for pt in PT_NAMES:
+        for pt in CONST_PT_NAMES:
             pt_thread = threading.Thread(target=readTC, args=(data_id_count, PT_DATA, pt))
             threads.append(pt_thread)
             pt_thread.start()
@@ -119,127 +122,6 @@ def ptReader(hz, prom_status):
         # We will only reach here once all the threads are completed
         data_id_count += 1
         time.sleep(1 / hz)      # SET BY USER ON FRONTEND
-
-def writeToFile():
-    global TC_DATA
-    global PT_DATA
-
-    # Sort data in case threading messed anything up
-    TC_DATA.sort(key=lambda tup: tup[2])
-    PT_DATA.sort(key=lambda tup: tup[2])
-    TC_DATA.sort(key=lambda tup: tup[0])
-    PT_DATA.sort(key=lambda tup: tup[0])
-
-    # General housekeeping
-    cwd = os.getcwd()
-    currentDT = datetime.datetime.now()  # Gets current time
-
-    dateFormatted = currentDT.strftime("%Y-%m-%d_%H-%M-%S")
-    base_file_path = cwd + "/Data/" + dateFormatted
-
-    print("Num of TC data points = " + str(len(TC_DATA)))
-    print("Num of PT data points = " + str(len(PT_DATA)))
-
-    # Directory management
-    if not os.path.exists(cwd + "/Data/"):
-        os.makedirs(cwd + "/Data/")
-
-    if not os.path.exists(base_file_path):
-        os.makedirs(base_file_path)
-
-    # ----------- Writing Raw Data ----------- #
-
-    # Open the file
-    raw_tc_file = open(base_file_path + "/promRawTC_" + dateFormatted +".csv", "w")
-    raw_pt_file = open(base_file_path + "/promRawPT_" + dateFormatted +".csv", "w")
-
-    # Create the CSV writers
-    tcWriter = csv.writer(raw_tc_file)
-    ptWriter = csv.writer(raw_pt_file)
-
-    # Write the raw data
-    for list in TC_DATA:
-        tcWriter.writerow(list)
-    for list in PT_DATA:
-        ptWriter.writerow(list)
-
-    # Close raw files
-    raw_tc_file.close()
-    raw_pt_file.close()
-
-    # ----------- Processing Data, Write to Clean Files ----------- #
-
-    header_row_pt = ["num","avgTime"] + PT_NAMES
-    header_row_tc = ["num","avgTime"] + TC_NAMES
-
-    clean_tc_file = open(base_file_path + "/promCleanTC_" + dateFormatted +".csv", "w")
-    tcWriter = csv.writer(clean_tc_file)
-    tcWriter.writerow(header_row_tc)
-
-    clean_pt_file = open(base_file_path + "/promCleanPT_" + dateFormatted +".csv", "w")
-    ptWriter = csv.writer(clean_pt_file)
-    ptWriter.writerow(header_row_pt)
-
-    # ----------- TC File Writing ----------- #
-
-    tcAvgTime = {}
-    # For each tc reading
-    for tc_reading in TC_DATA:
-
-        if tc_reading[0] in tcAvgTime:             # Sum up all the times at the same index
-            tcAvgTime[tc_reading[0]] += tc_reading[1]
-        else:
-            tcAvgTime[tc_reading[0]] = tc_reading[1]
-
-    for total in tcAvgTime:                     # Use the sum of the times to calculate average time
-        tcAvgTime[total] = tcAvgTime[total]/len(TC_NAMES)
-
-    # Loops one batch at a time, creating a list for the batch, and writing it to the file
-    for i in tcAvgTime:
-        to_write = [None] * len(header_row_tc)      # This is the list that will be written to file
-        to_write[0] = i                             # Thread batch number
-        to_write[1] = tcAvgTime[i]                  # Avg time of batch
-
-        # This for loop is super confusing, sorry
-        # Essentially it takes the sorted TC_DATA, compresses all of a single
-        # batch into the 'to_write' list. Using .index() to find which index
-        # in 'to_write' corresponds to each tc ID
-        for j in range((i*len(TC_NAMES)) + len(TC_NAMES)):
-            to_write[header_row_tc.index(TC_DATA[j][2])] = TC_DATA[j][3]
-
-        tcWriter.writerow(to_write)                 # Write the list of data to the csv
-
-    # ----------- PT File Writing ----------- #
-    ptAvgTime = {}
-
-    for pt_reading in PT_DATA:      # For each tc reading
-
-        if pt_reading[0] in ptAvgTime:  # Sum up all the times at the same index
-            ptAvgTime[pt_reading[0]] += pt_reading[1]
-        else:
-            ptAvgTime[pt_reading[0]] = pt_reading[1]
-
-    for total in ptAvgTime:  # Use the sum of the times to calculate average time
-        ptAvgTime[total] = ptAvgTime[total] / len(PT_NAMES)
-
-    # Loops one batch at a time, creating a list for the batch, and writing it to the file
-    for i in ptAvgTime:
-        to_write = [None] * len(header_row_pt)      # This is the list that will be written to file
-        to_write[0] = i                             # Thread batch number
-        to_write[1] = ptAvgTime[i]                  # Avg time of batch
-
-        # This for loop is super confusing, sorry
-        # Essentially it takes the sorted TC_DATA, compresses all of a single
-        # batch into the 'to_write' list. Using .index() to find which index
-        # in 'to_write' corresponds to each tc ID
-        for j in range((i * len(PT_NAMES)) + len(PT_NAMES)):
-            to_write[header_row_pt.index(PT_DATA[j][2])] = PT_DATA[j][3]
-
-        ptWriter.writerow(to_write)  # Write the list of data to the csv
-
-    # ----------- Finishing ----------- #
-    clean_tc_file.close()
-    clean_pt_file.close()
 
 
 # Function only for testing
@@ -279,7 +161,7 @@ def main():
     except Abort:
         print("Handle Abort")
 
-    writeToFile()
+    writeToFile(TC_DATA, PT_DATA)
 
 
 main()
@@ -298,3 +180,5 @@ class PressureAbort(Abort):
 
 class TempAbort(Abort):
     pass
+
+
