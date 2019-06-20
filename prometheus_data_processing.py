@@ -4,6 +4,7 @@ import os
 import csv
 
 import prometheus_consts as CONST
+import prometheus_shared as shared
 
 #TODO : Data Processing Edition
 #   - SAFETY!!! Put everything in a try/catch in case exception thrown
@@ -11,6 +12,13 @@ import prometheus_consts as CONST
 #   - Write function for unix->24hr
 #   - Keep iterating/refactoring
 
+def unix_to_24h(unix) -> str:
+    return datetime.datetime.fromtimestamp(
+        float(unix)
+    ).strftime('%H:%M:%S.%f')
+
+def unix_to_missiontime(unix) -> float:
+    return unix - shared.COUNTDOWN_START
 
 # This sorts the raw data primarily by batch number
 # but each batch is also sorted by instrument ID
@@ -38,7 +46,8 @@ def write_clean(csv_writer, header, RAW_DATA, INSTRUMENT_NAMES):
     for i in batch_avg_time:
         to_write = [None] * len(header)             # This is the list that will be written to file
         to_write[0] = i                             # Thread batch number
-        to_write[1] = batch_avg_time[i]             # Avg time of batch
+        to_write[1] = unix_to_24h(batch_avg_time[i])             # Avg time of batch
+        to_write[2] = unix_to_missiontime(batch_avg_time[i])     # Mission time
 
         # I know this for loop is super confusing... sorry
         # Essentially it takes the sorted DATA, moves all of the points of a single
@@ -50,7 +59,7 @@ def write_clean(csv_writer, header, RAW_DATA, INSTRUMENT_NAMES):
         csv_writer.writerow(to_write)               # Write the list of data to the csv
 
 
-def writeToFile(TC_DATA, PT_DATA, FM_DATA):
+def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
 
     # ----------- General Housekeeping ----------- #
 
@@ -85,7 +94,6 @@ def writeToFile(TC_DATA, PT_DATA, FM_DATA):
     ptWriter = csv.writer(raw_pt_file)
     fmWriter = csv.writer(raw_fm_file)
 
-
     # Write the raw data
     for data_point in TC_DATA:
         tcWriter.writerow(data_point)
@@ -101,9 +109,9 @@ def writeToFile(TC_DATA, PT_DATA, FM_DATA):
 
     # ----------- Processing Data, Write to Clean Files ----------- #
 
-    header_row_pt = ["Batch Num","Avg. Time"] + CONST.PT_NAMES
-    header_row_tc = ["Batch Num","Avg. Time"] + CONST.TC_NAMES
-    header_row_fm = ["Batch Num","Avg. Time"] + CONST.FM_NAMES
+    header_row_pt = ["Batch Num","Avg. Time", "Mission Time"] + CONST.PT_NAMES
+    header_row_tc = ["Batch Num","Avg. Time", "Mission Time"] + CONST.TC_NAMES
+    header_row_fm = ["Batch Num","Avg. Time", "Mission Time"] + CONST.FM_NAMES
 
     clean_tc_file = open(base_file_path + "/promCleanTC_" + formatted_date +".csv", "w")
     tcWriter = csv.writer(clean_tc_file)
@@ -119,7 +127,7 @@ def writeToFile(TC_DATA, PT_DATA, FM_DATA):
 
     write_clean(tcWriter, header_row_tc, TC_DATA, CONST.TC_NAMES)   # Write clean TC data to file
     write_clean(ptWriter, header_row_pt, PT_DATA, CONST.PT_NAMES)   # Write clean PT data to file
-    write_clean(fmWriter, header_row_fm, FM_DATA, CONST.FM_NAMES)
+    write_clean(fmWriter, header_row_fm, FM_DATA, CONST.FM_NAMES)   # Write clean FM data to file
 
     # ----------- Finishing ----------- #
 

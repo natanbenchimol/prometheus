@@ -4,6 +4,7 @@ import threading
 
 import prometheus_consts as CONST
 import prometheus_data_processing as data
+import prometheus_shared as shared
 
 # from .abort_sequences import Abort
 
@@ -25,13 +26,8 @@ import prometheus_data_processing as data
 #       Separate DAQ from firing
 
 
-TC_DATA = []    # to be written to file
-PT_DATA = []
-FM_DATA = []
-
-LIVE_DATA = {}   # contains the most recent reading
-
 MAX_VAL = 700   # example for testing
+
 
 def readPT(batch_id, PT_DATA, pt_id):
     res_list = [None] * 4
@@ -49,7 +45,7 @@ def readPT(batch_id, PT_DATA, pt_id):
 
     PT_DATA.append(res_list)  # Save on stack to write to file later
 
-    LIVE_DATA[pt_id] = res_list[3]  # Send to val to display on GUI
+    shared.LIVE_DATA[pt_id] = res_list[3]  # Send to val to display on GUI
 
 
 def readTC(batch_id, TC_DATA, tc_id):
@@ -68,7 +64,7 @@ def readTC(batch_id, TC_DATA, tc_id):
 
     TC_DATA.append(res_list)        # Save on stack to write to file later
 
-    LIVE_DATA[tc_id] = res_list[3]   # Send to val to display on GUI
+    shared.LIVE_DATA[tc_id] = res_list[3]   # Send to val to display on GUI
 
 
 def readFM(batch_id, FM_DATA, fm_id):
@@ -87,7 +83,7 @@ def readFM(batch_id, FM_DATA, fm_id):
 
     FM_DATA.append(res_list)        # Save on stack to write to file later
 
-    LIVE_DATA[fm_id] = res_list[3]   # Send to val to display on GUI
+    shared.LIVE_DATA[fm_id] = res_list[3]   # Send to val to display on GUI
 
 
 def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
@@ -133,12 +129,13 @@ def main():
     while(STATUS.upper() != "FIRE"):
         STATUS = input("> ")
 
+    shared.COUNTDOWN_START = time.time()
     prom_status["isFiring"] = True
     stopFireThread = threading.Thread(target=timeFire, args=(firingTime, prom_status))
 
-    ptThread = threading.Thread(target=batch_reader, args=(CONST.PT_HZ, prom_status, PT_DATA, CONST.PT_NAMES, readPT))
-    tcThread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, TC_DATA, CONST.TC_NAMES, readTC))
-    fmThread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, FM_DATA, CONST.FM_NAMES, readFM))
+    ptThread = threading.Thread(target=batch_reader, args=(CONST.PT_HZ, prom_status, shared.PT_DATA, CONST.PT_NAMES, readPT))
+    tcThread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, shared.TC_DATA, CONST.TC_NAMES, readTC))
+    fmThread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, shared.FM_DATA, CONST.FM_NAMES, readFM))
 
     try:
         ptThread.start()
@@ -154,7 +151,7 @@ def main():
     except Abort:
         print("Handle Abort")
 
-    data.writeToFile(TC_DATA, PT_DATA, FM_DATA)
+    data.writeToFile(shared.COUNTDOWN_START, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
 
 
 main()
