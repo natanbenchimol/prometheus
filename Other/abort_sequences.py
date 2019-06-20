@@ -14,6 +14,5 @@ class PressureAbort(Abort):
     pass
 
 class TempAbort(Abort):
-    handle_abort()
     pass
 

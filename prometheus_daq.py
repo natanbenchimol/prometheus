@@ -2,6 +2,7 @@
 import time
 import threading
 
+import prometheus_consts as CONST
 import prometheus_data_processing as data
 
 # from .abort_sequences import Abort
@@ -21,27 +22,23 @@ import prometheus_data_processing as data
 #       Test try/catch block for abort
 #       Reaarange global vars -> which files should they go in
 #       Soleniod actuation to actually launch system
-#       Refactor entire
+#       Separate DAQ from firing
 
-CONST_TC_NAMES = ["TC1_IP", "TC2_IP", "TC1_IF", "TC_I", "TC1_IO", "TC2_IO", "TC3_IO"]
-CONST_PT_NAMES = ["PT1_IP", "PT2_IP", "PT1_IF", "PT2_IF", "PT_I", "PT1_IO", "PT2_IO", "PT3_IO"]
-
-TC_HZ = 150
-PT_HZ = 150
 
 TC_DATA = []    # to be written to file
 PT_DATA = []
+FM_DATA = []
 
 LIVE_DATA = {}   # contains the most recent reading
 
 MAX_VAL = 700   # example for testing
 
-def readPT(data_id, PT_DATA, pt_id):
+def readPT(batch_id, PT_DATA, pt_id):
     res_list = [None] * 4
 
     # get result from id from TC protocol
 
-    res_list[0] = data_id       # int   - this is the nth time we are collecting data from here
+    res_list[0] = batch_id       # int   - this is the nth time we are collecting data from here
     res_list[1] = time.time()   # float - time data point collected (unix time)
     res_list[2] = pt_id         # str   - instrument id
     res_list[3] = 1             # float - data collected from PT
@@ -55,12 +52,12 @@ def readPT(data_id, PT_DATA, pt_id):
     LIVE_DATA[pt_id] = res_list[3]  # Send to val to display on GUI
 
 
-def readTC(data_id, TC_DATA, tc_id):
+def readTC(batch_id, TC_DATA, tc_id):
     res_list = [None] * 4
 
     # get result from id from TC protocol
 
-    res_list[0] = data_id           # int   - this is the nth time we are collecting data from here
+    res_list[0] = batch_id           # int   - this is the nth time we are collecting data from here
     res_list[1] = time.time()       # float - time data point collected (unix time)
     res_list[2] = tc_id             # str   - instrument id
     res_list[3] = 1                 # float - data collected from TC
@@ -74,34 +71,26 @@ def readTC(data_id, TC_DATA, tc_id):
     LIVE_DATA[tc_id] = res_list[3]   # Send to val to display on GUI
 
 
-def tcReader(hz, prom_status):
-    global TC_DATA
+def readFM(batch_id, FM_DATA, fm_id):
+    res_list = [None] * 4
 
-    data_id_count = 0
-    while(prom_status["isFiring"]):
+    # get result from id from FM protocol
 
-        threads = []
+    res_list[0] = batch_id          # int   - this is the nth time we are collecting data from here
+    res_list[1] = time.time()       # float - time data point collected (unix time)
+    res_list[2] = fm_id             # str   - instrument id
+    res_list[3] = 1                 # float - data collected from TC
 
-        # Creates all the threads to be executed, adds them to a list
-        for tc in CONST_TC_NAMES:
-            tc_thread = threading.Thread(target=readTC, args=(data_id_count, TC_DATA, tc))
-            threads.append(tc_thread)
+    if (res_list[3] > MAX_VAL):
+        FM_DATA.append(res_list)    # So we know what val caused the abort
+        raise TempAbort             # ABORT!!
 
-        # Starts all the threads in the list
-        for t in threads:
-            t.start()
+    FM_DATA.append(res_list)        # Save on stack to write to file later
 
-        # Joins all the threads, wait until they are done executing
-        for t in threads:
-            t.join()
-
-        # We will only reach here once all the threads are completed
-        data_id_count += 1
-        time.sleep(1 / hz)
+    LIVE_DATA[fm_id] = res_list[3]   # Send to val to display on GUI
 
 
-def ptReader(hz, prom_status):
-    global PT_DATA
+def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
 
     data_id_count = 0
     while(prom_status["isFiring"]):
@@ -109,10 +98,10 @@ def ptReader(hz, prom_status):
         threads = []
 
         # Creates all the threads to be executed, adds them to a list, runs them
-        for pt in CONST_PT_NAMES:
-            pt_thread = threading.Thread(target=readTC, args=(data_id_count, PT_DATA, pt))
-            threads.append(pt_thread)
-            pt_thread.start()
+        for instrument_name in INSTRUMENT_NAMES:
+            inst_thread = threading.Thread(target=reader_func, args=(data_id_count, DATA, instrument_name))
+            inst_thread.start()             # Start the thread
+            threads.append(inst_thread)     # Add to list
 
         # Joins all the threads, wait until they are done executing
         for t in threads:
@@ -125,14 +114,15 @@ def ptReader(hz, prom_status):
 
 # Function only for testing
 def timeFire(timer, prom_status):
+    print("START TIMER")
     time.sleep(timer)
     prom_status["isFiring"] = False
+    print("END FIRE")
 
 
 def main():
     global TC_DATA
     global PT_DATA
-    import prometheus_data_processing as data
 
     prom_status = {}
     prom_status["isFiring"] = False
@@ -146,22 +136,25 @@ def main():
     prom_status["isFiring"] = True
     stopFireThread = threading.Thread(target=timeFire, args=(firingTime, prom_status))
 
-    ptThread = threading.Thread(target=ptReader, args=(PT_HZ, prom_status))
-    tcThread = threading.Thread(target=tcReader, args=(TC_HZ, prom_status))
+    ptThread = threading.Thread(target=batch_reader, args=(CONST.PT_HZ, prom_status, PT_DATA, CONST.PT_NAMES, readPT))
+    tcThread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, TC_DATA, CONST.TC_NAMES, readTC))
+    fmThread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, FM_DATA, CONST.FM_NAMES, readFM))
 
     try:
         ptThread.start()
         tcThread.start()
+        fmThread.start()
         stopFireThread.start()
 
         ptThread.join()
         tcThread.join()
+        fmThread.join()
         stopFireThread.join()
 
     except Abort:
         print("Handle Abort")
 
-    data.writeToFile(TC_DATA, PT_DATA)
+    data.writeToFile(TC_DATA, PT_DATA, FM_DATA)
 
 
 main()
