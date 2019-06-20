@@ -5,8 +5,7 @@ import threading
 import prometheus_consts as CONST
 import prometheus_data_processing as data
 import prometheus_shared as shared
-
-# from .abort_sequences import Abort
+import abort_sequences as aborts
 
 # NOTE!!!!!
 #
@@ -21,9 +20,7 @@ import prometheus_shared as shared
 
 #TODO:  FUTURE FUNCTIONALITY
 #       Test try/catch block for abort
-#       Reaarange global vars -> which files should they go in
 #       Soleniod actuation to actually launch system
-#       Separate DAQ from firing
 
 
 MAX_VAL = 700   # example for testing
@@ -41,7 +38,7 @@ def readPT(batch_id, PT_DATA, pt_id):
 
     if (res_list[3] > MAX_VAL):
         PT_DATA.append(res_list)  # So we know what val caused the abort
-        raise PressureAbort       # ABORT!!
+        raise aborts.PressureAbort       # ABORT!!
 
     PT_DATA.append(res_list)  # Save on stack to write to file later
 
@@ -60,7 +57,7 @@ def readTC(batch_id, TC_DATA, tc_id):
 
     if (res_list[3] > MAX_VAL):
         TC_DATA.append(res_list)    # So we know what val caused the abort
-        raise TempAbort             # ABORT!!
+        raise aborts.TempAbort             # ABORT!!
 
     TC_DATA.append(res_list)        # Save on stack to write to file later
 
@@ -79,7 +76,7 @@ def readFM(batch_id, FM_DATA, fm_id):
 
     if (res_list[3] > MAX_VAL):
         FM_DATA.append(res_list)    # So we know what val caused the abort
-        raise TempAbort             # ABORT!!
+        raise aborts.TempAbort             # ABORT!!
 
     FM_DATA.append(res_list)        # Save on stack to write to file later
 
@@ -93,7 +90,7 @@ def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
 
         threads = []
 
-        # Creates all the threads to be executed, adds them to a list, runs them
+        # Creates all the threads to be executed, starts them, adds them to a list
         for instrument_name in INSTRUMENT_NAMES:
             inst_thread = threading.Thread(target=reader_func, args=(data_id_count, DATA, instrument_name))
             inst_thread.start()             # Start the thread
@@ -105,7 +102,7 @@ def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
 
         # We will only reach here once all the threads are completed
         data_id_count += 1
-        time.sleep(1 / hz)      # SET BY USER ON FRONTEND
+        time.sleep(1 / hz)
 
 
 # Function only for testing
@@ -148,7 +145,7 @@ def main():
         fmThread.join()
         stopFireThread.join()
 
-    except Abort:
+    except aborts.Abort:
         print("Handle Abort")
 
     data.writeToFile(shared.COUNTDOWN_START, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
@@ -156,19 +153,19 @@ def main():
 
 main()
 
-
-# Base abort class, pure virtual
-class Abort(Exception):
-    # Basic abort
-    pass
-
-
-# Example of how we could make a different exception
-# for each abort scenario and handle it automatically using OOP
-class PressureAbort(Abort):
-    pass
-
-class TempAbort(Abort):
-    pass
-
+#
+# # Base abort class, pure virtual
+# class Abort(Exception):
+#     # Basic abort
+#     pass
+#
+#
+# # Example of how we could make a different exception
+# # for each abort scenario and handle it automatically using OOP
+# class PressureAbort(Abort):
+#     pass
+#
+# class TempAbort(Abort):
+#     pass
+#
 
