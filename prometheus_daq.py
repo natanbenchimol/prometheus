@@ -152,20 +152,3 @@ def main():
 
 
 main()
-
-#
-# # Base abort class, pure virtual
-# class Abort(Exception):
-#     # Basic abort
-#     pass
-#
-#
-# # Example of how we could make a different exception
-# # for each abort scenario and handle it automatically using OOP
-# class PressureAbort(Abort):
-#     pass
-#
-# class TempAbort(Abort):
-#     pass
-#
-

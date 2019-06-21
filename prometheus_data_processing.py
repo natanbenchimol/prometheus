@@ -8,8 +8,6 @@ import prometheus_shared as shared
 
 #TODO : Data Processing Edition
 #   - SAFETY!!! Put everything in a try/catch in case exception thrown
-#   - Add launch-relative time to clean data
-#   - Write function for unix->24hr
 #   - Keep iterating/refactoring
 
 def unix_to_24h(unix) -> str:
