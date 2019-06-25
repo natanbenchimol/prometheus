@@ -16,4 +16,5 @@ LIVE_DATA = {}      # contains the most recent reading from each instrument
 
 # ----------- NOT THREAD SAFE ----------- #
 
-COUNTDOWN_START = None
+COUNTDOWN_START = None  # Saves the timestamp for start of countdown for
+                        # calculating relative mission time
