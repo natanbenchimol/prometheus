@@ -50,10 +50,10 @@ def readTC(batch_id, TC_DATA, tc_id):
 
     # get result from id from TC protocol
 
-    res_list[0] = batch_id           # int   - this is the nth time we are collecting data from here
+    res_list[0] = batch_id          # int   - this is the nth time we are collecting data from here
     res_list[1] = time.time()       # float - time data point collected (unix time)
     res_list[2] = tc_id             # str   - instrument id
-    res_list[3] = 1                 # float - data collected from TC
+    res_list[3] = 1                  # float - data collected from TC
 
     if (res_list[3] > MAX_VAL):
         TC_DATA.append(res_list)    # So we know what val caused the abort
