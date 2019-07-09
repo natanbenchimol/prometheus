@@ -15,7 +15,7 @@ Note that this program generates a directory called 'Data' which will contain al
 
 ###Contributers:
 
-- **Sean Lissner** - USC B.S. Computer Science, May 2020
+- **Sean Lissner** - USC B.S. Computer Science, May 2020, +1 (213) 458-1512 seanlissner@usc.edu
 - **John Rogers** -  USC B.S. Astronautical Engineering, December 2021
 - **Natan Benchimol** -  USC B.S. Electrical Engineering, December 2020
 

@@ -1,8 +1,9 @@
-# Prometheus related Ignores
+# Prometheus related ignores - Sean
 .idea/workspace.xml
 /Data
+config.txt
 
-# ---- Below is a standard python .gitignore i found on github ----
+# ---- Below is a standard python .gitignore I found on github ----
 # https://github.com/github/gitignore/blob/master/Python.gitignore
 
 # Byte-compiled / optimized / DLL files
