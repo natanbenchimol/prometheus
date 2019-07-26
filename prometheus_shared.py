@@ -79,8 +79,8 @@ def update_config(name, value):
 
 def gen_config():
 
-    # After running this function, any config file that we already have will populate the
-    # local structs in this file
+    # After running read_config(), any config file that we already have will populate the
+    # local structs being stored in volatile memory
     read_config()
 
     config = open("config.txt", "a")    # Append mode so as not to overwrite existing values
