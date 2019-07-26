@@ -9,16 +9,14 @@ def printNum(num):
 
 def main():
 
-    threads = []
+    list = [1,3,5,6]
 
-    for i in range(8):
-        t = threading.Thread(target=printNum, args=[i])
-        threads.append(t)
+    for i in range(len(list)):
+        if list[i] is 3:
+            list[i] = 4
 
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
+    print(list)
+
 
     print("All done")
 
