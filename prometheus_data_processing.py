@@ -61,6 +61,7 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
 
     # ----------- General Housekeeping ----------- #
 
+    did_throw = False                                       # True if we have an issue doing file stuff
     cwd = os.getcwd()                                       # Get current working directory
     currentDT = datetime.datetime.now()                     # Get current time
 
@@ -71,10 +72,17 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     print("Num of PT data points = " + str(len(PT_DATA)))
     print("Num of FM data points = " + str(len(FM_DATA)))
 
-    if not os.path.exists(cwd + "/Data/"):                  # Directory management
-        os.makedirs(cwd + "/Data/")
-    if not os.path.exists(base_file_path):
-        os.makedirs(base_file_path)
+    try:
+        if not os.path.exists(cwd + "/Data/"):                  # Directory management
+            os.makedirs(cwd + "/Data/")
+        if not os.path.exists(base_file_path):
+            os.makedirs(base_file_path)
+
+    except OSError as e:
+        print("ERROR: Issue making dirs in data processing, emergency save")
+        print(e)
+        did_throw = True
+        base_file_path = cwd
 
     sort_raw(TC_DATA)                                    # Sort data in case threading messed up order
     sort_raw(PT_DATA)
@@ -106,6 +114,9 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     raw_fm_file.close()
 
     # ----------- Processing Data, Write to Clean Files ----------- #
+
+    if did_throw:   # We don't want to write the clean files if we almost crashed creating dirs
+        return
 
     header_row_pt = ["Batch Num","Avg. Time", "Mission Time"] + CONST.PT_NAMES
     header_row_tc = ["Batch Num","Avg. Time", "Mission Time"] + CONST.TC_NAMES
