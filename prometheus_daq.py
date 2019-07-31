@@ -114,6 +114,10 @@ def timeFire(timer, prom_status):
     print("END FIRE")
 
 
+# Fire function
+def fire():
+    pass
+
 def main():
     global TC_DATA
     global PT_DATA
