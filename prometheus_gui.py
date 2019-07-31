@@ -20,8 +20,10 @@ class PrometheusGUI:
 
     def __init__(self, parent):
 
+
         self.parent = parent
         parent.title('Prometheus GUI')
+        shared.populate_live_data()  # FAKE ASS DATA
 
 ########################################################################################################################
 # ----------------------------------------- initialize frame set up ---------------------------------------------------#
@@ -269,10 +271,11 @@ class PrometheusGUI:
                                       borderwidth=1, relief="sunken")
             self.FM_O.grid(column=0, row='1', sticky=(N, S, E, W))
 
-            FM_O_live = 69
+            FM_O_live = IntVar(value=shared.LIVE_DATA["FM_IO"])
 
             self.FM_O_read = tk.Label(self.f3, textvariable=FM_O_live, font=(font, 15), bg='#000000', fg='#FFFFFF',
-                                 borderwidth=1, relief="sunken")
+                                      borderwidth=1, relief="sunken")
+
             self.FM_O_read.grid(column=1, row=1, sticky=(N, S, E, W))
 
             self.FM_O_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF',
@@ -283,14 +286,15 @@ class PrometheusGUI:
                                  borderwidth=1, relief="sunken")
             self.FM_F.grid(column=0, row='2', sticky=(N, S, E, W))
 
-            self.FM_F_read = tk.Label(self.f3, text="420", font=(font, 15), bg='#000000', fg='#FFFFFF',
+            FM_F_live = IntVar(value=shared.LIVE_DATA["FM_IF"])
+
+            self.FM_F_read = tk.Label(self.f3, textvariable=FM_F_live, font=(font, 15), bg='#000000', fg='#FFFFFF',
                                       borderwidth=1, relief="sunken")
             self.FM_F_read.grid(column=1, row='2', sticky=(N, S, E, W))
 
             self.FM_F_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF',
                                       borderwidth=1, relief="sunken")
             self.FM_F_unit.grid(column=2, row='2', sticky=(N, S, E, W))
-
 # ------------------------------------------------ Set Aborts panel -------------------------------------------------- #
         elif switch3 == 'b':
             # set grid size on frame 3 b (mostly for debugging and convenience of rearranging widgets)
