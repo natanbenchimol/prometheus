@@ -122,12 +122,28 @@ def gen_config():
 
     config.close()
 
+# ONLY FOR TESTING PURPOSES
+# This function should not be called anywhere during actual experimentation
+def populate_live_data():
+    print("Overwriting LIVE_DATA with fake data!!!")
+
+    count = 1
+    for instrument in const.TC_NAMES:
+        LIVE_DATA[instrument] = count
+        count += 1
+    for instrument in const.PT_NAMES:
+        LIVE_DATA[instrument] = count
+        count += 1
+    for instrument in const.FM_NAMES:
+        LIVE_DATA[instrument] = count
+        count += 1
+
 
 # Uncomment the following 4 lines if this is the first time you are
 # running the GUI on a device and run THIS file. This will allow you
 # to generate and then populate the config file
-
+#
 # def main():
-#     gen_config()
+#    # gen_config()
 #
 # main()
