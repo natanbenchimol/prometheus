@@ -345,6 +345,7 @@ class PrometheusGUI:
     def solenoid(self, w):
         name = w.cget('text')
         if arm == 1:
+            print(GPIO.input(17))
             if w.cget('bg') == '#FF0000':
                 GPIO.output(17, GPIO.HIGH)
                 w.configure(bg='#00FF00', relief='ridge')
