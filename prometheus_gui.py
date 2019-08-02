@@ -15,6 +15,8 @@ import RPi.GPIO as GPIO
 # enter "pinout" in the pi's terminal to see it's numbers
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.OUT)
+print(GPIO.input(17))
+
 # configure pin 7 as output for testing with LED
 
 
@@ -345,7 +347,6 @@ class PrometheusGUI:
     def solenoid(self, w):
         name = w.cget('text')
         if arm == 1:
-            print(GPIO.input(17))
             if w.cget('bg') == '#FF0000':
                 GPIO.output(17, GPIO.HIGH)
                 w.configure(bg='#00FF00', relief='ridge')
