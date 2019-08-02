@@ -7,7 +7,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import prometheus_shared as shared
 import prometheus_consts as CONST
-#import RPi.GIO as GIO
+import RPi.GPIO as GPIO
 
 
 # ------------------------------------------ initialize setup values --------------------------------------------------#
