@@ -15,6 +15,9 @@ import RPi.GPIO as GPIO
 # enter "pinout" in the pi's terminal to see it's numbers
 GPIO.setmode(GPIO.BCM)
 
+# configure pin 7 as output for testing with LED
+GPIO.setup(7, GPIO.OUT)
+
 global font
 font = 'ansi'
 
@@ -343,9 +346,9 @@ class PrometheusGUI:
         name = w.cget('text')
         if arm == 1:
             if w.cget('bg') == '#FF0000':
+                
                 w.configure(bg='#00FF00', relief='ridge')
                 print('%s high' % name)
-                print(shared.FM_DATA)
             elif w.cget('bg') == '#00FF00':
                 w.configure(bg='#FF0000', relief='ridge')
                 print('%s low' % name)
