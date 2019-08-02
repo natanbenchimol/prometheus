@@ -14,7 +14,7 @@ import RPi.GPIO as GPIO
 # set up input out put pin numbering system on Pi (BCM = broadcom chip specific)
 # enter "pinout" in the pi's terminal to see it's numbers
 GPIO.setmode(GPIO.BCM)
-
+GPIO.setup(17, GPIO.OUT)
 # configure pin 7 as output for testing with LED
 
 
@@ -346,14 +346,10 @@ class PrometheusGUI:
         name = w.cget('text')
         if arm == 1:
             if w.cget('bg') == '#FF0000':
-                GPIO.setmode(GPIO.BCM)
-                GPIO.setup(17, GPIO.OUT)
                 GPIO.output(17, GPIO.HIGH)
                 w.configure(bg='#00FF00', relief='ridge')
                 print('%s high' % name)
             elif w.cget('bg') == '#00FF00':
-                GPIO.setmode(GPIO.BCM)
-                GPIO.setup(17, GPIO.OUT)
                 GPIO.output(17, GPIO.LOW)
                 w.configure(bg='#FF0000', relief='ridge')
                 print('%s low' % name)
