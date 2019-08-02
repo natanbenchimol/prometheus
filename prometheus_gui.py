@@ -11,6 +11,10 @@ import RPi.GPIO as GPIO
 
 
 # ------------------------------------------ initialize setup values --------------------------------------------------#
+# set up input out put pin numbering system on Pi (BCM = broadcom chip specific)
+# enter "pinout" in the pi's terminal to see it's numbers
+GPIO.setmode(GPIO.BCM)
+
 global font
 font = 'ansi'
 
