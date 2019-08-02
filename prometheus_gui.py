@@ -17,7 +17,7 @@ GPIO.setmode(GPIO.BCM)
 
 # configure pin 7 as output for testing with LED
 GPIO.setup(17, GPIO.OUT)
-
+GPIO.cleanup()
 global font
 font = 'ansi'
 
