@@ -346,10 +346,11 @@ class PrometheusGUI:
         name = w.cget('text')
         if arm == 1:
             if w.cget('bg') == '#FF0000':
-                
+                GPIO.setup(7, True)
                 w.configure(bg='#00FF00', relief='ridge')
                 print('%s high' % name)
             elif w.cget('bg') == '#00FF00':
+                GPIO.setup(7, False)
                 w.configure(bg='#FF0000', relief='ridge')
                 print('%s low' % name)
         elif arm == 0:
