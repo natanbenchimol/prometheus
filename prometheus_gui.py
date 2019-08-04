@@ -351,7 +351,7 @@ class PrometheusGUI:
                 GPIO.output(17, GPIO.HIGH)
                 w.configure(bg='#00FF00', relief='ridge')
                 print(GPIO.input(17))
-            elif w.cget('bg') == '#00FF00' and GPIO.input():
+            elif w.cget('bg') == '#00FF00' and GPIO.input(17) == 1:
                 GPIO.output(17, GPIO.LOW)
                 w.configure(bg='#FF0000', relief='ridge')
                 print(GPIO.input(17))
