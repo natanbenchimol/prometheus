@@ -311,7 +311,7 @@ class PrometheusGUI:
 
             self.Input_10 = tk.Label(self.f3, text="GPIO 10 ", font=(font, 15), bg='#000000', fg='#FFFFFF',
                                  borderwidth=1, relief="sunken")
-            self.Ipunt_10.grid(column=0, row=3, sticky=(N, S, E, W))
+            self.Input_10.grid(column=0, row=3, sticky=(N, S, E, W))
 
             Input_10_live = IntVar(GPIO.input(10))
 
