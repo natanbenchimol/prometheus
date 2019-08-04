@@ -16,6 +16,8 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.OUT)
 print(GPIO.input(17))
+GPIO.setup(10, GPIO.IN)
+
 
 # configure pin 7 as output for testing with LED
 
@@ -338,7 +340,7 @@ class PrometheusGUI:
             self.arm_valves.configure(bg='#00FF00', relief='sunken')
             global arm
             arm = 1
-        elif self.arm_valves.cget('bg') == '#00FF00':
+        elif self.arm_valves.cget('bg') == '#00FF00' and GPIO.input(10) == 1:
             self.arm_valves.configure(bg='#FF0000', relief='raised')
             arm = 2
 
