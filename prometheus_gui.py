@@ -347,11 +347,11 @@ class PrometheusGUI:
     def solenoid(self, w):
         name = w.cget('text')
         if arm == 1:
-            if w.cget('bg') == '#FF0000'
+            if w.cget('bg') == '#FF0000':
                 GPIO.output(17, GPIO.HIGH)
                 w.configure(bg='#00FF00', relief='ridge')
                 print(GPIO.input(17))
-            elif w.cget('bg') == '#00FF00'
+            elif w.cget('bg') == '#00FF00':
                 GPIO.output(17, GPIO.LOW)
                 w.configure(bg='#FF0000', relief='ridge')
                 print(GPIO.input(17))
