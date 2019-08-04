@@ -15,7 +15,6 @@ import time
 # enter "pinout" in the pi's terminal to see it's numbers
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.OUT)
-print(GPIO.input(17))
 GPIO.setup(10, GPIO.IN)
 
 
