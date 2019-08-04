@@ -334,13 +334,21 @@ class PrometheusGUI:
 # --------- GUI functionality, setup widgets functions here see below section to add/subtract widgets -----------------#
 ########################################################################################################################
 
+# manual switch function
+    def arm_manual(self):
+        if GPIO.input(10) == 0:
+            self.arm_valves.configure(bg='#FF0000', relief='raised')
+
+        elif GPIO.input(10) == 1:
+            self.arm_valves.configure(bg='#00FF00', relief='raised')
+
 # arm valve function
     def arm_v(self):
-        if self.arm_valves.cget('bg') == '#FF0000' and GPIO.input(10) == 0:
+        if self.arm_valves.cget('bg') == '#FF0000':
             self.arm_valves.configure(bg='#00FF00', relief='sunken')
             global arm
             arm = 1
-        elif self.arm_valves.cget('bg') == '#00FF00' and GPIO.input(10) == 1:
+        elif self.arm_valves.cget('bg') == '#00FF00':
             self.arm_valves.configure(bg='#FF0000', relief='raised')
             arm = 2
 
