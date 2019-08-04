@@ -336,7 +336,7 @@ class PrometheusGUI:
 
 # arm valve function
     def arm_v(self):
-        if self.arm_valves.cget('bg') == '#FF0000':
+        if self.arm_valves.cget('bg') == '#FF0000' and GPIO.input(10) == 0:
             self.arm_valves.configure(bg='#00FF00', relief='sunken')
             global arm
             arm = 1
