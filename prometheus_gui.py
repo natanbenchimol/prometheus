@@ -8,7 +8,7 @@ from PIL import Image, ImageTk
 import prometheus_shared as shared
 import prometheus_consts as CONST
 import RPi.GPIO as GPIO
-
+import time
 
 # ------------------------------------------ initialize setup values --------------------------------------------------#
 # set up input out put pin numbering system on Pi (BCM = broadcom chip specific)
@@ -386,4 +386,6 @@ class PrometheusGUI:
 # loop this shit tho
 root = Tk()
 my_gui = PrometheusGUI(root)
+print(GPIO.input(10))
+time.sleep(2)
 root.mainloop()
