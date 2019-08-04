@@ -386,6 +386,5 @@ class PrometheusGUI:
 # loop this shit tho
 root = Tk()
 my_gui = PrometheusGUI(root)
-print(GPIO.input(10))
-time.sleep(2)
 root.mainloop()
+
