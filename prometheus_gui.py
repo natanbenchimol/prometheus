@@ -307,6 +307,18 @@ class PrometheusGUI:
             self.FM_F_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF',
                                       borderwidth=1, relief="sunken")
             self.FM_F_unit.grid(column=2, row='2', sticky=(N, S, E, W))
+
+
+            self.Input_10 = tk.Label(self.f3, text="GPIO 10 ", font=(font, 15), bg='#000000', fg='#FFFFFF',
+                                 borderwidth=1, relief="sunken")
+            self.Ipunt_10.grid(column=0, row=3, sticky=(N, S, E, W))
+
+            Input_10_live = IntVar(GPIO.input(10))
+
+            self.Input_10read = tk.Label(self.f3, textvariable=Input_10_live, font=(font, 15), bg='#000000', fg='#FFFFFF',
+                                      borderwidth=1, relief="sunken")
+            self.Input_10read.grid(column=1, row=3, sticky=(N, S, E, W))
+
 # ------------------------------------------------ Set Aborts panel -------------------------------------------------- #
         elif switch3 == 'b':
             # set grid size on frame 3 b (mostly for debugging and convenience of rearranging widgets)
@@ -355,7 +367,6 @@ class PrometheusGUI:
 # this function actuates solenoids and changes button color based on previous state
 
     def solenoid(self, w):
-        name = w.cget('text')
         if arm == 1:
             if w.cget('bg') == '#FF0000':
                 GPIO.output(17, GPIO.HIGH)
