@@ -33,7 +33,7 @@ class PrometheusGUI:
         self.toggle_off = ImageTk.PhotoImage(file=r"/home/pi/Desktop/prometheus/Assets/toggle_off.png")
         self.toggle_on = ImageTk.PhotoImage(file=r"/home/pi/Desktop/prometheus/Assets/toggle_on.png")
 
-        ########################################################################################################################
+########################################################################################################################
 # ----------------------------------------- initialize frame set up ---------------------------------------------------#
 ########################################################################################################################
 
@@ -180,7 +180,7 @@ class PrometheusGUI:
                  self.f2.rowconfigure(x, weight=1)
 
         # place widgets
-            self.main_ops = tk.Label(self.f1, text="Manual Operations", font=(font, 40, 'bold'), bg='#000000', fg='#FFFFFF')
+            self.main_ops = tk.Label(self.f1, text="Manual Operations", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
             self.main_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
 # use const file from repository to shrink this to single loop in the future
@@ -238,7 +238,7 @@ class PrometheusGUI:
                 self.f2.rowconfigure(x, weight=1)
 
         # place widgets
-            self.fire_ops = tk.Label(self.f1, text="Firing Operations", font=(font, 40, 'bold'), bg='#000000', fg='#FFFFFF')
+            self.fire_ops = tk.Label(self.f1, text="Firing Operations", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
             self.fire_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
             self.abort_butt = tk.Button(self.f2, text="ABORT", font=(font, 18), bg='#FF0000', fg='#FFFFFF')
@@ -286,11 +286,11 @@ class PrometheusGUI:
             self.name2.grid(column=5, row=3, sticky=(N, S, E, W))
 
             self.name3 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                                   width=200, command=lambda: self.prefire_toggle(self.name3))
+                                   width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name3))
             self.name3.grid(column=5, row=4, sticky=(N, S, E, W))
 
             self.name4 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                                   width=200,highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name4))
+                                   width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name4))
             self.name4.grid(column=5, row=5, sticky=(N, S, E, W))
 
             self.name5 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
@@ -332,7 +332,7 @@ class PrometheusGUI:
 
         # place widgets
 
-            self.sense_ops = tk.Label(self.f3, text="Sensor Readouts ", font=(font, 20), bg='#000000', fg='#FFFFFF')
+            self.sense_ops = tk.Label(self.f3, text="Sensor Readouts ", font=(font, 25), bg='#000000', fg='#FFFFFF')
             self.sense_ops.grid(column=0, row='0', columnspan=3, sticky=(N, S, E, W))
 
             self.FM_O = tk.Label(self.f3, text="Oxygen Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
@@ -383,7 +383,7 @@ class PrometheusGUI:
                 self.f3.rowconfigure(x, weight=1)
 
     # place widgets
-            self.abort_ops = tk.Label(self.f3, text="Abort Gates ", font=(font, 20), bg='#000000', fg='#FFFFFF')
+            self.abort_ops = tk.Label(self.f3, text="Abort Gates ", font=(font, 25), bg='#000000', fg='#FFFFFF')
             self.abort_ops.grid(column=0, row='0', columnspan=3, sticky=(N, S, E, W))
 
             self.FM_O = tk.Label(self.f3, text="Oxygen Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
