@@ -242,10 +242,10 @@ class PrometheusGUI:
             self.fire_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
             self.abort_butt = tk.Button(self.f2, text="ABORT", font=(font, 18), bg='#FF0000', fg='#FFFFFF')
-            self.abort_butt.grid(column=7, row=3, columnspan=2, rowspan=3, sticky=(N, S, E, W))
+            self.abort_butt.grid(column=7, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
 
             self.fire_butt = tk.Button(self.f2, text="FIRE", font=(font, 20), bg='#ff7300', fg='#FFFFFF')
-            self.fire_butt.grid(column=1, row=3, columnspan=2, rowspan=3, sticky=(N, S, E, W))
+            self.fire_butt.grid(column=1, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
 
             self.prefire_1 = tk.Label(self.f2, text="Valves in correct states", font=(font, 15),
                                        bg='#000000', fg='#FFFFFF')
