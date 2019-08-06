@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 import prometheus_shared as shared
 import prometheus_consts as CONST
 import RPi.GPIO as GPIO
+
 import time
 
 # ------------------------------------------ initialize setup values --------------------------------------------------#
@@ -242,7 +243,31 @@ class PrometheusGUI:
             self.fire_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
             self.abort_butt = tk.Button(self.f2, text="ABORT", font=(font, 20), bg='#FF0000', fg='#FFFFFF')
-            self.abort_butt.grid(column=4, row=1, sticky=(N, S, E, W), padx=40, pady=40)
+            self.abort_butt.grid(column=5, row=0, sticky=(N, S, E, W), padx=40, pady=40)
+
+            self.fire_butt = tk.Button(self.f2, text="FIRE", font=(font, 20), bg='#FF0000', fg='#FFFFFF')
+            self.fire_butt.grid(column=3, row=0, sticky=(N, S, E, W), padx=40, pady=40)
+
+            self.prefire_1 = tk.Button(self.f2, text="Verify valves are in correct states", font=(font, 10), bg='#000000', fg='#FFFFFF')
+            self.prefire_1.grid(column=4, row=1, sticky=(N, S, E, W))
+
+            self.prefire_2 = tk.Button(self.f2, text="Verify sensor readings are within \n acceptable operating conditions",  bg='#000000', font=(font, 10), fg='#FFFFFF')
+            self.prefire_2.grid(column=4, row=2, sticky=(N, S, E, W))
+
+            self.prefire_3 = tk.Button(self.f2,
+                                       text="Verify PA system is operational \n and range admin is notified",
+                                       bg='#000000', font=(font, 10), fg='#FFFFFF')
+            self.prefire_3.grid(column=4, row=3, sticky=(N, S, E, W))
+
+            self.prefire_4 = tk.Button(self.f2,
+                                       text="Verify range is clear",
+                                       bg='#000000', font=(font, 10), fg='#FFFFFF')
+            self.prefire_4.grid(column=4, row=4, sticky=(N, S, E, W))
+
+            self.prefire_5 = tk.Button(self.f2,
+                                       text="Go/No go",
+                                       bg='#000000', font=(font, 10), fg='#FFFFFF')
+            self.prefire_5.grid(column=4, row=5, sticky=(N, S, E, W))
 
 # ---------------------------------- frame 3 (read outs, a and aborts. b) ---------------------------------------------#
             # this function controls the switch for frame3
@@ -346,15 +371,11 @@ class PrometheusGUI:
 ########################################################################################################################
 
 # manual switch function
-    def arm_manual(self):
-        if GPIO.input(10) == 0:
-            self.arm_valves.configure(bg='#FF0000', relief='raised')
 
-        elif GPIO.input(10) == 1:
-            self.arm_valves.configure(bg='#00FF00', relief='raised')
 
 # arm valve function
     def arm_v(self):
+
         if self.arm_valves.cget('bg') == '#FF0000':
             self.arm_valves.configure(bg='#00FF00', relief='sunken')
             global arm
