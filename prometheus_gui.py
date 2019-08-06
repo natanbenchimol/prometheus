@@ -30,8 +30,8 @@ class PrometheusGUI:
         parent.title('Prometheus GUI')
         shared.populate_live_data()  # FAKE ASS DATA
 
-        self.toggle_off = ImageTk.PhotoImage(file=r"C:\Users\Atticus\Desktop\prometheus\Assets\toggle_off.png")
-        self.toggle_on = ImageTk.PhotoImage(file=r"C:\Users\Atticus\Desktop\prometheus\Assets\toggle_on.png")
+        self.toggle_off = ImageTk.PhotoImage(file=r"/home/Pi/Desktop/prometheus/Assets/toggle_off.png")
+        self.toggle_on = ImageTk.PhotoImage(file=r"/home/Pi/Desktop/prometheus/Assets/toggle_on.png")
 
         ########################################################################################################################
 # ----------------------------------------- initialize frame set up ---------------------------------------------------#
