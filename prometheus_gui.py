@@ -278,11 +278,11 @@ class PrometheusGUI:
             # pre fire toggle switches, put this in a loop when you get better at python
 
             self.name1 = tk.Button(self.f2,  bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                                 width=200, command=lambda: self.prefire_toggle(self.name1))
+                                 width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name1))
             self.name1.grid(column=5, row=2, sticky=(N, S, E, W))
 
             self.name2 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                           width=200, command=lambda: self.prefire_toggle(self.name2))
+                           width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name2))
             self.name2.grid(column=5, row=3, sticky=(N, S, E, W))
 
             self.name3 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
@@ -290,15 +290,15 @@ class PrometheusGUI:
             self.name3.grid(column=5, row=4, sticky=(N, S, E, W))
 
             self.name4 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                                   width=200, command=lambda: self.prefire_toggle(self.name4))
+                                   width=200,highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name4))
             self.name4.grid(column=5, row=5, sticky=(N, S, E, W))
 
             self.name5 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                                   width=200, command=lambda: self.prefire_toggle(self.name5))
+                                   width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name5))
             self.name5.grid(column=5, row=6, sticky=(N, S, E, W))
 
             self.name6 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                                   width=200, command=lambda: self.prefire_toggle(self.name6))
+                                   width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name6))
             self.name6.grid(column=5, row=7, sticky=(N, S, E, W))
 
 
