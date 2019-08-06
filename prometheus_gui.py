@@ -30,8 +30,24 @@ class PrometheusGUI:
         parent.title('Prometheus GUI')
         shared.populate_live_data()  # FAKE ASS DATA
 
-        self.toggle_off = ImageTk.PhotoImage(file=r"/home/pi/Desktop/prometheus/Assets/toggle_off.png")
-        self.toggle_on = ImageTk.PhotoImage(file=r"/home/pi/Desktop/prometheus/Assets/toggle_on.png")
+        # Atticus laptop directory
+        # self.tog_off = Image.open(r"C:\Users\Atticus\Desktop\prometheus\Assets\toggle_off.png").resize((125, 50),
+        # Image.ANTIALIAS)
+
+        # self.tog_on = Image.open(r"C:\Users\Atticus\Desktop\prometheus\Assets\toggle_on.png").resize((125, 50),
+        # Image.ANTIALIAS)
+
+        # Pi directory
+
+        self.tog_off = Image.open(r"/home/pi/Desktop/prometheus/Assets/toggle_off.png").resize((125, 50), Image.ANTIALIAS)
+
+        self.tog_on = Image.open(r"/home/pi/Desktop/prometheus/Assets/toggle_on.png").resize((125, 50), Image.ANTIALIAS)
+
+        # initiate
+        self.toggle_off = ImageTk.PhotoImage(self.tog_off)
+
+        self.toggle_on = ImageTk.PhotoImage(self.tog_on)
+
 
 ########################################################################################################################
 # ----------------------------------------- initialize frame set up ---------------------------------------------------#
@@ -70,16 +86,16 @@ class PrometheusGUI:
 ########################################################################################################################
 
 # ------------------------------- frame 1 (main labels and panel switches) --------------------------------------------#
-        self.main_ops = tk.Button(self.f1, text="Manual Operations", font=(font, 20), bg='#FFD700', command=lambda: self.switch_2('Man'))
+        self.main_ops = tk.Button(self.f1, text="Manual Mode", font=(font, 20), bg='#FFD700', command=lambda: self.switch_2('Man'))
         self.main_ops.grid(column=0, row=0, sticky=(N, S, E, W))
 
-        self.fire_ops = tk.Button(self.f1, text="Firing Operations", font=(font, 20), bg='#c41e3a', command=lambda: self.switch_2('Fire'))
+        self.fire_ops = tk.Button(self.f1, text="Firing Mode", font=(font, 20), bg='#c41e3a', command=lambda: self.switch_2('Fire'))
         self.fire_ops.grid(column=2, row=0, sticky=(N, S, E, W))
 
         self.abort_ops = tk.Button(self.f1, text="Set Aborts Values", font=(font, 15), bg='#bc13fe', borderwidth='5', relief='ridge', command=lambda: self.switch_3('aborts'))
-        self.abort_ops.grid(column=3, row=0, sticky=(N+E + S))
+        self.abort_ops.grid(column=3, row=0, sticky=(N+E + S), padx=10, pady=10)
         self.sense_ops = tk.Button(self.f1, text="Sensor Readouts", font=(font, 15), bg='#fe019a', borderwidth='5', relief='ridge', command=lambda: self.switch_3('sense'))
-        self.sense_ops.grid(column=3, row=0, sticky=(N + W + S))
+        self.sense_ops.grid(column=3, row=0, sticky=(N + W + S), padx=10, pady=10)
 
 
 # ------------------------------------- frame 4 (set firing parameters) -----------------------------------------------#
@@ -180,7 +196,7 @@ class PrometheusGUI:
                  self.f2.rowconfigure(x, weight=1)
 
         # place widgets
-            self.main_ops = tk.Label(self.f1, text="Manual Operations", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
+            self.main_ops = tk.Label(self.f1, text="Manual Mode", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
             self.main_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
 # use const file from repository to shrink this to single loop in the future
@@ -238,7 +254,7 @@ class PrometheusGUI:
                 self.f2.rowconfigure(x, weight=1)
 
         # place widgets
-            self.fire_ops = tk.Label(self.f1, text="Firing Operations", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
+            self.fire_ops = tk.Label(self.f1, text="Firing Mode", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
             self.fire_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
             self.abort_butt = tk.Button(self.f2, text="ABORT", font=(font, 18), bg='#FF0000', fg='#FFFFFF')
@@ -277,28 +293,28 @@ class PrometheusGUI:
 
             # pre fire toggle switches, put this in a loop when you get better at python
 
-            self.name1 = tk.Button(self.f2,  bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                                 width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name1))
+            self.name1 = tk.Button(self.f2,  bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                 width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name1))
             self.name1.grid(column=5, row=2, sticky=(N, S, E, W))
 
-            self.name2 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                           width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name2))
+            self.name2 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                           width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name2))
             self.name2.grid(column=5, row=3, sticky=(N, S, E, W))
 
-            self.name3 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                                   width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name3))
+            self.name3 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name3))
             self.name3.grid(column=5, row=4, sticky=(N, S, E, W))
 
-            self.name4 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                                   width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name4))
+            self.name4 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name4))
             self.name4.grid(column=5, row=5, sticky=(N, S, E, W))
 
-            self.name5 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                                   width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name5))
+            self.name5 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name5))
             self.name5.grid(column=5, row=6, sticky=(N, S, E, W))
 
-            self.name6 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=100,
-                                   width=200, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name6))
+            self.name6 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name6))
             self.name6.grid(column=5, row=7, sticky=(N, S, E, W))
 
 
@@ -425,6 +441,7 @@ class PrometheusGUI:
 
     def prefire_toggle(self, toggle):
         bck = str(toggle.cget('image'))
+        print(bck)
         if bck == "pyimage1":
             toggle.configure(image=self.toggle_on)
         elif bck == "pyimage2":
