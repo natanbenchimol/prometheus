@@ -399,12 +399,12 @@ class PrometheusGUI:
 # arm valve function
     def arm_v(self):
 
-        if self.arm_valves.cget('bg') == '#FF0000':
+        if self.arm_valves.cget('bg') == '#ff7300':
             self.arm_valves.configure(bg='#00FF00', relief='sunken')
             global arm
             arm = 1
         elif self.arm_valves.cget('bg') == '#00FF00':
-            self.arm_valves.configure(bg='#FF0000', relief='raised')
+            self.arm_valves.configure(bg='#ff7300', relief='raised')
             arm = 2
 
 # this function actuates solenoids and changes button color based on previous state
