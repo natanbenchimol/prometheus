@@ -214,7 +214,7 @@ class PrometheusGUI:
                                    relief='ridge', command=lambda: self.solenoid(self.NC_OP))
             self.NC_OP.grid(column=4, row=0, sticky=(N, S, E, W), padx=40, pady=40)
 
-            self.arm_valves = tk.Button(self.f2, text="ARM Valves", font=(font, 15), bg='#FF0000', fg='#FFFFFF',
+            self.arm_valves = tk.Button(self.f2, text="ARM Valves", font=(font, 15), bg='#ff7300', fg='#FFFFFF',
                                         borderwidth=20, relief='raised', command=lambda: self.arm_v())
             self.arm_valves.grid(column=4, row=1, sticky=(N, S, E, W), padx=40, pady=40)
 
@@ -244,7 +244,7 @@ class PrometheusGUI:
             self.abort_butt = tk.Button(self.f2, text="ABORT", font=(font, 18), bg='#FF0000', fg='#FFFFFF')
             self.abort_butt.grid(column=7, row=3, columnspan=2, rowspan=3, sticky=(N, S, E, W))
 
-            self.fire_butt = tk.Button(self.f2, text="FIRE", font=(font, 20), bg='#FF0000', fg='#FFFFFF')
+            self.fire_butt = tk.Button(self.f2, text="FIRE", font=(font, 20), bg='#ff7300', fg='#FFFFFF')
             self.fire_butt.grid(column=1, row=3, columnspan=2, rowspan=3, sticky=(N, S, E, W))
 
             self.prefire_1 = tk.Button(self.f2, text="Valves in correct states", font=(font, 15),
