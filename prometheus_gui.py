@@ -247,30 +247,30 @@ class PrometheusGUI:
             self.fire_butt = tk.Button(self.f2, text="FIRE", font=(font, 20), bg='#ff7300', fg='#FFFFFF')
             self.fire_butt.grid(column=1, row=3, columnspan=2, rowspan=3, sticky=(N, S, E, W))
 
-            self.prefire_1 = tk.Button(self.f2, text="Valves in correct states", font=(font, 15),
+            self.prefire_1 = tk.Label(self.f2, text="Valves in correct states", font=(font, 15),
                                        bg='#000000', fg='#FFFFFF')
             self.prefire_1.grid(column=4, row=2, sticky=(N, S, E, W))
 
-            self.prefire_2 = tk.Button(self.f2, text="Sensor readings nominal"
+            self.prefire_2 = tk.Label(self.f2, text="Sensor readings nominal"
                                                      ,  bg='#000000', font=(font, 15), fg='#FFFFFF')
             self.prefire_2.grid(column=4, row=3, sticky=(N, S, E, W))
 
-            self.prefire_3 = tk.Button(self.f2,
+            self.prefire_3 = tk.Label(self.f2,
                                        text="Range admin notified",
                                        bg='#000000', font=(font, 15), fg='#FFFFFF')
             self.prefire_3.grid(column=4, row=4, sticky=(N, S, E, W))
 
-            self.prefire_4 = tk.Button(self.f2,
+            self.prefire_4 = tk.Label(self.f2,
                                        text="Range is clear",
                                        bg='#000000', font=(font, 15), fg='#FFFFFF')
             self.prefire_4.grid(column=4, row=5, sticky=(N, S, E, W))
 
-            self.prefire_5 = tk.Button(self.f2,
+            self.prefire_5 = tk.Label(self.f2,
                                        text="Go/No go",
                                        bg='#000000', font=(font, 15), fg='#FFFFFF')
             self.prefire_5.grid(column=4, row=6, sticky=(N, S, E, W))
 
-            self.prefire_6 = tk.Button(self.f2,
+            self.prefire_6 = tk.Label(self.f2,
                                        text="Send it",
                                        bg='#000000', font=(font, 15), fg='#FFFFFF')
             self.prefire_6.grid(column=4, row=7, sticky=(N, S, E, W))
