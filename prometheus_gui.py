@@ -32,10 +32,10 @@ class PrometheusGUI:
 
         # Atticus laptop directory
         # self.tog_off = Image.open(r"C:\Users\Atticus\Desktop\prometheus\Assets\toggle_off.png").resize((125, 50),
-        # Image.ANTIALIAS)
+        #    Image.ANTIALIAS)
 
         # self.tog_on = Image.open(r"C:\Users\Atticus\Desktop\prometheus\Assets\toggle_on.png").resize((125, 50),
-        # Image.ANTIALIAS)
+        #    Image.ANTIALIAS)
 
         # Pi directory
 
@@ -63,7 +63,7 @@ class PrometheusGUI:
 
         # initialize frame 3 (right side panel side A readouts side B set aborts)
         self.f3 = tk.Frame(self.f1, background='#000000', relief="sunken", width=80)
-        self.f3.grid(column=3, row=1, columnspan=1, rowspan=3, sticky=(N, S, E, W))  # added sticky
+        self.f3.grid(column=3, row=1, columnspan=2, rowspan=3, sticky=(N, S, E, W))  # added sticky
 
         # initialize frame 4 (static panel at bottom for firing parameters)
         self.f4 = tk.Frame(self.f1, background='#000000', relief="sunken", width=100)
@@ -93,7 +93,7 @@ class PrometheusGUI:
         self.fire_ops.grid(column=2, row=0, sticky=(N, S, E, W))
 
         self.abort_ops = tk.Button(self.f1, text="Set Aborts Values", font=(font, 15), bg='#bc13fe', borderwidth='5', relief='ridge', command=lambda: self.switch_3('aborts'))
-        self.abort_ops.grid(column=3, row=0, sticky=(N+E + S), padx=10, pady=10)
+        self.abort_ops.grid(column=4, row=0, sticky=(N+E + S), padx=10, pady=10)
         self.sense_ops = tk.Button(self.f1, text="Sensor Readouts", font=(font, 15), bg='#fe019a', borderwidth='5', relief='ridge', command=lambda: self.switch_3('sense'))
         self.sense_ops.grid(column=3, row=0, sticky=(N + W + S), padx=10, pady=10)
 
