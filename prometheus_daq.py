@@ -8,6 +8,8 @@ import prometheus_data_processing as data
 import prometheus_shared as shared
 import abort_sequences as aborts
 
+fire_sequence = []
+
 # NOTE!!!!!
 #
 #   The daq is not yet linked to the front end!
@@ -88,7 +90,7 @@ def readFM(batch_id, FM_DATA, fm_id):
 def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
 
     data_id_count = 0
-    while(prom_status["isFiring"]):
+    while(prom_status["shouldRecordData"]):
 
         threads = []
 
@@ -116,7 +118,7 @@ def timeFire(timer, prom_status):
 
 
 # Called as a part of pre fire checklist
-def prefire_checks():
+def prefire_checks_and_setup():
 
     # ---------------- AUTOMATIC PRE-FIRE CHECKS ---------------- #
 
@@ -131,6 +133,10 @@ def prefire_checks():
     # Initialize the LIVE_VALS dictionary with values: int, will be filled in during fire
     shared.init_live_data()
 
+    # Create fire sequence
+    for key in shared.FRONT_END_TIMINGS:
+        pass # Do soemthing idk holy shit
+
 
 # Fire function
 def fire():
@@ -142,14 +148,34 @@ def fire():
     fmThread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, shared.FM_DATA, CONST.FM_NAMES, readFM))
 
     shared.COUNTDOWN_START = time.time()
-    prom_status["isFiring"] = True
+    prom_status["shouldRecordData"] = True
 
     # Maybe a list of pairs with (timings, functions/actions)
     # sorted by timings, go through array executing functions after waiting for their times
 
+    try:
+        ptThread.start()
+        tcThread.start()
+        fmThread.start()
+
+        # Here's where all our shit goes DOWN
+
+        ptThread.join()
+        tcThread.join()
+        fmThread.join()
+
+    except aborts.Abort:
+        print("Handle Abort")
+
+    data.writeToFile(shared.COUNTDOWN_START, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
+
     # notify that firing is complete
     # begin data processing
     # notify that data processing is complete
+
+
+def purge(time):
+    pass
 
 
 def main():

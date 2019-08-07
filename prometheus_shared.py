@@ -148,9 +148,29 @@ def init_live_data():
     for instrument in const.TC_NAMES + const.PT_NAMES + const.FM_NAMES:
         LIVE_DATA[instrument] = int
 
+
+# Initializing the FRONT END TIMINGS dict to avoid key errors
+def init_timings_dict():
+    global FRONT_END_TIMINGS
+
+    FRONT_END_TIMINGS = {
+        "NCIO_START" : int,
+        "NCIO_STOP"  : int,
+        "SPARK_START": int,
+        "SPARK_STOP" : int,
+        "NCIF_START" : int,
+        "NCIF_STOP"  : int
+    }
+
+
 # Sets values in the timings dictionary
 def set_timing(time_post_countdown, key):
-    FRONT_END_TIMINGS[key] = time_post_countdown
+    global FRONT_END_TIMINGS
+
+    if key in FRONT_END_TIMINGS:
+        FRONT_END_TIMINGS[key] = time_post_countdown
+    else:
+        print("Key: " + key + " not found" )
 
 
 # Uncomment the following 4 lines if this is the first time you are
@@ -158,6 +178,6 @@ def set_timing(time_post_countdown, key):
 # to generate and then populate the config file
 #
 # def main():
-#    # gen_config()
+#     # gen_config()
 #
 # main()
