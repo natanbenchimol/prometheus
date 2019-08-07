@@ -30,24 +30,12 @@ class PrometheusGUI:
         parent.title('Prometheus GUI')
         shared.populate_live_data()  # FAKE ASS DATA
 
-        # Atticus laptop directory
-        # self.tog_off = Image.open(r"C:\Users\Atticus\Desktop\prometheus\Assets\toggle_off.png").resize((125, 50),
-        #    Image.ANTIALIAS)
+        # load pictures for check list buttons
 
-        # self.tog_on = Image.open(r"C:\Users\Atticus\Desktop\prometheus\Assets\toggle_on.png").resize((125, 50),
-        #    Image.ANTIALIAS)
-
-        # Pi directory
-
-        self.tog_off = Image.open(r"/home/pi/Desktop/prometheus/Assets/toggle_off.png").resize((125, 50), Image.ANTIALIAS)
-
-        self.tog_on = Image.open(r"/home/pi/Desktop/prometheus/Assets/toggle_on.png").resize((125, 50), Image.ANTIALIAS)
-
-        # initiate
+        self.tog_off = Image.open(r"Assets/toggle_off.png").resize((125, 50), Image.ANTIALIAS)
+        self.tog_on = Image.open(r"Assets/toggle_on.png").resize((125, 50), Image.ANTIALIAS)
         self.toggle_off = ImageTk.PhotoImage(self.tog_off)
-
         self.toggle_on = ImageTk.PhotoImage(self.tog_on)
-
 
 ########################################################################################################################
 # ----------------------------------------- initialize frame set up ---------------------------------------------------#
@@ -441,7 +429,6 @@ class PrometheusGUI:
 
     def prefire_toggle(self, toggle):
         bck = str(toggle.cget('image'))
-        print(bck)
         if bck == "pyimage1":
             toggle.configure(image=self.toggle_on)
         elif bck == "pyimage2":
