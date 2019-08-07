@@ -92,9 +92,9 @@ class PrometheusGUI:
         self.fire_ops = tk.Button(self.f1, text="Firing Mode", font=(font, 20), bg='#c41e3a', command=lambda: self.switch_2('Fire'))
         self.fire_ops.grid(column=2, row=0, sticky=(N, S, E, W))
 
-        self.abort_ops = tk.Button(self.f1, text="Set Aborts Values", font=(font, 15), bg='#bc13fe', borderwidth='5', relief='ridge', command=lambda: self.switch_3('aborts'))
+        self.abort_ops = tk.Button(self.f1, text="Aborts Values", font=(font, 15), bg='#bc13fe', borderwidth='5', relief='ridge', command=lambda: self.switch_3('aborts'))
         self.abort_ops.grid(column=4, row=0, sticky=(N+E + S + W), padx=10, pady=10)
-        self.sense_ops = tk.Button(self.f1, text="Sensor Readouts", font=(font, 15), bg='#fe019a', borderwidth='5', relief='ridge', command=lambda: self.switch_3('sense'))
+        self.sense_ops = tk.Button(self.f1, text="Readouts", font=(font, 15), bg='#fe019a', borderwidth='5', relief='ridge', command=lambda: self.switch_3('sense'))
         self.sense_ops.grid(column=3, row=0, sticky=(N + E+ W + S), padx=10, pady=10)
 
 
@@ -240,7 +240,7 @@ class PrometheusGUI:
             # set grid size on frame 2 (mostly for debugging and convenience of rearranging widgets)
             f2brow = 10
             f2bcolumn = 9
-            self.f2 = tk.Frame(self.f1, background='#000000', width=100, height=80)
+            self.f2 = tk.Frame(self.f1, background='#000000', borderwidth=1, relief="sunken", width=100, height=80)
             self.f2.grid(row=1, columnspan=3, rowspan=2, sticky=(N, S, E, W))
 
             for column in range(f2bcolumn):
