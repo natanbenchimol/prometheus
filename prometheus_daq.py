@@ -1,6 +1,7 @@
 
 import time
 import threading
+# import psutil
 
 import prometheus_consts as CONST
 import prometheus_data_processing as data
@@ -114,13 +115,44 @@ def timeFire(timer, prom_status):
     print("END FIRE")
 
 
+# Called as a part of pre fire checklist
+def prefire_checks():
+
+    # ---------------- AUTOMATIC PRE-FIRE CHECKS ---------------- #
+
+    # Abort gates
+    for gate in shared.FM_ABORT_GATES + shared.TC_ABORT_GATES + shared.PT_ABORT_GATES:
+        if not gate.is_valid_gate():
+            print("Prematurely Aborting Fire")
+            return
+
+    # CHeck Frequencies and Timings
+
+    # Initialize the LIVE_VALS dictionary with values: int, will be filled in during fire
+    shared.init_live_data()
+
+
 # Fire function
 def fire():
-    pass
+
+    prom_status = {}
+
+    ptThread = threading.Thread(target=batch_reader, args=(CONST.PT_HZ, prom_status, shared.PT_DATA, CONST.PT_NAMES, readPT))
+    tcThread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, shared.TC_DATA, CONST.TC_NAMES, readTC))
+    fmThread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, shared.FM_DATA, CONST.FM_NAMES, readFM))
+
+    shared.COUNTDOWN_START = time.time()
+    prom_status["isFiring"] = True
+
+    # Maybe a list of pairs with (timings, functions/actions)
+    # sorted by timings, go through array executing functions after waiting for their times
+
+    # notify that firing is complete
+    # begin data processing
+    # notify that data processing is complete
+
 
 def main():
-    global TC_DATA
-    global PT_DATA
 
     prom_status = {}
     prom_status["isFiring"] = False
