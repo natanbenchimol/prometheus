@@ -9,31 +9,33 @@ import prometheus_shared as shared
 import prometheus_consts as CONST
 import RPi.GPIO as GPIO
 
+import time
 
 # ------------------------------------------ initialize setup values --------------------------------------------------#
 # set up input out put pin numbering system on Pi (BCM = broadcom chip specific)
 # enter "pinout" in the pi's terminal to see it's numbers
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.OUT)
-print(GPIO.input(17))
-
-# configure pin 7 as output for testing with LED
-
+GPIO.setup(10, GPIO.IN)
 
 global font
+global tog
+tog = 1
 font = 'ansi'
-
-# for arming valves logic
-arm = 0
-
 class PrometheusGUI:
 
     def __init__(self, parent):
 
-
         self.parent = parent
         parent.title('Prometheus GUI')
         shared.populate_live_data()  # FAKE ASS DATA
+
+        # load pictures for check list buttons
+
+        self.tog_off = Image.open(r"Assets/toggle_off.png").resize((125, 50), Image.ANTIALIAS)
+        self.tog_on = Image.open(r"Assets/toggle_on.png").resize((125, 50), Image.ANTIALIAS)
+        self.toggle_off = ImageTk.PhotoImage(self.tog_off)
+        self.toggle_on = ImageTk.PhotoImage(self.tog_on)
 
 ########################################################################################################################
 # ----------------------------------------- initialize frame set up ---------------------------------------------------#
@@ -49,7 +51,7 @@ class PrometheusGUI:
 
         # initialize frame 3 (right side panel side A readouts side B set aborts)
         self.f3 = tk.Frame(self.f1, background='#000000', relief="sunken", width=80)
-        self.f3.grid(column=3, row=1, columnspan=1, rowspan=3, sticky=(N, S, E, W))  # added sticky
+        self.f3.grid(column=3, row=1, columnspan=2, rowspan=3, sticky=(N, S, E, W))  # added sticky
 
         # initialize frame 4 (static panel at bottom for firing parameters)
         self.f4 = tk.Frame(self.f1, background='#000000', relief="sunken", width=100)
@@ -61,7 +63,7 @@ class PrometheusGUI:
         self.parent.rowconfigure(0, weight=1)
 
         # f1 (branch of root)
-        for x in range(4):
+        for x in range(5):
             self.f1.columnconfigure(x, weight=1)
         self.f1.rowconfigure(0, weight=1)
         for x in range(1, 4):
@@ -72,16 +74,16 @@ class PrometheusGUI:
 ########################################################################################################################
 
 # ------------------------------- frame 1 (main labels and panel switches) --------------------------------------------#
-        self.main_ops = tk.Button(self.f1, text="Manual Operations", font=(font, 20), bg='#FFD700', command=lambda: self.switch_2('Man'))
+        self.main_ops = tk.Button(self.f1, text="Manual Mode", font=(font, 20), bg='#FFD700', command=lambda: self.switch_2('Man'))
         self.main_ops.grid(column=0, row=0, sticky=(N, S, E, W))
 
-        self.fire_ops = tk.Button(self.f1, text="Firing Operations", font=(font, 20), bg='#c41e3a', command=lambda: self.switch_2('Fire'))
+        self.fire_ops = tk.Button(self.f1, text="Firing Mode", font=(font, 20), bg='#c41e3a', command=lambda: self.switch_2('Fire'))
         self.fire_ops.grid(column=2, row=0, sticky=(N, S, E, W))
 
-        self.abort_ops = tk.Button(self.f1, text="Set Aborts Values", font=(font, 15), bg='#bc13fe', borderwidth='5', relief='ridge', command=lambda: self.switch_3('aborts'))
-        self.abort_ops.grid(column=3, row=0, sticky=(N+E + S))
-        self.sense_ops = tk.Button(self.f1, text="Sensor Readouts", font=(font, 15), bg='#fe019a', borderwidth='5', relief='ridge', command=lambda: self.switch_3('sense'))
-        self.sense_ops.grid(column=3, row=0, sticky=(N + W + S))
+        self.abort_ops = tk.Button(self.f1, text="Aborts Values", font=(font, 15), bg='#bc13fe', borderwidth='5', relief='ridge', command=lambda: self.switch_3('aborts'))
+        self.abort_ops.grid(column=4, row=0, sticky=(N+E + S + W), padx=30, pady=10)
+        self.sense_ops = tk.Button(self.f1, text="Readouts", font=(font, 15), bg='#fe019a', borderwidth='5', relief='ridge', command=lambda: self.switch_3('sense'))
+        self.sense_ops.grid(column=3, row=0, sticky=(N + E+ W + S), padx=30, pady=10)
 
 
 # ------------------------------------- frame 4 (set firing parameters) -----------------------------------------------#
@@ -90,7 +92,7 @@ class PrometheusGUI:
         f4bcolumn = 5
         for column in range(f4bcolumn):
             for row in range(f4brow):
-                self.f4_grid = tk.Label(self.f4, bg='#000000', relief='sunken')
+                self.f4_grid = tk.Label(self.f4, bg='#000000')
                 self.f4_grid.grid(column=column, row=row, sticky=(N, S, E, W))
         # scaling factor for frame4
         for x in range(f4bcolumn):
@@ -182,39 +184,42 @@ class PrometheusGUI:
                  self.f2.rowconfigure(x, weight=1)
 
         # place widgets
-            self.main_ops = tk.Label(self.f1, text="Manual Operations", font=(font, 40, 'bold'), bg='#000000', fg='#FFFFFF')
+            self.main_ops = tk.Label(self.f1, text="Manual Mode", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
             self.main_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
 # use const file from repository to shrink this to single loop in the future
 
-            self.NC_IO = tk.Button(self.f2, text="NCIO", font=(font, 20), bg='#FF0000', fg='#FFFFFF',  borderwidth=10, relief='ridge', command=lambda: self.solenoid(self.NC_IO))
+            self.NC_IO = tk.Button(self.f2, text="NCIO", font=(font, 20), bg='#FF0000', fg='#FFFFFF',  borderwidth=10,
+                                   relief='ridge', command=lambda: self.solenoid(self.NC_IO))
             self.NC_IO.grid(column=8, row=2, sticky=(N, S, E, W))
 
-            self.NC_IF = tk.Button(self.f2, text="NCIF", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10, relief='ridge')
+            self.NC_IF = tk.Button(self.f2, text="NCIF", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                                   relief='ridge')
             self.NC_IF.configure(command=lambda: self.solenoid(self.NC_IF))
             self.NC_IF.grid(column=0, row=2, sticky=(N, S, E, W))
 
-            self.NO_IP = tk.Button(self.f2, text="NOIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10, relief='ridge',
-                                   command=lambda: self.solenoid(self.NO_IP))
+            self.NO_IP = tk.Button(self.f2, text="NOIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                                   relief='ridge', command=lambda: self.solenoid(self.NO_IP))
             self.NO_IP.grid(column=3, row=2, sticky=(N, S, E, W))
 
-            self.NC_IP = tk.Button(self.f2, text="NCIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10, relief='ridge',
-                                   command=lambda: self.solenoid(self.NC_IP))
+            self.NC_IP = tk.Button(self.f2, text="NCIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                                   relief='ridge', command=lambda: self.solenoid(self.NC_IP))
             self.NC_IP.grid(column=5, row=2, sticky=(N, S, E, W))
 
-            self.NC_3O = tk.Button(self.f2, text="NC3O", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10, relief='ridge',
-                                   command=lambda: self.solenoid(self.NC_3O))
+            self.NC_3O = tk.Button(self.f2, text="NC3O", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                                   relief='ridge', command=lambda: self.solenoid(self.NC_3O))
             self.NC_3O.grid(column=1, row=0, sticky=(N, S, E, W), padx=40, pady=40)
 
-            self.NC_3N = tk.Button(self.f2, text="NC3N", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10, relief='ridge',
-                                   command=lambda: self.solenoid(self.NC_3N))
+            self.NC_3N = tk.Button(self.f2, text="NC3N", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                                   relief='ridge', command=lambda: self.solenoid(self.NC_3N))
             self.NC_3N.grid(column=7, row=0, sticky=(N, S, E, W), padx=40, pady=40)
 
-            self.NC_OP = tk.Button(self.f2, text="NCOP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10, relief='ridge',
-                                   command=lambda: self.solenoid(self.NC_OP))
+            self.NC_OP = tk.Button(self.f2, text="NCOP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                                   relief='ridge', command=lambda: self.solenoid(self.NC_OP))
             self.NC_OP.grid(column=4, row=0, sticky=(N, S, E, W), padx=40, pady=40)
 
-            self.arm_valves = tk.Button(self.f2, text="ARM Valves", font=(font, 15), bg='#FF0000', fg='#FFFFFF',  borderwidth=20, relief='raised', command=lambda: self.arm_v())
+            self.arm_valves = tk.Button(self.f2, text="ARM Valves", font=(font, 15), bg='#ff7300', fg='#FFFFFF',
+                                        borderwidth=20, relief='raised', command=lambda: self.arm_v())
             self.arm_valves.grid(column=4, row=1, sticky=(N, S, E, W), padx=40, pady=40)
 
 # -------------------------------------------- Firing panel options -------------------------------------------------- #
@@ -228,7 +233,7 @@ class PrometheusGUI:
 
             for column in range(f2bcolumn):
                 for row in range(f2brow):
-                    self.f2_grid = tk.Label(self.f2, bg='#000000', relief="sunken")
+                    self.f2_grid = tk.Label(self.f2, bg='#000000')
                     self.f2_grid.grid(column=column, row=row, sticky=(N, S, E, W))
             # scaling factor for frame2
             for x in range(f2bcolumn):
@@ -237,11 +242,69 @@ class PrometheusGUI:
                 self.f2.rowconfigure(x, weight=1)
 
         # place widgets
-            self.fire_ops = tk.Label(self.f1, text="Firing Operations", font=(font, 40, 'bold'), bg='#000000', fg='#FFFFFF')
+            self.fire_ops = tk.Label(self.f1, text="Firing Mode", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
             self.fire_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
-            self.abort_butt = tk.Button(self.f2, text="ABORT", font=(font, 20), bg='#FF0000', fg='#FFFFFF')
-            self.abort_butt.grid(column=4, row=1, sticky=(N, S, E, W), padx=40, pady=40)
+            self.abort_butt = tk.Button(self.f2, text="ABORT", font=(font, 18), bg='#FF0000', fg='#FFFFFF')
+            self.abort_butt.grid(column=7, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
+
+            self.fire_butt = tk.Button(self.f2, text="FIRE", font=(font, 20), bg='#ff7300', fg='#FFFFFF')
+            self.fire_butt.grid(column=1, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
+
+            self.prefire_1 = tk.Label(self.f2, text="Valves in correct states", font=(font, 15),
+                                       bg='#000000', fg='#FFFFFF')
+            self.prefire_1.grid(column=4, row=2, sticky=(N, S, E, W))
+
+            self.prefire_2 = tk.Label(self.f2, text="Sensor readings nominal"
+                                                     ,  bg='#000000', font=(font, 15), fg='#FFFFFF')
+            self.prefire_2.grid(column=4, row=3, sticky=(N, S, E, W))
+
+            self.prefire_3 = tk.Label(self.f2,
+                                       text="Range admin notified",
+                                       bg='#000000', font=(font, 15), fg='#FFFFFF')
+            self.prefire_3.grid(column=4, row=4, sticky=(N, S, E, W))
+
+            self.prefire_4 = tk.Label(self.f2,
+                                       text="Range is clear",
+                                       bg='#000000', font=(font, 15), fg='#FFFFFF')
+            self.prefire_4.grid(column=4, row=5, sticky=(N, S, E, W))
+
+            self.prefire_5 = tk.Label(self.f2,
+                                       text="Go/No go",
+                                       bg='#000000', font=(font, 15), fg='#FFFFFF')
+            self.prefire_5.grid(column=4, row=6, sticky=(N, S, E, W))
+
+            self.prefire_6 = tk.Label(self.f2,
+                                       text="Send it",
+                                       bg='#000000', font=(font, 15), fg='#FFFFFF')
+            self.prefire_6.grid(column=4, row=7, sticky=(N, S, E, W))
+
+            # pre fire toggle switches, put this in a loop when you get better at python
+
+            self.name1 = tk.Button(self.f2,  bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                 width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name1))
+            self.name1.grid(column=5, row=2, sticky=(N, S, E, W))
+
+            self.name2 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                           width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name2))
+            self.name2.grid(column=5, row=3, sticky=(N, S, E, W))
+
+            self.name3 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name3))
+            self.name3.grid(column=5, row=4, sticky=(N, S, E, W))
+
+            self.name4 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name4))
+            self.name4.grid(column=5, row=5, sticky=(N, S, E, W))
+
+            self.name5 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name5))
+            self.name5.grid(column=5, row=6, sticky=(N, S, E, W))
+
+            self.name6 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name6))
+            self.name6.grid(column=5, row=7, sticky=(N, S, E, W))
+
 
 # ---------------------------------- frame 3 (read outs, a and aborts. b) ---------------------------------------------#
             # this function controls the switch for frame3
@@ -263,7 +326,7 @@ class PrometheusGUI:
             f3acolumn = 3
             for column in range(f3acolumn):
                 for row in range(f3arow):
-                    self.f3_grid = tk.Label(self.f3, bg='#000000', relief="sunken")
+                    self.f3_grid = tk.Label(self.f3, bg='#000000')
                     self.f3_grid.grid(column=column, row=row, sticky=(N, S, E, W))
             # scaling factor for frame2
             for x in range(f3acolumn):
@@ -273,38 +336,41 @@ class PrometheusGUI:
 
         # place widgets
 
-            self.sense_ops = tk.Label(self.f3, text="Sensor Readouts ", font=(font, 20), bg='#000000', fg='#FFFFFF', borderwidth=1,
-                                      relief="sunken")
+            self.sense_ops = tk.Label(self.f3, text="Sensor Readouts ", font=(font, 25), bg='#000000', fg='#FFFFFF')
             self.sense_ops.grid(column=0, row='0', columnspan=3, sticky=(N, S, E, W))
 
-            self.FM_O = tk.Label(self.f3, text="Oxygen Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF',
-                                      borderwidth=1, relief="sunken")
+            self.FM_O = tk.Label(self.f3, text="Oxygen Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
             self.FM_O.grid(column=0, row='1', sticky=(N, S, E, W))
 
             FM_O_live = IntVar(value=shared.LIVE_DATA["FM_IO"])
 
-            self.FM_O_read = tk.Label(self.f3, textvariable=FM_O_live, font=(font, 15), bg='#000000', fg='#FFFFFF',
-                                      borderwidth=1, relief="sunken")
+            self.FM_O_read = tk.Label(self.f3, textvariable=FM_O_live, font=(font, 15), bg='#000000', fg='#FFFFFF')
 
             self.FM_O_read.grid(column=1, row=1, sticky=(N, S, E, W))
 
-            self.FM_O_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF',
-                                      borderwidth=1, relief="sunken")
+            self.FM_O_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF')
             self.FM_O_unit.grid(column=2, row='1', sticky=(N, S, E, W))
 
-            self.FM_F = tk.Label(self.f3, text="Fuel Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF',
-                                 borderwidth=1, relief="sunken")
+            self.FM_F = tk.Label(self.f3, text="Fuel Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
             self.FM_F.grid(column=0, row='2', sticky=(N, S, E, W))
 
             FM_F_live = IntVar(value=shared.LIVE_DATA["FM_IF"])
 
-            self.FM_F_read = tk.Label(self.f3, textvariable=FM_F_live, font=(font, 15), bg='#000000', fg='#FFFFFF',
-                                      borderwidth=1, relief="sunken")
+            self.FM_F_read = tk.Label(self.f3, textvariable=FM_F_live, font=(font, 15), bg='#000000', fg='#FFFFFF')
             self.FM_F_read.grid(column=1, row='2', sticky=(N, S, E, W))
 
-            self.FM_F_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF',
-                                      borderwidth=1, relief="sunken")
+            self.FM_F_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF')
             self.FM_F_unit.grid(column=2, row='2', sticky=(N, S, E, W))
+
+
+            self.Input_10 = tk.Label(self.f3, text="GPIO 10 ", font=(font, 15), bg='#000000', fg='#FFFFFF')
+            self.Input_10.grid(column=0, row=3, sticky=(N, S, E, W))
+
+            Input_10_live = IntVar(GPIO.input(10))
+
+            self.Input_10read = tk.Label(self.f3, textvariable=Input_10_live, font=(font, 15), bg='#000000', fg='#FFFFFF')
+            self.Input_10read.grid(column=1, row=3, sticky=(N, S, E, W))
+
 # ------------------------------------------------ Set Aborts panel -------------------------------------------------- #
         elif switch3 == 'b':
             # set grid size on frame 3 b (mostly for debugging and convenience of rearranging widgets)
@@ -312,7 +378,7 @@ class PrometheusGUI:
             f3bcolumn = 3
             for column in range(f3bcolumn):
                 for row in range(f3brow):
-                    self.f3_grid = tk.Label(self.f3, bg='#000000', relief="sunken")
+                    self.f3_grid = tk.Label(self.f3, bg='#000000')
                     self.f3_grid.grid(column=column, row=row, sticky=(N, S, E, W))
             # scaling factor for frame2
             for x in range(f3bcolumn):
@@ -321,43 +387,52 @@ class PrometheusGUI:
                 self.f3.rowconfigure(x, weight=1)
 
     # place widgets
-            self.abort_ops = tk.Label(self.f3, text="Abort Gates ", font=(font, 20), bg='#000000', fg='#FFFFFF', borderwidth=1, relief="sunken")
+            self.abort_ops = tk.Label(self.f3, text="Abort Gates ", font=(font, 25), bg='#000000', fg='#FFFFFF')
             self.abort_ops.grid(column=0, row='0', columnspan=3, sticky=(N, S, E, W))
 
-            self.FM_O = tk.Label(self.f3, text="Oxygen Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF',
-                                 borderwidth=1, relief="sunken")
+            self.FM_O = tk.Label(self.f3, text="Oxygen Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
             self.FM_O.grid(column=0, row='1', sticky=(N, S, E, W))
             
 ########################################################################################################################
 # --------- GUI functionality, setup widgets functions here see below section to add/subtract widgets -----------------#
 ########################################################################################################################
 
+# manual switch function
+
+
 # arm valve function
     def arm_v(self):
-        if self.arm_valves.cget('bg') == '#FF0000':
+
+        if self.arm_valves.cget('bg') == '#ff7300':
             self.arm_valves.configure(bg='#00FF00', relief='sunken')
             global arm
             arm = 1
         elif self.arm_valves.cget('bg') == '#00FF00':
-            self.arm_valves.configure(bg='#FF0000', relief='raised')
+            self.arm_valves.configure(bg='#ff7300', relief='raised')
             arm = 2
 
 # this function actuates solenoids and changes button color based on previous state
 
-    def solenoid(self, w):
-        name = w.cget('text')
+    def solenoid(self, solbutton):
         if arm == 1:
-            if w.cget('bg') == '#FF0000':
+            if solbutton.cget('bg') == '#FF0000':
                 GPIO.output(17, GPIO.HIGH)
-                w.configure(bg='#00FF00', relief='ridge')
-                print(GPIO.input(17))
-            elif w.cget('bg') == '#00FF00':
+                solbutton.configure(bg='#00FF00', relief='ridge')
+                print(GPIO.input(10))
+            elif solbutton.cget('bg') == '#00FF00':
                 GPIO.output(17, GPIO.LOW)
-                w.configure(bg='#FF0000', relief='ridge')
-                print(GPIO.input(17))
+                solbutton.configure(bg='#FF0000', relief='ridge')
+                print(GPIO.input(10))
 
         elif arm == 0:
             pass
+
+    def prefire_toggle(self, toggle):
+        bck = str(toggle.cget('image'))
+        if bck == "pyimage1":
+            toggle.configure(image=self.toggle_on)
+        elif bck == "pyimage2":
+            toggle.configure(image=self.toggle_off)
 
 ########################################################################################################################
 # -------------------------------------------------- THE END ----------------------------------------------------------#
@@ -366,3 +441,4 @@ class PrometheusGUI:
 root = Tk()
 my_gui = PrometheusGUI(root)
 root.mainloop()
+
