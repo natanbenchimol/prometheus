@@ -75,7 +75,7 @@ class PrometheusGUI:
         self.parent.rowconfigure(0, weight=1)
 
         # f1 (branch of root)
-        for x in range(4):
+        for x in range(5):
             self.f1.columnconfigure(x, weight=1)
         self.f1.rowconfigure(0, weight=1)
         for x in range(1, 4):
