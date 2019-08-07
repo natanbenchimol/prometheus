@@ -93,9 +93,9 @@ class PrometheusGUI:
         self.fire_ops.grid(column=2, row=0, sticky=(N, S, E, W))
 
         self.abort_ops = tk.Button(self.f1, text="Set Aborts Values", font=(font, 15), bg='#bc13fe', borderwidth='5', relief='ridge', command=lambda: self.switch_3('aborts'))
-        self.abort_ops.grid(column=4, row=0, sticky=(N+E + S), padx=10, pady=10)
+        self.abort_ops.grid(column=4, row=0, sticky=(N+E + S + W), padx=10, pady=10)
         self.sense_ops = tk.Button(self.f1, text="Sensor Readouts", font=(font, 15), bg='#fe019a', borderwidth='5', relief='ridge', command=lambda: self.switch_3('sense'))
-        self.sense_ops.grid(column=3, row=0, sticky=(N + W + S), padx=10, pady=10)
+        self.sense_ops.grid(column=3, row=0, sticky=(N + E+ W + S), padx=10, pady=10)
 
 
 # ------------------------------------- frame 4 (set firing parameters) -----------------------------------------------#
