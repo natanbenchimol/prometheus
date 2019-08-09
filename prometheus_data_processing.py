@@ -2,6 +2,7 @@
 import datetime
 import os
 import csv
+import multiprocessing
 
 import prometheus_consts as CONST
 import prometheus_shared as shared
@@ -55,9 +56,15 @@ def write_clean(csv_writer, header, RAW_DATA, INSTRUMENT_NAMES):
             to_write[header.index(RAW_DATA[j][2])] = RAW_DATA[j][3]
 
         csv_writer.writerow(to_write)               # Write the list of data to the csv
+        
+        if i%1000 is 0:
+            print("Batch num: " + str(i))
 
 
 def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
+    
+    print("Begin data processing")
+    print(datetime.datetime.now().time())
 
     # ----------- General Housekeeping ----------- #
 
@@ -89,6 +96,7 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     sort_raw(FM_DATA)
 
     # ----------- Writing Raw Data ----------- #
+    print("Writing raw data")
 
     # Open the file
     raw_tc_file = open(base_file_path + "/promRawTC_" + formatted_date +".csv", "w")
@@ -134,10 +142,29 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     fmWriter = csv.writer(clean_fm_file)
     fmWriter.writerow(header_row_fm)
 
-    write_clean(tcWriter, header_row_tc, TC_DATA, CONST.TC_NAMES)   # Write clean TC data to file
-    write_clean(ptWriter, header_row_pt, PT_DATA, CONST.PT_NAMES)   # Write clean PT data to file
-    write_clean(fmWriter, header_row_fm, FM_DATA, CONST.FM_NAMES)   # Write clean FM data to file
+    print("Writing clean data")
+    print(datetime.datetime.now().time())
 
+
+    # write_clean(tcWriter, header_row_tc, TC_DATA, CONST.TC_NAMES)   # Write clean TC data to file
+    # write_clean(ptWriter, header_row_pt, PT_DATA, CONST.PT_NAMES)   # Write clean PT data to file
+    # write_clean(fmWriter, header_row_fm, FM_DATA, CONST.FM_NAMES)   # Write clean FM data to file
+
+    # 
+    p1 = multiprocessing.Process(target=write_clean, args=((tcWriter, header_row_tc, TC_DATA, CONST.TC_NAMES)))
+    p2 = multiprocessing.Process(target=write_clean, args=((ptWriter, header_row_pt, PT_DATA, CONST.PT_NAMES)))
+    p3 = multiprocessing.Process(target=write_clean, args=((fmWriter, header_row_fm, FM_DATA, CONST.FM_NAMES)))
+    
+    p1.start()
+    p2.start()
+    p3.start()
+    
+    p1.join()
+    p2.join()
+    p3.join()
+    
+    print(datetime.datetime.now().time())
+    
     # ----------- Finishing ----------- #
 
     clean_tc_file.close()
