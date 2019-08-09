@@ -145,19 +145,14 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     print("Writing clean data")
     print(datetime.datetime.now().time())
 
-
-    # write_clean(tcWriter, header_row_tc, TC_DATA, CONST.TC_NAMES)   # Write clean TC data to file
-    # write_clean(ptWriter, header_row_pt, PT_DATA, CONST.PT_NAMES)   # Write clean PT data to file
-    # write_clean(fmWriter, header_row_fm, FM_DATA, CONST.FM_NAMES)   # Write clean FM data to file
-
-    # 
+    # Multi-processing functionality cuts our crunch time in half
     p1 = multiprocessing.Process(target=write_clean, args=((tcWriter, header_row_tc, TC_DATA, CONST.TC_NAMES)))
     p2 = multiprocessing.Process(target=write_clean, args=((ptWriter, header_row_pt, PT_DATA, CONST.PT_NAMES)))
     p3 = multiprocessing.Process(target=write_clean, args=((fmWriter, header_row_fm, FM_DATA, CONST.FM_NAMES)))
     
-    p1.start()
-    p2.start()
-    p3.start()
+    p1.start()  # Write clean TC data to file
+    p2.start()  # Write clean PT data to file
+    p3.start()  # Write clean FM data to file
     
     p1.join()
     p2.join()

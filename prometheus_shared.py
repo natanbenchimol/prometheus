@@ -181,8 +181,8 @@ def load_timings():
 # Uncomment the following 4 lines if this is the first time you are
 # running the GUI on a device and run THIS file. This will allow you
 # to generate and then populate the config file
-#
-# def main():
-#     # gen_config()
-#
-# main()
+
+def main():
+    gen_config()
+
+main()
