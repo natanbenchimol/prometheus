@@ -10,10 +10,14 @@ TC_NAMES = ["TC1_IP", "TC2_IP", "TC1_IF", "TC_I", "TC1_IO", "TC2_IO", "TC3_IO"]
 PT_NAMES = ["PT1_IP", "PT2_IP", "PT1_IF", "PT2_IF", "PT_I", "PT1_IO", "PT2_IO", "PT3_IO"]
 FM_NAMES = ["FM_IF", "FM_IO", "FM2_IO"]
 
-SOL_NAMES = ["NC3O", "NCOP", "NC3N", "NCIF", "NOIP", "NCIP", "NCIO", "NCFP"]
+SOL_NAMES = ["NC3O", "NCOP", "NC3N", "NCIF", "NOIP", "NCIP", "NCIO", "NCFP", "SPRK"]
 
 # Firing actions
-FIRING_ACTIONS = ["NCIO_1", "SPARK_1", "NCIF_1", "SPARK_0", "NCIF_0", "NC30_0", "NC3P_1", "NC3P_0", "NCIO_0"]
+FIRING_ACTIONS = {"NCIO_1",
+                 "SPRK_1",
+                 "NCIF_1", "SPRK_0", "NCIF_0", "NC30_0", "NC3P_1", "NC3P_0", "NCIO_0"}
+
+# STANDARD TORCH FIRE PROCEDURE:
 
 # combustion ox valve open (NCIO)
 # spark plug begin

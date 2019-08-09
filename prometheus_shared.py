@@ -20,6 +20,7 @@ FM_ABORT_GATES = {}    # these are initialized by a config file
 LIVE_DATA = {}      # contains the most recent reading from each instrument
 
 FRONT_END_TIMINGS = {}  # Contains solenoid/spark plug timings inputted on front end
+PARSED_TIMINGS = []
 
 
 # ----------- NOT THREAD SAFE ----------- #
@@ -28,7 +29,7 @@ COUNTDOWN_START = None  # Saves the timestamp for start of countdown for
                         # calculating relative mission time
 
 
-# ----------- INITIALIZATION FUNCTIONS ----------- #
+# ---------------------- START OF CONFIG FILE SETUP FUNCTIONS ---------------------- #
 
 # Function is called at program start to load the max val dictionaries from
 # our config file
@@ -124,6 +125,8 @@ def gen_config():
 
     config.close()
 
+# ---------------------- END OF CONFIG FILE SETUP FUNCTIONS ---------------------- #
+
 
 # ONLY FOR TESTING PURPOSES
 # This function should not be called anywhere during actual experimentation
@@ -165,12 +168,14 @@ def init_timings_dict():
 
 # Sets values in the timings dictionary
 def set_timing(time_post_countdown, key):
-    global FRONT_END_TIMINGS
 
     if key in FRONT_END_TIMINGS:
         FRONT_END_TIMINGS[key] = time_post_countdown
     else:
         print("Key: " + key + " not found" )
+
+def load_timings():
+    pass
 
 
 # Uncomment the following 4 lines if this is the first time you are

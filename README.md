@@ -23,6 +23,13 @@ Note that this program generates a directory called 'Data' which will contain al
   - Python version: python3
   - required python packages: tkinter, PIL
   - Intended operational screen size is **** 20.5in (520.7mm) (Length) x 11.5in (292.1mm) (Height)****. If you are editing/testing the file on a smaller screen size, some adjustments may need to be made. These are mostly just visual adjustments and will most likely not affect functionality of the program. We intend to include notes at the top of prometheus_gui_test.py with instructions on what needs to be changed in order to factor in the adjusted screen size
+  - Install conky for the pi with this link: https://www.youtube.com/watch?v=OB7Nfe_05h4
+### STYLE NOTES  ###
+The style convention chosen for this project can be confusing but we have tried to adhere to the following: 
+- **ALL_CAPS** is used to denote global constants that can't be changed by the user once the GUI is running.
+- **Capital_Case_With_Underscores** is used for shared structures that are read/modified by multiple files.
+- **all_lower_case** is used for local vars
+- **CapitalCaseNoSpaces** is used to denote custom structures/classes that we have built. 
 
 #### README TODO:
 - How to add an instrument

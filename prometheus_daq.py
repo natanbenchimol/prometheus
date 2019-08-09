@@ -18,11 +18,13 @@ fire_sequence = []
 #
 # END OF NOTE
 
-#TODO:  PRESSING ISSUES
-#       Learn debugger!!! Important for MT func.
+#TODO:  LETS GET IT
+#       Write firing function
+#       Draw out an import structure tree
+#       TC/PT Read code
+#       FM code
 
 #TODO:  FUTURE FUNCTIONALITY
-#       Test try/catch block for abort
 #       Soleniod actuation to actually launch system
 #       Import tree structure documentation
 
@@ -38,7 +40,7 @@ def readPT(batch_id, PT_DATA, pt_id):
     res_list[0] = batch_id       # int   - this is the nth time we are collecting data from here
     res_list[1] = time.time()   # float - time data point collected (unix time)
     res_list[2] = pt_id         # str   - instrument id
-    res_list[3] = 1             # float - data collected from PT
+    res_list[3] = 4005             # float - data collected from PT
 
     if (res_list[3] > MAX_VAL):
         PT_DATA.append(res_list)  # So we know what val caused the abort
@@ -57,7 +59,7 @@ def readTC(batch_id, TC_DATA, tc_id):
     res_list[0] = batch_id          # int   - this is the nth time we are collecting data from here
     res_list[1] = time.time()       # float - time data point collected (unix time)
     res_list[2] = tc_id             # str   - instrument id
-    res_list[3] = 1                  # float - data collected from TC
+    res_list[3] = 224                  # float - data collected from TC
 
     if (res_list[3] > MAX_VAL):
         TC_DATA.append(res_list)    # So we know what val caused the abort
@@ -76,7 +78,7 @@ def readFM(batch_id, FM_DATA, fm_id):
     res_list[0] = batch_id          # int   - this is the nth time we are collecting data from here
     res_list[1] = time.time()       # float - time data point collected (unix time)
     res_list[2] = fm_id             # str   - instrument id
-    res_list[3] = 1                 # float - data collected from TC
+    res_list[3] = 6.02                 # float - data collected from TC
 
     if (res_list[3] > MAX_VAL):
         FM_DATA.append(res_list)    # So we know what val caused the abort
@@ -117,18 +119,26 @@ def timeFire(timer, prom_status):
     print("END FIRE")
 
 
+# Function creates the list of pairs + orders them for firing
+def fire_timings():
+    # need to parse through shared
+    pass
+
+
 # Called as a part of pre fire checklist
 def prefire_checks_and_setup():
 
     # ---------------- AUTOMATIC PRE-FIRE CHECKS ---------------- #
 
-    # Abort gates
+    # Checks that all our abort gates are populated and they make sense
     for gate in shared.FM_ABORT_GATES + shared.TC_ABORT_GATES + shared.PT_ABORT_GATES:
         if not gate.is_valid_gate():
             print("Prematurely Aborting Fire")
             return
 
-    # CHeck Frequencies and Timings
+    if (CONST.TC_HZ):
+
+        pass
 
     # Initialize the LIVE_VALS dictionary with values: int, will be filled in during fire
     shared.init_live_data()
@@ -184,7 +194,7 @@ def main():
     prom_status["isFiring"] = False
 
     STATUS = "PREFIRE"
-    firingTime = 3
+    firingTime = 15
 
     while(STATUS.upper() != "FIRE"):
         STATUS = input("> ")

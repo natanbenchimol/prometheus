@@ -1,23 +1,31 @@
 # Contains the data structure responsible for maintaining
 # the state of the solenoids in the system
 
-import prometheus_consts as const
+import prometheus_consts as CONST
 # import RPi.GPIO as gpio
 
 
 class SolenoidManager:
 
     def __init__(self):
-        # Note that the 0/1 doesn't refer to open/closed
+        # Note that 1/0 doesn't refer to open/closed
         # it refers to energized or not energized
+        # look at the solenoid name to see what that translates to
         self.curr_state = {}
 
-        for name in const.SOL_NAMES:    # Initialize dict
-            self.curr_state[name] = 0   # All sols in default state
+        for name in CONST.SOL_NAMES:    # Initialize dict
+            self.curr_state[name] = 0   # All sols in their default state
 
         self.pin_mapping = {    # Mapping the solenoid to the pins so we know which address to signal
-            "NC_IF": 1,
-            "ADFF": 18  # ETC, needs to be completed
+            "NC3O": int,
+            "NCOP": int,
+            "NC3N": int,
+            "NCIF": int,
+            "NOIP": int,
+            "NCIP": int,
+            "NCIO": int,
+            "NCFP": int,
+            "SPRK": int     # All ints need to be replaced with pin numbers
         }
 
     # Changes a state of a single solenoid
@@ -26,15 +34,18 @@ class SolenoidManager:
         # gpio.output(self.pin_mapping[name], gpio.HIGH) # This code is taken from swapnils snippet
         self.write_to_log()
 
+    # Changes the state of solenoid 'name' to 'state'
+    # if sol already in that state then do nothing
+    def solenoid_to_state(self, name, state):
+        pass
+
     # Makes large change to entire system state
     def state_change(self, new_state):
         # Loops thru both dicts (easy because keys are the same)
-        for name in const.SOL_NAMES:
-
+        for name in CONST.SOL_NAMES:
             if new_state[name] != self.curr_state[name]:
                 # gpio.output(self.pin_mapping[name], gpio.HIGH) # This code is taken from swapnils snippet
                 pass
-
         self.write_to_log()
 
     # Function actually responsible for sending electric signal
