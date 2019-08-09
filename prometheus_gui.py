@@ -28,30 +28,18 @@ class PrometheusGUI:
 
         self.parent = parent
         parent.title('Prometheus GUI')
-        shared.populate_live_data()  # FAKE ASS DATA
+        shared.init_live_data()         # Creates int values for all keys
+        shared.populate_live_data()     # FILLS WITH FAKE ASS DATA
 
-        # Atticus laptop directory
-        # self.tog_off = Image.open(r"C:\Users\Atticus\Desktop\prometheus\Assets\toggle_off.png").resize((125, 50),
-        #    Image.ANTIALIAS)
-
-        # self.tog_on = Image.open(r"C:\Users\Atticus\Desktop\prometheus\Assets\toggle_on.png").resize((125, 50),
-        #    Image.ANTIALIAS)
-
-        # Pi directory
-
-        self.tog_off = Image.open(r"/home/pi/Desktop/prometheus/Assets/toggle_off.png").resize((125, 50), Image.ANTIALIAS)
-
-        self.tog_on = Image.open(r"/home/pi/Desktop/prometheus/Assets/toggle_on.png").resize((125, 50), Image.ANTIALIAS)
-
-        # initiate
+        # load pictures for check list buttons
+        self.tog_off = Image.open(r"Assets/toggle_off.png").resize((125, 50), Image.ANTIALIAS)
+        self.tog_on = Image.open(r"Assets/toggle_on.png").resize((125, 50), Image.ANTIALIAS)
         self.toggle_off = ImageTk.PhotoImage(self.tog_off)
-
         self.toggle_on = ImageTk.PhotoImage(self.tog_on)
 
-
-########################################################################################################################
-# ----------------------------------------- initialize frame set up ---------------------------------------------------#
-########################################################################################################################
+        ###################################################################################
+        # --------------------------- initialize frame set up --------------------------- #
+        ###################################################################################
 
         # initialize frame 1 (static panel, includes title, panel change buttons)
         self.f1 = tk.Frame(parent, background='#000000')
@@ -69,7 +57,7 @@ class PrometheusGUI:
         self.f4 = tk.Frame(self.f1, background='#000000', relief="sunken", width=100)
         self.f4.grid(column=0, row=3, columnspan=3, sticky=(N, S, E, W))  # added sticky
 
-# -------------------------- scaling factors for static frames, (non static frame scaling set below) ------------------#
+        # ------------------ scaling factors for static frames, (non static frame scaling set below) ------------------#
         # parent (root)
         self.parent.columnconfigure(0, weight=1)
         self.parent.rowconfigure(0, weight=1)
@@ -81,11 +69,11 @@ class PrometheusGUI:
         for x in range(1, 4):
             self.f1.rowconfigure(x, weight=4)
 
-########################################################################################################################
-# ------------------------------------- GUI LAYOUT, setup widgets here ------------------------------------------------#
-########################################################################################################################
+        #########################################################################################
+        # --------------------------- GUI LAYOUT, setup widgets here ---------------------------#
+        #########################################################################################
 
-# ------------------------------- frame 1 (main labels and panel switches) --------------------------------------------#
+        # --------------------------- frame 1 (main labels and panel switches) ---------------------------#
         self.main_ops = tk.Button(self.f1, text="Manual Mode", font=(font, 20), bg='#FFD700', command=lambda: self.switch_2('Man'))
         self.main_ops.grid(column=0, row=0, sticky=(N, S, E, W))
 
@@ -94,18 +82,20 @@ class PrometheusGUI:
 
         self.abort_ops = tk.Button(self.f1, text="Aborts Values", font=(font, 15), bg='#bc13fe', borderwidth='5', relief='ridge', command=lambda: self.switch_3('aborts'))
         self.abort_ops.grid(column=4, row=0, sticky=(N+E + S + W), padx=30, pady=10)
+
         self.sense_ops = tk.Button(self.f1, text="Readouts", font=(font, 15), bg='#fe019a', borderwidth='5', relief='ridge', command=lambda: self.switch_3('sense'))
         self.sense_ops.grid(column=3, row=0, sticky=(N + E+ W + S), padx=30, pady=10)
 
-
-# ------------------------------------- frame 4 (set firing parameters) -----------------------------------------------#
-# set grid size on frame 3 b (mostly for debugging and convenience of rearranging widgets)
+        # --------------------------- frame 4 (set firing parameters) ---------------------------#
+        # set grid size on frame 3 b (mostly for debugging and convenience of rearranging widgets)
         f4brow = 7
         f4bcolumn = 5
+
         for column in range(f4bcolumn):
             for row in range(f4brow):
                 self.f4_grid = tk.Label(self.f4, bg='#000000')
                 self.f4_grid.grid(column=column, row=row, sticky=(N, S, E, W))
+
         # scaling factor for frame4
         for x in range(f4bcolumn):
             self.f4.columnconfigure(x, weight=1)
@@ -164,8 +154,8 @@ class PrometheusGUI:
         self.NCIF_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
                                       fg='#FFFFFF', borderwidth=10, relief='groove')
         self.NCIF_prog.grid(column=3, row=6, columnspan=2, sticky=(N, S, W, E))
-# ----------------------------------- frame 2 (manual ops and firing ops) ---------------------------------------------#
 
+    # -------------------------------- frame 2 (manual ops and firing ops) -----------------------------------------#
     # this function controls the switch for frame2
     def switch_2(self, s2):
         global font
@@ -174,8 +164,8 @@ class PrometheusGUI:
             switch2 = 'a'
         elif s2 == 'Fire':
             switch2 = 'b'
-# -------------------------------------------- Manual panel options -------------------------------------------------- #
 
+        # --------------------------- Manual panel options --------------------------- #
         if switch2 == 'a':
 
             # set grid size on frame 2 (mostly for debugging and convenience of rearranging widgets)
@@ -189,17 +179,18 @@ class PrometheusGUI:
                 for row in range(f2arow):
                     self.f2_grid = tk.Label(self.f2, bg='#000000')
                     self.f2_grid.grid(column=column, row=row, sticky=(N, S, E, W))
+
             # scaling factor for frame2
             for x in range(f2acolumn):
                 self.f2.columnconfigure(x, weight=1)
             for x in range(f2arow):
                  self.f2.rowconfigure(x, weight=1)
 
-        # place widgets
+            # place widgets
             self.main_ops = tk.Label(self.f1, text="Manual Mode", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
             self.main_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
-# use const file from repository to shrink this to single loop in the future
+            # use const file from repository to shrink this to single loop in the future
 
             self.NC_IO = tk.Button(self.f2, text="NCIO", font=(font, 20), bg='#FF0000', fg='#FFFFFF',  borderwidth=10,
                                    relief='ridge', command=lambda: self.solenoid(self.NC_IO))
@@ -234,7 +225,7 @@ class PrometheusGUI:
                                         borderwidth=20, relief='raised', command=lambda: self.arm_v())
             self.arm_valves.grid(column=4, row=1, sticky=(N, S, E, W), padx=40, pady=40)
 
-# -------------------------------------------- Firing panel options -------------------------------------------------- #
+        # --------------------------- Firing panel options --------------------------- #
 
         elif switch2 == 'b':
             # set grid size on frame 2 (mostly for debugging and convenience of rearranging widgets)
@@ -253,7 +244,7 @@ class PrometheusGUI:
             for x in range(f2brow):
                 self.f2.rowconfigure(x, weight=1)
 
-        # place widgets
+            # place widgets
             self.fire_ops = tk.Label(self.f1, text="Firing Mode", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
             self.fire_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
@@ -318,36 +309,37 @@ class PrometheusGUI:
             self.name6.grid(column=5, row=7, sticky=(N, S, E, W))
 
 
-# ---------------------------------- frame 3 (read outs, a and aborts. b) ---------------------------------------------#
-            # this function controls the switch for frame3
-
+    # --------------------------- frame 3 (read outs, a and aborts. b) ---------------------------#
+    # this function controls the switch for frame3
     def switch_3(self, s3):
 
         global font
+
         if s3 == 'sense':
             switch3 = 'a'
         elif s3 == 'aborts':
             switch3 = 'b'
 
-# -------------------------------------------- Sensor Readout Panel -------------------------------------------------- #
+        # --------------------------- Sensor Readout Panel --------------------------- #
 
         if switch3 == 'a':
 
             # set grid size on frame 3a (mostly for debugging and convenience of rearranging widgets)
             f3arow = 21
             f3acolumn = 3
+
             for column in range(f3acolumn):
                 for row in range(f3arow):
                     self.f3_grid = tk.Label(self.f3, bg='#000000')
                     self.f3_grid.grid(column=column, row=row, sticky=(N, S, E, W))
+
             # scaling factor for frame2
             for x in range(f3acolumn):
                 self.f3.columnconfigure(x, weight=1)
             for x in range(f3arow):
                 self.f3.rowconfigure(x, weight=1)
 
-        # place widgets
-
+            # place widgets
             self.sense_ops = tk.Label(self.f3, text="Sensor Readouts ", font=(font, 25), bg='#000000', fg='#FFFFFF')
             self.sense_ops.grid(column=0, row='0', columnspan=3, sticky=(N, S, E, W))
 
@@ -383,7 +375,7 @@ class PrometheusGUI:
             self.Input_10read = tk.Label(self.f3, textvariable=Input_10_live, font=(font, 15), bg='#000000', fg='#FFFFFF')
             self.Input_10read.grid(column=1, row=3, sticky=(N, S, E, W))
 
-# ------------------------------------------------ Set Aborts panel -------------------------------------------------- #
+        # --------------------------- Set Aborts panel --------------------------- #
         elif switch3 == 'b':
             # set grid size on frame 3 b (mostly for debugging and convenience of rearranging widgets)
             f3brow = 10
@@ -392,27 +384,29 @@ class PrometheusGUI:
                 for row in range(f3brow):
                     self.f3_grid = tk.Label(self.f3, bg='#000000')
                     self.f3_grid.grid(column=column, row=row, sticky=(N, S, E, W))
+
             # scaling factor for frame2
             for x in range(f3bcolumn):
                 self.f3.columnconfigure(x, weight=1)
             for x in range(f3brow):
                 self.f3.rowconfigure(x, weight=1)
 
-    # place widgets
+            # place widgets
             self.abort_ops = tk.Label(self.f3, text="Abort Gates ", font=(font, 25), bg='#000000', fg='#FFFFFF')
             self.abort_ops.grid(column=0, row='0', columnspan=3, sticky=(N, S, E, W))
 
             self.FM_O = tk.Label(self.f3, text="Oxygen Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
             self.FM_O.grid(column=0, row='1', sticky=(N, S, E, W))
             
-########################################################################################################################
-# --------- GUI functionality, setup widgets functions here see below section to add/subtract widgets -----------------#
-########################################################################################################################
+    ##########################################################################
+    # --------- GUI functionality, setup widgets functions ------------------#
+    #---------- here see below section to add/subtract widgets --------------#
+    ##########################################################################
 
-# manual switch function
+    # manual switch function
 
 
-# arm valve function
+    # arm valve function
     def arm_v(self):
 
         if self.arm_valves.cget('bg') == '#ff7300':
@@ -423,8 +417,7 @@ class PrometheusGUI:
             self.arm_valves.configure(bg='#ff7300', relief='raised')
             arm = 2
 
-# this function actuates solenoids and changes button color based on previous state
-
+    # this function actuates solenoids and changes button color based on previous state
     def solenoid(self, solbutton):
         if arm == 1:
             if solbutton.cget('bg') == '#FF0000':
@@ -437,15 +430,17 @@ class PrometheusGUI:
                 print(GPIO.input(10))
 
         elif arm == 0:
-            pass
+            return
 
+    # Prefire toggle
     def prefire_toggle(self, toggle):
         bck = str(toggle.cget('image'))
-        print(bck)
         if bck == "pyimage1":
             toggle.configure(image=self.toggle_on)
         elif bck == "pyimage2":
             toggle.configure(image=self.toggle_off)
+
+
 
 ########################################################################################################################
 # -------------------------------------------------- THE END ----------------------------------------------------------#

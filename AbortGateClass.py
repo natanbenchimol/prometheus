@@ -38,3 +38,25 @@ class AbortGate:
                 return False
 
         return True                         # Executed if either of our conditionals aren't valid ABORT!!!!
+
+    # Checks that we have a valid abort gate for just before the countdown is initiated
+    def is_valid_gate(self):
+        # All attributes must have a value
+        for attr, value in self.__dict__.items():
+            if value is None:
+                print("Gate: " + self.name + " has no value for attribute: " + attr)
+                return False
+
+        # Times and max/mins are in the correct order
+        if self.t1 > self.t2:
+            print("Gate: " + self.name + " has inverted time attributes")
+            return False
+        if self.std_max < self.std_min:
+            print("Gate: " + self.name + " has inverted std_max/std_min attributes")
+            return False
+        if self.gate_max < self.gate_min:
+            print("Gate: " + self.name + " has inverted gate_max/gate_min attributes")
+            return False
+
+        # All good, proceed with fire
+        return True

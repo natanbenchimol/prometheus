@@ -1,11 +1,14 @@
 
 import time
 import threading
+# import psutil
 
 import prometheus_consts as CONST
 import prometheus_data_processing as data
 import prometheus_shared as shared
 import abort_sequences as aborts
+
+fire_sequence = []
 
 # NOTE!!!!!
 #
@@ -87,7 +90,7 @@ def readFM(batch_id, FM_DATA, fm_id):
 def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
 
     data_id_count = 0
-    while(prom_status["isFiring"]):
+    while(prom_status["shouldRecordData"]):
 
         threads = []
 
@@ -114,13 +117,68 @@ def timeFire(timer, prom_status):
     print("END FIRE")
 
 
+# Called as a part of pre fire checklist
+def prefire_checks_and_setup():
+
+    # ---------------- AUTOMATIC PRE-FIRE CHECKS ---------------- #
+
+    # Abort gates
+    for gate in shared.FM_ABORT_GATES + shared.TC_ABORT_GATES + shared.PT_ABORT_GATES:
+        if not gate.is_valid_gate():
+            print("Prematurely Aborting Fire")
+            return
+
+    # CHeck Frequencies and Timings
+
+    # Initialize the LIVE_VALS dictionary with values: int, will be filled in during fire
+    shared.init_live_data()
+
+    # Create fire sequence
+    for key in shared.FRONT_END_TIMINGS:
+        pass # Do soemthing idk holy shit
+
+
 # Fire function
 def fire():
+
+    prom_status = {}
+
+    ptThread = threading.Thread(target=batch_reader, args=(CONST.PT_HZ, prom_status, shared.PT_DATA, CONST.PT_NAMES, readPT))
+    tcThread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, shared.TC_DATA, CONST.TC_NAMES, readTC))
+    fmThread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, shared.FM_DATA, CONST.FM_NAMES, readFM))
+
+    shared.COUNTDOWN_START = time.time()
+    prom_status["shouldRecordData"] = True
+
+    # Maybe a list of pairs with (timings, functions/actions)
+    # sorted by timings, go through array executing functions after waiting for their times
+
+    try:
+        ptThread.start()
+        tcThread.start()
+        fmThread.start()
+
+        # Here's where all our shit goes DOWN
+
+        ptThread.join()
+        tcThread.join()
+        fmThread.join()
+
+    except aborts.Abort:
+        print("Handle Abort")
+
+    data.writeToFile(shared.COUNTDOWN_START, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
+
+    # notify that firing is complete
+    # begin data processing
+    # notify that data processing is complete
+
+
+def purge(time):
     pass
 
+
 def main():
-    global TC_DATA
-    global PT_DATA
 
     prom_status = {}
     prom_status["isFiring"] = False

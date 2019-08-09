@@ -13,11 +13,13 @@ TC_DATA = []        # data to be written to files
 PT_DATA = []
 FM_DATA = []
 
-TC_MAX_VALS = {}    # the maximum values to be read by each instrument
-PT_MAX_VALS = {}    # if this value is exceeded -> abort
-FM_MAX_VALS = {}    # these are initialized by a config file
+TC_ABORT_GATES = {}    # the maximum values to be read by each instrument
+PT_ABORT_GATES = {}    # if this value is exceeded -> abort
+FM_ABORT_GATES = {}    # these are initialized by a config file
 
 LIVE_DATA = {}      # contains the most recent reading from each instrument
+
+FRONT_END_TIMINGS = {}  # Contains solenoid/spark plug timings inputted on front end
 
 
 # ----------- NOT THREAD SAFE ----------- #
@@ -37,11 +39,11 @@ def read_config():
         arr = line.split(",")
 
         if arr[0][0] is "T":                # Decide which dictionary to put it in
-            TC_MAX_VALS[arr[0]] = AbortGate(arr)
+            TC_ABORT_GATES[arr[0]] = AbortGate(arr)
         elif arr[0][0] is "P":
-            PT_MAX_VALS[arr[0]] = AbortGate(arr)
+            PT_ABORT_GATES[arr[0]] = AbortGate(arr)
         elif arr[0][0] is "F":
-            FM_MAX_VALS[arr[0]] = AbortGate(arr)
+            FM_ABORT_GATES[arr[0]] = AbortGate(arr)
         else:
             print("Error: Config file parse error")
 
@@ -59,19 +61,19 @@ def update_config(name, t1, t2, gate_max, gate_min, std_max, std_min):
         if name not in const.TC_NAMES:
             print("Error: Instrument not present in TC name consts")
             return
-        TC_MAX_VALS[name] = AbortGate(new_gate_params)
+        TC_ABORT_GATES[name] = AbortGate(new_gate_params)
 
     if name[0] is "P":
         if name not in const.PT_NAMES:                          # Checks that the instrument name exists
             print("Error: Instrument not present in PT name consts")
             return
-        PT_MAX_VALS[name] = AbortGate(new_gate_params)          # Saves the new gate object into our dictionary
+        PT_ABORT_GATES[name] = AbortGate(new_gate_params)          # Saves the new gate object into our dictionary
 
     if name[0] is "F":
         if name not in const.FM_NAMES:
             print("Error: Instrument not present in FM name consts")
             return
-        FM_MAX_VALS[name] = AbortGate(new_gate_params)
+        FM_ABORT_GATES[name] = AbortGate(new_gate_params)
 
     new_line_str = ""
     for val in new_gate_params:         # Turn the list into a string formatted for config file
@@ -108,23 +110,25 @@ def gen_config():
     # and to our local dictionaries. This code will only be useful if we already have a config
     # and we are adding another instrument, scalability.
     for val in const.TC_NAMES:
-        if val not in TC_MAX_VALS:
+        if val not in TC_ABORT_GATES:
             print(val + ",,,,,,", file=config)
-            TC_MAX_VALS[val] = None
+            TC_ABORT_GATES[val] = None
     for val in const.PT_NAMES:
-        if val not in PT_MAX_VALS:
+        if val not in PT_ABORT_GATES:
             print(val + ",,,,,,", file=config)
-            PT_MAX_VALS[val] = None
+            PT_ABORT_GATES[val] = None
     for val in const.FM_NAMES:
-        if val in FM_MAX_VALS:
+        if val in FM_ABORT_GATES:
             print(val + ",,,,,,", file=config)
-            FM_MAX_VALS[val] = None
+            FM_ABORT_GATES[val] = None
 
     config.close()
+
 
 # ONLY FOR TESTING PURPOSES
 # This function should not be called anywhere during actual experimentation
 def populate_live_data():
+
     print("Overwriting LIVE_DATA with fake data!!!")
 
     count = 1
@@ -139,11 +143,41 @@ def populate_live_data():
         count += 1
 
 
+# Initialize the live dictionary, values empty
+def init_live_data():
+    for instrument in const.TC_NAMES + const.PT_NAMES + const.FM_NAMES:
+        LIVE_DATA[instrument] = int
+
+
+# Initializing the FRONT END TIMINGS dict to avoid key errors
+def init_timings_dict():
+    global FRONT_END_TIMINGS
+
+    FRONT_END_TIMINGS = {
+        "NCIO_START" : int,
+        "NCIO_STOP"  : int,
+        "SPARK_START": int,
+        "SPARK_STOP" : int,
+        "NCIF_START" : int,
+        "NCIF_STOP"  : int
+    }
+
+
+# Sets values in the timings dictionary
+def set_timing(time_post_countdown, key):
+    global FRONT_END_TIMINGS
+
+    if key in FRONT_END_TIMINGS:
+        FRONT_END_TIMINGS[key] = time_post_countdown
+    else:
+        print("Key: " + key + " not found" )
+
+
 # Uncomment the following 4 lines if this is the first time you are
 # running the GUI on a device and run THIS file. This will allow you
 # to generate and then populate the config file
 #
 # def main():
-#    # gen_config()
+#     # gen_config()
 #
 # main()
