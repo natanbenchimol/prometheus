@@ -69,7 +69,9 @@ Raspberry Pi with pip or homebrew before it can run correctly:
 The 'Assets' directory contains all the images used in the GUI.
 The 'Other' directory contains code snippets for syntax testing and old depreciated code.
 All files inside the main directory are used in the running of the program.
-Note that this program generates a directory called 'Data' which will contain all of the data produced during any firing.
+
+__Note__ that this program generates a directory called `prometheus/Data` which will contain all of the data produced during any firing,
+and a file called `prometheus/config.txt` that will hold the values for configuring the abort gates.
   
 ### Code Style Guide
 The style convention chosen for this project can be confusing but we have tried to adhere to the following: 
@@ -92,10 +94,28 @@ of how it works. First we should understand that the user will not have been abl
 through a standardized firing procedure, with each step of the procedure represented by a switch on the GUI, we will not
 be able to fire without flipping all the switches. Once the firing begins we create three instances of threads containing
 the `batch_reader` function, one for each PTs/TCs/FMs. Each of these threads produce an instance of an instrument reader
-thread, either `readPT`, `readTC`, or `readFM`. 
+thread, (either `readPT`, `readTC`, or `readFM`) for each sensor of that type in batches. These data points are then
+checked against the abort gates, appended to their respective data lists and sent to the GUI via `LIVE_DICT`.
+
+Note that the DAQ process is very independent from the firing procedure, the `batch_reader` threads continue to take data
+readings until the `prom_status` dictionary tells it to stop. This means we can force the system to start recording when
+the `fire()` function is called and then continue recording until after the fire + purge have both run to completion. 
+This independence is very important to ensuring that we never fire without recording data.
 
 #### Data Processing
+The data processing for the system initiates immediately after the `batch_reader` threads finish and is entirely encapsulated
+in the `write_to_file` function. The functions first action is to write all of the raw data to main memory, the processing
+is quite CPU intensive since there is a lot of arithmetic going on. To avoid crashes that may happen during this dangerous
+process we save all our data immediately and can come back to it later.
 
+Next we need to format our data, I won't lie this is kinda complicated, sorry about that. I'll talk about all that we need
+  to do to the data before we save it again, here's what the data looks like for reference:
+> [batch_num, timestamp, instrument_name, reading]
+
+For each batch of readings we need to find the average time of reading (the individual batch times will be different due
+to how multithreading works), then we need to take all the readings of the same batch number and collect them in one array
+so that we can map each instrument to an average time, we also need to turn our timestamp into mission time and 24h time. Spend some time looking at the code and the two file formats and it
+will make more sense.
 
 ## README TODO:
 - How to add an instrument
