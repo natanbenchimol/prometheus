@@ -1,14 +1,13 @@
 
 import time
 import threading
-# import psutil
+import os
+import datetime
 
 import prometheus_consts as CONST
 import prometheus_data_processing as data
 import prometheus_shared as shared
 import abort_sequences as aborts
-
-fire_sequence = []
 
 # NOTE!!!!!
 #
@@ -78,7 +77,7 @@ def readFM(batch_id, FM_DATA, fm_id):
     res_list[0] = batch_id          # int   - this is the nth time we are collecting data from here
     res_list[1] = time.time()       # float - time data point collected (unix time)
     res_list[2] = fm_id             # str   - instrument id
-    res_list[3] = 6.02                 # float - data collected from TC
+    res_list[3] = 6.02              # float - data collected from FM
 
     if (res_list[3] > MAX_VAL):
         FM_DATA.append(res_list)    # So we know what val caused the abort
@@ -152,32 +151,47 @@ def prefire_checks_and_setup():
 def fire():
 
     prom_status = {}
+    prom_status["should_record_data"] = True
+    prom_status["did_abort"] = False
+    prom_status["countdown_start"] = time.time()
 
-    ptThread = threading.Thread(target=batch_reader, args=(CONST.PT_HZ, prom_status, shared.PT_DATA, CONST.PT_NAMES, readPT))
-    tcThread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, shared.TC_DATA, CONST.TC_NAMES, readTC))
-    fmThread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, shared.FM_DATA, CONST.FM_NAMES, readFM))
+    cwd = os.getcwd()                                           # Get current working directory
+    current_dt = datetime.datetime.now()                        # Get current time
+    formatted_date = current_dt.strftime("%Y-%m-%d_%H-%M-%S")   # Format time
+    prom_status["base_file_path"] = cwd + "/Data/" + formatted_date         # Directory where we will save our data
 
-    shared.COUNTDOWN_START = time.time()
-    prom_status["shouldRecordData"] = True
+    logfile = open("logfile_"+formatted_date)
+    write_log_header(logfile, prom_status)
+
+    pt_thread = threading.Thread(target=batch_reader, args=(CONST.PT_HZ, prom_status, shared.PT_DATA, CONST.PT_NAMES, readPT))
+    tc_thread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, shared.TC_DATA, CONST.TC_NAMES, readTC))
+    fm_thread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, shared.FM_DATA, CONST.FM_NAMES, readFM))
 
     # Maybe a list of pairs with (timings, functions/actions)
     # sorted by timings, go through array executing functions after waiting for their times
+    # fire_procedure = [] <- create_proc()
+
+    shared.COUNTDOWN_START = time.time()
 
     try:
-        ptThread.start()
-        tcThread.start()
-        fmThread.start()
+        pt_thread.start()
+        tc_thread.start()
+        fm_thread.start()
+        print("Proceed with fire")
 
         # Here's where all our shit goes DOWN
 
-        ptThread.join()
-        tcThread.join()
-        fmThread.join()
+        pt_thread.join()
+        tc_thread.join()
+        fm_thread.join()
 
     except aborts.Abort:
         print("Handle Abort")
+        # Some solenoid state change
+        prom_status["shouldRecordData"] = False # stop spawning the reader threads
 
-    data.writeToFile(shared.COUNTDOWN_START, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
+    data.writeToFile(prom_status, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
+    write_log_footer(logfile, prom_status)
 
     # notify that firing is complete
     # begin data processing
@@ -187,6 +201,14 @@ def fire():
 def purge(time):
     pass
 
+def write_log_header(logfile, prom_status):
+    pass
+
+def write_log_event(logfile):
+    pass
+
+def write_log_footer(logfile, prom_status):
+    pass
 
 def main():
 
@@ -220,6 +242,7 @@ def main():
 
     except aborts.Abort:
         print("Handle Abort")
+        prom_status["isFiring"] = False
 
     data.writeToFile(shared.COUNTDOWN_START, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
 

@@ -46,7 +46,7 @@ def read_config():
         elif arr[0][0] is "F":
             FM_ABORT_GATES[arr[0]] = AbortGate(arr)
         else:
-            print("Error: Config file parse error")
+            print("Error - Config file parse error: " + line)
 
     config.close()
 
@@ -80,20 +80,19 @@ def update_config(name, t1, t2, gate_max, gate_min, std_max, std_min):
     for val in new_gate_params:         # Turn the list into a string formatted for config file
         new_line_str += str(val) + ","
     new_line_str = new_line_str[:-1]    # Remove the comma at the end of this string
-    print(new_line_str)
 
-    configR = open("config.txt", "r")    # Next we propagate the change within the config file
-    prev_data = configR.readlines()      # Save whole file locally inside prev_data
+    config_r = open("config.txt", "r")    # Next we propagate the change within the config file
+    prev_data = config_r.readlines()      # Save whole file locally inside prev_data
     for i in range(len(prev_data)):
         if name in prev_data[i]:                    # Find the line we want to change
             prev_data[i] = new_line_str + "\n"      # Change the line in prev_data
             break
-    configR.close()
+    config_r.close()
 
-    config = open("config.txt", "w")    # Write new_data to file
+    config_w = open("config.txt", "w")    # Write new_data to file
     for line in prev_data:
-        print(line, file=config, end="")
-    config.close()
+        print(line, file=config_w, end="")
+    config_w.close()
 
 
 def gen_config():
@@ -149,7 +148,7 @@ def populate_live_data():
 # Initialize the live dictionary, values empty
 def init_live_data():
     for instrument in const.TC_NAMES + const.PT_NAMES + const.FM_NAMES:
-        LIVE_DATA[instrument] = int
+        LIVE_DATA[instrument] = None
 
 
 # Initializing the FRONT END TIMINGS dict to avoid key errors
@@ -166,13 +165,13 @@ def init_timings_dict():
     }
 
 
-# Sets values in the timings dictionary
+# Sets individual values in the timings dictionary
 def set_timing(time_post_countdown, key):
-
     if key in FRONT_END_TIMINGS:
         FRONT_END_TIMINGS[key] = time_post_countdown
     else:
-        print("Key: " + key + " not found" )
+        print("Key: " + key + " not found (see 'prometheus_shared.py')" )
+
 
 def load_timings():
     pass
@@ -184,5 +183,6 @@ def load_timings():
 
 def main():
     gen_config()
+
 
 main()
