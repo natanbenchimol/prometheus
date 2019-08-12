@@ -20,7 +20,6 @@ FM_ABORT_GATES = {}    # these are initialized by a config file
 LIVE_DATA = {}      # contains the most recent reading from each instrument
 
 FRONT_END_TIMINGS = {}  # Contains solenoid/spark plug timings inputted on front end
-PARSED_TIMINGS = []
 
 
 # ----------- NOT THREAD SAFE ----------- #

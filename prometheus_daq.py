@@ -177,7 +177,7 @@ def fire():
         pt_thread.start()
         tc_thread.start()
         fm_thread.start()
-        print("Proceed with fire")
+        print("Proceeding with fire")
 
         # Here's where all our shit goes DOWN
 
@@ -189,6 +189,7 @@ def fire():
         print("Handle Abort")
         # Some solenoid state change
         prom_status["shouldRecordData"] = False # stop spawning the reader threads
+        prom_status["did_abort"] = True
 
     data.writeToFile(prom_status, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
     write_log_footer(logfile, prom_status)
@@ -198,17 +199,30 @@ def fire():
     # notify that data processing is complete
 
 
-def purge(time):
+# Purge ops will remain almost entirely unchanged from firing to firing
+# if something here need to be placed
+def purge(purge_duration):
+    # sol.solenoid_to_state("NC30", 0)            # Close ox by bottle
+    # # time.sleep(0.1)                             # Might need a quick sleep right here
+    # sol.solenoid_to_state("NC3P", 1)            # Open N2 by bottle
+    # # Now Purging
+    # time.sleep(purge_duration)
+    # sol.solenoid_to_state("NC3P", 0)            # Close N2 by bottle
+    # sol.solenoid_to_state("NCIO", 0)            # Close ox valve
     pass
+
 
 def write_log_header(logfile, prom_status):
     pass
 
+
 def write_log_event(logfile):
     pass
 
+
 def write_log_footer(logfile, prom_status):
     pass
+
 
 def main():
 
