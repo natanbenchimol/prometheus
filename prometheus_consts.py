@@ -13,11 +13,9 @@ FM_NAMES = ["FM_IF", "FM_IO", "FM2_IO"]
 SOL_NAMES = ["NC3O", "NCOP", "NC3N", "NCIF", "NOIP", "NCIP", "NCIO", "NCFP", "SPRK"]
 
 # Firing actions
-FIRING_ACTIONS = ["NCIO_1",
-                 "SPRK_1",
-                 "NCIF_1", "SPRK_0", "NCIF_0", "NC30_0", "NC3P_1", "NC3P_0", "NCIO_0"]
-
-FIRING_ACTIONSa = [""]
+FIRING_ACTIONS = ["NCIO_1", "SPRK_1", "NCIF_1", "SPRK_0",               # Initiating fire
+                  "NCIF_0" ]                                            # Stopping fire
+                # "NC30_0", "NC3P_1", "NC3P_0", "NCIO_0"                # Purge ops (hardcoded in daq)
 
 # STANDARD TORCH FIRE PROCEDURE:
 

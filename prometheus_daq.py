@@ -118,12 +118,6 @@ def timeFire(timer, prom_status):
     print("END FIRE")
 
 
-# Function creates the list of pairs + orders them for firing
-def fire_timings():
-    # need to parse through shared
-    pass
-
-
 # Called as a part of pre fire checklist
 def prefire_checks_and_setup():
 
@@ -142,22 +136,20 @@ def prefire_checks_and_setup():
     # Initialize the LIVE_VALS dictionary with values: int, will be filled in during fire
     shared.init_live_data()
 
-    # Create fire sequence
-    for key in shared.FRONT_END_TIMINGS:
-        pass # Do soemthing idk holy shit
-
 
 # Fire function
-def fire():
+def fire(sol):
 
-    prom_status = {}
-    prom_status["should_record_data"] = True
-    prom_status["did_abort"] = False
-    prom_status["countdown_start"] = time.time()
+    prom_status = {
+        "should_record_data": True,
+        "did_abort": False,
+        "countdown_start": time.time()
+    }
 
     cwd = os.getcwd()                                           # Get current working directory
     current_dt = datetime.datetime.now()                        # Get current time
     formatted_date = current_dt.strftime("%Y-%m-%d_%H-%M-%S")   # Format time
+    # TODO: WHAT IF THIS FILE PATH DOESNT EXIST
     prom_status["base_file_path"] = cwd + "/Data/" + formatted_date         # Directory where we will save our data
 
     logfile = open("logfile_"+formatted_date)
@@ -167,9 +159,9 @@ def fire():
     tc_thread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, shared.TC_DATA, CONST.TC_NAMES, readTC))
     fm_thread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, shared.FM_DATA, CONST.FM_NAMES, readFM))
 
-    # Maybe a list of pairs with (timings, functions/actions)
-    # sorted by timings, go through array executing functions after waiting for their times
-    # fire_procedure = [] <- create_proc()
+    # Sequence is a data structure with all of the actions and timings required for the firing
+    # see the load_timings() func for information about its structure
+    sequence = shared.load_timings()
 
     shared.COUNTDOWN_START = time.time()
 
@@ -179,7 +171,13 @@ def fire():
         fm_thread.start()
         print("Proceeding with fire")
 
-        # Here's where all our shit goes DOWN
+        for action in sequence:                     # All our firing sequence
+            time.sleep(action[2])
+            sol.solenoid_to_state(action[0], action[1])
+
+        purge(sol, 3)                               # Purge
+        time.sleep(2)                               # Give system a couple of seconds to stabilize post purge
+        prom_status["should_record_data"] = False   # This stops data recording and begins processing
 
         pt_thread.join()
         tc_thread.join()
@@ -189,7 +187,7 @@ def fire():
         print("Handle Abort")
         # Some solenoid state change
         prom_status["shouldRecordData"] = False # stop spawning the reader threads
-        prom_status["did_abort"] = True
+        prom_status["did_abort"] = True         # Info for logfile
 
     data.writeToFile(prom_status, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
     write_log_footer(logfile, prom_status)
@@ -201,15 +199,17 @@ def fire():
 
 # Purge ops will remain almost entirely unchanged from firing to firing
 # if something here need to be placed
-def purge(purge_duration):
-    # sol.solenoid_to_state("NC30", 0)            # Close ox by bottle
-    # # time.sleep(0.1)                             # Might need a quick sleep right here
-    # sol.solenoid_to_state("NC3P", 1)            # Open N2 by bottle
-    # # Now Purging
-    # time.sleep(purge_duration)
-    # sol.solenoid_to_state("NC3P", 0)            # Close N2 by bottle
-    # sol.solenoid_to_state("NCIO", 0)            # Close ox valve
-    pass
+def purge(sol, purge_duration):
+
+    # Post fire procedure, setup for purge
+    sol.solenoid_to_state("NC30", 0)            # Close ox by bottle
+    # time.sleep(0.1)                           # Might need a quick sleep right here
+    sol.solenoid_to_state("NC3P", 1)            # Open N2 by bottle
+
+    # Now Purging
+    time.sleep(purge_duration)
+    sol.solenoid_to_state("NC3P", 0)            # Close N2 by bottle
+    sol.solenoid_to_state("NCIO", 0)            # Close ox valve
 
 
 def write_log_header(logfile, prom_status):

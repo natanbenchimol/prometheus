@@ -152,19 +152,13 @@ def init_live_data():
 
 # Initializing the FRONT END TIMINGS dict to avoid key errors
 def init_timings_dict():
-    global FRONT_END_TIMINGS
-
-    FRONT_END_TIMINGS = {
-        "NCIO_START" : int,
-        "NCIO_STOP"  : int,
-        "SPARK_START": int,
-        "SPARK_STOP" : int,
-        "NCIF_START" : int,
-        "NCIF_STOP"  : int
-    }
+    for act in const.FIRING_ACTIONS:
+        FRONT_END_TIMINGS[act] = int
 
 
-# Sets individual values in the timings dictionary
+# Sets individual values in the timing function
+# Very important to call this function instead of setting them manually
+# this way we always know exactly what keys we have in the dict
 def set_timing(time_post_countdown, key):
     if key in FRONT_END_TIMINGS:
         FRONT_END_TIMINGS[key] = time_post_countdown
@@ -172,8 +166,27 @@ def set_timing(time_post_countdown, key):
         print("Key: " + key + " not found (see 'prometheus_shared.py')" )
 
 
+# This function builds and returns the actual data structure which will be
+# the point of reference for the firing
 def load_timings():
-    pass
+                    #                      name    state  cDown sleepTime
+    seq = []        # To be filled with [ "NCIO"  , "0"  , 15  , 1  ]
+
+    for key in const.FIRING_ACTIONS:    # Creates the array elements and appends them to seq
+        params = key.split("_")
+        seq.append([params[0], params[1], FRONT_END_TIMINGS[key], int])
+
+    seq.sort(key=lambda tup: tup[2])    # sort by countdown time
+
+    for i in range(len(seq)):
+        if i is 0:
+            seq[i][3] = seq[i][2]       # if first action in the firing
+
+        else:
+            seq[i][3] = seq[i][2]-seq[i-1][2] # This line saves the difference between two
+                                          # timings set on the front end, calculating
+                                          # the sleep time between solenoid actions
+    return seq
 
 
 # Uncomment the following 4 lines if this is the first time you are
