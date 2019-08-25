@@ -1,14 +1,15 @@
 # Prometheus Graphical User Interface V2
 # By Atticus Vadera
 # 7/23/2019
-from sys import maxsize
+
 from tkinter import *
 import tkinter as tk
 from PIL import Image, ImageTk
-import prometheus_shared as shared
-import prometheus_consts as CONST
 import RPi.GPIO as GPIO
 
+import prometheus_shared as shared
+import prometheus_consts as CONST
+from SolenoidManagerClass import SolenoidManager
 import time
 
 # ------------------------------------------ initialize setup values --------------------------------------------------#
@@ -30,6 +31,7 @@ class PrometheusGUI:
         parent.title('Prometheus GUI')
         shared.init_live_data()         # Creates int values for all keys
         shared.populate_live_data()     # FILLS WITH FAKE ASS DATA
+        SolManager = SolenoidManager()  # Initialize the solenoid manager
 
         # load pictures for check list buttons
         self.tog_off = Image.open(r"Assets/toggle_off.png").resize((125, 50), Image.ANTIALIAS)
