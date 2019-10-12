@@ -31,6 +31,8 @@ import abort_sequences as aborts
 MAX_VAL = 700   # example for testing
 
 
+# ---------------------- START OF DATA ACQUISITION FUNCTIONS ---------------------- #
+
 def readPT(batch_id, PT_DATA, pt_id):
     res_list = [None] * 4
 
@@ -48,6 +50,10 @@ def readPT(batch_id, PT_DATA, pt_id):
     PT_DATA.append(res_list)  # Save on stack to write to file later
 
     shared.LIVE_DATA[pt_id] = res_list[3]  # Send to val to display on GUI
+
+
+def pt_protocol():
+    pass
 
 
 def readTC(batch_id, TC_DATA, tc_id):
@@ -69,6 +75,10 @@ def readTC(batch_id, TC_DATA, tc_id):
     shared.LIVE_DATA[tc_id] = res_list[3]   # Send to val to display on GUI
 
 
+def tc_protocol():
+    pass
+
+
 def readFM(batch_id, FM_DATA, fm_id):
     res_list = [None] * 4
 
@@ -86,6 +96,10 @@ def readFM(batch_id, FM_DATA, fm_id):
     FM_DATA.append(res_list)        # Save on stack to write to file later
 
     shared.LIVE_DATA[fm_id] = res_list[3]   # Send to val to display on GUI
+
+
+def fm_protocol():
+    pass
 
 
 def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
@@ -110,6 +124,9 @@ def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
         time.sleep(1 / hz)
 
 
+# ---------------------- END OF DATA ACQUISITION FUNCTIONS ---------------------- #
+
+
 # Function only for testing
 def timeFire(timer, prom_status):
     print("START TIMER")
@@ -121,7 +138,7 @@ def timeFire(timer, prom_status):
 # Called as a part of pre fire checklist
 def prefire_checks_and_setup():
 
-    # ---------------- AUTOMATIC PRE-FIRE CHECKS ---------------- #
+    # AUTOMATIC PRE-FIRE CHECKS
 
     # Checks that all our abort gates are populated and they make sense
     for gate in shared.FM_ABORT_GATES + shared.TC_ABORT_GATES + shared.PT_ABORT_GATES:
@@ -212,8 +229,17 @@ def purge(sol, purge_duration):
     sol.solenoid_to_state("NCIO", 0)            # Close ox valve
 
 
+# ---------------------- START OF LOGFILE FUNCTIONS ---------------------- #
+
+
 def write_log_header(logfile, prom_status):
-    pass
+
+    # Basic lil header
+    print("PROMETHEUS FIRING | " + str(datetime.date) + " | " + str(datetime.time), file=logfile)
+
+    # Printing out the abort gates
+    for gate in shared.TC_ABORT_GATES + shared.PT_ABORT_GATES + shared.FM_ABORT_GATES:
+        print(gate, file=logfile)
 
 
 def write_log_event(logfile):
@@ -222,6 +248,9 @@ def write_log_event(logfile):
 
 def write_log_footer(logfile, prom_status):
     pass
+
+
+# ---------------------- END OF LOGFILE FUNCTIONS ---------------------- #
 
 
 def main():

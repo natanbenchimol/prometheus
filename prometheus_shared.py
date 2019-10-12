@@ -169,8 +169,8 @@ def set_timing(time_post_countdown, key):
 # This function builds and returns the actual data structure which will be
 # the point of reference for the firing
 def load_timings():
-                    #                      name    state  cDown sleepTime
-    seq = []        # To be filled with [ "NCIO"  , "0"  , 15  , 1  ]
+                    #                                   name    state  cDown sleepTime
+    seq = []        # To be filled with instances of [ "NCIO"  , "0"  , 15  , 1  ]
 
     for key in const.FIRING_ACTIONS:    # Creates the array elements and appends them to seq
         params = key.split("_")
@@ -183,7 +183,7 @@ def load_timings():
             seq[i][3] = seq[i][2]       # if first action in the firing
 
         else:
-            seq[i][3] = seq[i][2]-seq[i-1][2] # This line saves the difference between two
+            seq[i][3] = seq[i][2] - seq[i-1][2] # This line saves the difference between two
                                           # timings set on the front end, calculating
                                           # the sleep time between solenoid actions
     return seq

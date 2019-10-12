@@ -5,7 +5,7 @@
 from tkinter import *
 import tkinter as tk
 from PIL import Image, ImageTk
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 
 import prometheus_shared as shared
 import prometheus_consts as CONST
@@ -15,9 +15,9 @@ import time
 # ------------------------------------------ initialize setup values --------------------------------------------------#
 # set up input out put pin numbering system on Pi (BCM = broadcom chip specific)
 # enter "pinout" in the pi's terminal to see it's numbers
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(17, GPIO.OUT)
-GPIO.setup(10, GPIO.IN)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setup(17, GPIO.OUT)
+# GPIO.setup(10, GPIO.IN)
 
 global font
 global tog
