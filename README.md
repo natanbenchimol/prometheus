@@ -12,10 +12,10 @@ of our engines, the demand grows for more powerful ignition systems and more sop
 for iterating on these systems. This repository contains the control systems for _Prometheus_ as well as its data acquisition
 and data processing software.
 
+#### Design Principles:
 During development there were a list of system requirements that were followed as well as a series of design principles
 that had to be adhered to:
 
-#### Design Principles:
 1. __Flexibility__ - This system needs to be able to support many different sensor configurations, firing sequences,
 and igniters.
 2. __Simplicity__ - We plan on _Prometheus_ having a long and successful life in the lab, this means that the system 
@@ -23,6 +23,15 @@ should be as intuitive as possible and incredibly well documented/commented so t
 configure it for their needs.
 3. __Replicability__ - Need to be able to support multiple firings/tests in a short period, keep system setup and reset
 as fast as possible.
+
+#### Priorities:
+During development we kept a few priorities of the system in mind when developing.
+1. __Data Safety__ - Keeping data safe is the single most important priority. Data is how we measure success, 
+troubleshoot issues, and write papers. At every point in development we must ensure that we find all potential failures
+and account for them. 
+2. __Maximise data collection frequency__ - Code should be efficient so that we can push the data collection frequencies
+as high as possible. More data = better!
+
 
 #### System Requirements:
 * __GUI__ - Entire system must be controllable with a well designed user interface. 
