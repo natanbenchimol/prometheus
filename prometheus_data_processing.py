@@ -31,6 +31,8 @@ def sort_raw(DATA):
     DATA.sort(key=lambda tup: tup[0])   # Sorting by batch number
 
 
+# Formats raw data -> clean data and writes data to clean files
+# Uses multiprocessing, very CPU heavy
 def write_clean(csv_writer, header, RAW_DATA, INSTRUMENT_NAMES):
 
     batch_avg_time = {}                 # KEY: batch_number - VALUE: avg time of that batch number
@@ -64,10 +66,14 @@ def write_clean(csv_writer, header, RAW_DATA, INSTRUMENT_NAMES):
             print("Processing batch num: " + str(i))
 
 
+# Handles all data. Saves all to raw files and formats + saves to clean files
+# Designed to account for failures and exceptions
+# Returns base location
 def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     
     print("Begin data processing")
     print(datetime.datetime.now().time())
+    shared.log_event("DATA", "Begin data processing")
 
     # ----------- General Housekeeping ----------- #
 
@@ -127,12 +133,15 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     # ----------- Processing Data, Write to Clean Files ----------- #
 
     if did_throw:   # We don't want to write the clean files if we almost crashed creating dirs
-        return
+        # Returns the root directory so that the log file knows where to write to
+        return cwd
 
+    # Headers of our CSV files
     header_row_pt = ["Batch Num","Avg. Time", "Mission Time"] + CONST.PT_NAMES
     header_row_tc = ["Batch Num","Avg. Time", "Mission Time"] + CONST.TC_NAMES
     header_row_fm = ["Batch Num","Avg. Time", "Mission Time"] + CONST.FM_NAMES
 
+    # Opening files, creating csv writers, and writing the header
     clean_tc_file = open(base_file_path + "/promCleanTC_" + formatted_date +".csv", "w")
     tcWriter = csv.writer(clean_tc_file)
     tcWriter.writerow(header_row_tc)
@@ -161,10 +170,27 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     p2.join()
     p3.join()
     
-    print(datetime.datetime.now().time())
-    
     # ----------- Finishing ----------- #
 
     clean_tc_file.close()
     clean_pt_file.close()
     clean_fm_file.close()
+
+    print(datetime.datetime.now().time())
+    shared.log_event("DATA", "Data processing completed")
+
+    # End by returning the file path for log file
+    return base_file_path
+
+
+# Pretty simple function, mostly just dumps info into a file
+def generate_logfile(file_path):
+
+    log = open(file_path + "/logfile.txt", "w")
+
+    shared.write_log_header(log)
+    shared.write_log_events(log)
+    shared.write_log_footer(log)
+
+    log.close()
+

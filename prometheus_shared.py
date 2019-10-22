@@ -1,4 +1,6 @@
 import prometheus_consts as const
+import datetime
+import time
 from AbortGateClass import AbortGate
 
 # This file contains:
@@ -12,6 +14,8 @@ from AbortGateClass import AbortGate
 TC_DATA = []        # data to be written to files
 PT_DATA = []
 FM_DATA = []
+
+LOGGED_EVENTS = []     # Stores strings of all events in the firing to be written to log
 
 TC_ABORT_GATES = {}    # the maximum values to be read by each instrument
 PT_ABORT_GATES = {}    # if this value is exceeded -> abort
@@ -28,12 +32,49 @@ COUNTDOWN_START = None  # Saves the timestamp for start of countdown for
                         # calculating relative mission time
 
 
+# ---------------------- START OF LOGFILE FUNCTIONS ---------------------- #
+
+
+def write_log_header(logfile):
+    # Basic lil header
+    print("PROMETHEUS FIRING | " + str(datetime.date) + " | " + str(datetime.time), file=logfile)
+
+    # Printing out the abort gates
+    for gate in TC_ABORT_GATES:
+        print(gate, file=logfile)
+    for gate in PT_ABORT_GATES:
+        print(gate, file=logfile)
+    for gate in FM_ABORT_GATES:
+        print(gate, file=logfile)
+
+
+# Throws all of our events into the logfile after we are done with the firing
+def write_log_events(logfile):
+    for event in LOGGED_EVENTS:
+        print(event, file=logfile)
+
+
+# Generates string from an event which will be written to log file post fire
+def log_event(event, info):
+    # This code sucks, fix it
+    ts = datetime.datetime.fromtimestamp(float(time.time())).strftime('%H:%M:%S.%f')
+    to_save = ts + "\t" + event + "\t" + info
+    LOGGED_EVENTS.append(to_save)
+
+
+def write_log_footer(logfile):
+    pass
+
+
+# ---------------------- END OF LOGFILE FUNCTIONS ---------------------- #
+
 # ---------------------- START OF CONFIG FILE SETUP FUNCTIONS ---------------------- #
 
 # Function is called at program start to load the max val dictionaries from
 # our config file
 def read_config():
-    config = open("config.txt", "r")
+    config = open("config.txt", "r")        # If this throws FileNotFound we will generate a config
+
     for line in config:
         line = line.strip()                 # Just cleans up a single line for processing
         arr = line.split(",")
@@ -100,34 +141,36 @@ def gen_config():
     # local structs being stored in volatile memory
     try:
         read_config()
+
     except FileNotFoundError:
+
         print("No config file exists, generating now...")
+        config = open("config.txt", "a")    # Append mode so as not to overwrite existing values
 
-    config = open("config.txt", "a")    # Append mode so as not to overwrite existing values
+        # Go through the INSTRUMENT NAMES, adding any missing instruments to both config file
+        # and to our local dictionaries. This code will only be useful if we already have a config
+        # and we are adding another instrument, scalability.
+        for val in const.TC_NAMES:
+            if val not in TC_ABORT_GATES:
+                print(val + ",,,,,,", file=config)
+                TC_ABORT_GATES[val] = None
+        for val in const.PT_NAMES:
+            if val not in PT_ABORT_GATES:
+                print(val + ",,,,,,", file=config)
+                PT_ABORT_GATES[val] = None
+        for val in const.FM_NAMES:
+            if val in FM_ABORT_GATES:
+                print(val + ",,,,,,", file=config)
+                FM_ABORT_GATES[val] = None
 
-    # Go through the INSTRUMENT NAMES, adding any missing instruments to both config file
-    # and to our local dictionaries. This code will only be useful if we already have a config
-    # and we are adding another instrument, scalability.
-    for val in const.TC_NAMES:
-        if val not in TC_ABORT_GATES:
-            print(val + ",,,,,,", file=config)
-            TC_ABORT_GATES[val] = None
-    for val in const.PT_NAMES:
-        if val not in PT_ABORT_GATES:
-            print(val + ",,,,,,", file=config)
-            PT_ABORT_GATES[val] = None
-    for val in const.FM_NAMES:
-        if val in FM_ABORT_GATES:
-            print(val + ",,,,,,", file=config)
-            FM_ABORT_GATES[val] = None
-
-    config.close()
+        config.close()
 
 # ---------------------- END OF CONFIG FILE SETUP FUNCTIONS ---------------------- #
 
 
 # ONLY FOR TESTING PURPOSES
 # This function should not be called anywhere during actual experimentation
+# fills the live_data dictionary so that we can see values on the GUI
 def populate_live_data():
 
     print("Overwriting LIVE_DATA with fake data!!!")

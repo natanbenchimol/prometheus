@@ -135,7 +135,7 @@ def timeFire(timer, prom_status):
     print("END FIRE")
 
 
-# Called as a part of pre fire checklist
+#TODO: Potentially useless functioN?!?!?!
 def prefire_checks_and_setup():
 
     # AUTOMATIC PRE-FIRE CHECKS
@@ -163,15 +163,6 @@ def fire(sol):
         "countdown_start": time.time()
     }
 
-    cwd = os.getcwd()                                           # Get current working directory
-    current_dt = datetime.datetime.now()                        # Get current time
-    formatted_date = current_dt.strftime("%Y-%m-%d_%H-%M-%S")   # Format time
-    # TODO: WHAT IF THIS FILE PATH DOESNT EXIST
-    prom_status["base_file_path"] = cwd + "/Data/" + formatted_date         # Directory where we will save our data
-
-    logfile = open("logfile_"+formatted_date)
-    write_log_header(logfile, prom_status)
-
     pt_thread = threading.Thread(target=batch_reader, args=(CONST.PT_HZ, prom_status, shared.PT_DATA, CONST.PT_NAMES, readPT))
     tc_thread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, shared.TC_DATA, CONST.TC_NAMES, readTC))
     fm_thread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, shared.FM_DATA, CONST.FM_NAMES, readFM))
@@ -183,6 +174,7 @@ def fire(sol):
     shared.COUNTDOWN_START = time.time()
 
     try:
+        shared.log_event("FIRE", "Start data collection")
         pt_thread.start()
         tc_thread.start()
         fm_thread.start()
@@ -192,11 +184,14 @@ def fire(sol):
             time.sleep(action[2])
             sol.solenoid_to_state(action[0], action[1])
 
+        shared.log_event("FIRE", "Purge operations start")
         purge(sol, 3)                               # Purge
-        time.sleep(2)                               # Give system a couple of seconds to stabilize post purge
-        prom_status["should_record_data"] = False   # This stops data recording and begins processing
+        time.sleep(3)                               # Give system a few seconds to stabilize post purge
 
-        pt_thread.join()
+        prom_status["should_record_data"] = False   # This stops data recording and begins processing
+        shared.log_event("FIRE", "End data collection")
+
+        pt_thread.join()    # Wait for our threads to finish
         tc_thread.join()
         fm_thread.join()
 
@@ -206,12 +201,11 @@ def fire(sol):
         prom_status["shouldRecordData"] = False # stop spawning the reader threads
         prom_status["did_abort"] = True         # Info for logfile
 
-    data.writeToFile(prom_status, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
-    write_log_footer(logfile, prom_status)
+    # Data processing
+    file_path = data.writeToFile(prom_status, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
 
-    # notify that firing is complete
-    # begin data processing
-    # notify that data processing is complete
+    # Log file generation
+    data.generate_logfile(file_path)
 
 
 # Purge ops will remain almost entirely unchanged from firing to firing
@@ -227,30 +221,6 @@ def purge(sol, purge_duration):
     time.sleep(purge_duration)
     sol.solenoid_to_state("NC3P", 0)            # Close N2 by bottle
     sol.solenoid_to_state("NCIO", 0)            # Close ox valve
-
-
-# ---------------------- START OF LOGFILE FUNCTIONS ---------------------- #
-
-
-def write_log_header(logfile, prom_status):
-
-    # Basic lil header
-    print("PROMETHEUS FIRING | " + str(datetime.date) + " | " + str(datetime.time), file=logfile)
-
-    # Printing out the abort gates
-    for gate in shared.TC_ABORT_GATES + shared.PT_ABORT_GATES + shared.FM_ABORT_GATES:
-        print(gate, file=logfile)
-
-
-def write_log_event(logfile):
-    pass
-
-
-def write_log_footer(logfile, prom_status):
-    pass
-
-
-# ---------------------- END OF LOGFILE FUNCTIONS ---------------------- #
 
 
 def main():

@@ -1,6 +1,7 @@
 # Contains the data structure responsible for maintaining
 # the state of the solenoids in the system
 
+import prometheus_shared as shared
 import prometheus_consts as CONST
 from datetime import time
 # import RPi.GPIO as gpio
@@ -29,17 +30,15 @@ class SolenoidManager:
             "SPRK": int     # All ints need to be replaced with pin numbers
         }
 
+
     # Changes the state of solenoid 'name' to 'state'
     # if sol already in that state then do nothing
     # DOES NOT RECORD STATE CHANGE IN LOG FILE
     def solenoid_to_state(self, name, state):
-        pass
+        shared.log_event("SOL", name + " transitioning to state " + str(state))
 
-    # Changes the state of solenoid 'name' to 'state'
-    # if sol already in that state then do nothing
-    # RECORDS STATE CHANGE IN LOG FILE
-    def solenoid_to_state_log(self, name, state, logfile):
-        pass
+        # gpio.output(self.pin_mapping[name], gpio.HIGH) # This code is taken from swapnils snippet
+
 
     # Makes large change to entire system state
     # Used during abort scenarios
@@ -47,14 +46,15 @@ class SolenoidManager:
         # Loops thru both dicts (easy because keys are the same)
         for name in CONST.SOL_NAMES:
             if new_state[name] != self.curr_state[name]:
-                # gpio.output(self.pin_mapping[name], gpio.HIGH) # This code is taken from swapnils snippet
+                # Actuate
                 pass
 
         # Write this info to logfile later, this has to be fast because of abort
 
-    # Writes current state to logfile, called every time state changes
-    def write_to_log(self, name, state, logfile):
-        print("Sol '" + name + "' state set to '" + str(state) + "' at " + str(time), file=logfile)
 
-    def write_abort_to_log(self, abort, logfile):
-        print("SYSTEM ABORTED: " + abort + " at time " + str(time), file=logfile)
+def main():
+
+    sols = SolenoidManager()
+    sols.solenoid_to_state("NCIO", 1)
+
+main()
