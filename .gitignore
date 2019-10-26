@@ -3,6 +3,7 @@
 .idea/prometheus.iml
 /Data
 config.txt
+logfile.txt
 
 # ---- Below is a standard python .gitignore I found on github ----
 # https://github.com/github/gitignore/blob/master/Python.gitignore

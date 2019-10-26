@@ -35,21 +35,34 @@ COUNTDOWN_START = None  # Saves the timestamp for start of countdown for
 # ---------------------- START OF LOGFILE FUNCTIONS ---------------------- #
 
 
-def write_log_header(logfile):
+def write_log_header(logfile, sequence):
     # Basic lil header
     print("PROMETHEUS FIRING | " + str(datetime.date) + " | " + str(datetime.time), file=logfile)
 
+    print("\n\n************** Abort Gates **************", file=logfile)
+
     # Printing out the abort gates
     for gate in TC_ABORT_GATES:
-        print(gate, file=logfile)
+        print(TC_ABORT_GATES[gate], file=logfile)
     for gate in PT_ABORT_GATES:
-        print(gate, file=logfile)
+        print(PT_ABORT_GATES[gate], file=logfile)
     for gate in FM_ABORT_GATES:
-        print(gate, file=logfile)
+        print(FM_ABORT_GATES[gate], file=logfile)
+
+    print("\n\n************** Sequence Timings **************", file=logfile)
+    print("\nSOL\t\tSTATE\t\tCOUNTDOWN TIME", file=logfile)
+    for action in sequence:
+        print(action[0] + "\t\t" + action[1] + "\t\t" +  str(action[2]))
+
+    # TODO: Write all metadata from SETUP.py here
 
 
 # Throws all of our events into the logfile after we are done with the firing
 def write_log_events(logfile):
+
+    print("\n\n************** Log of Events **************", file=logfile)
+    print("\nTIMESTAMP\t\t\tTYPE\t\tINFO", file=logfile)
+
     for event in LOGGED_EVENTS:
         print(event, file=logfile)
 
@@ -58,11 +71,12 @@ def write_log_events(logfile):
 def log_event(event, info):
     # This code sucks, fix it
     ts = datetime.datetime.fromtimestamp(float(time.time())).strftime('%H:%M:%S.%f')
-    to_save = ts + "\t" + event + "\t" + info
+    to_save = ts + "\t\t" + event + "\t" + info
     LOGGED_EVENTS.append(to_save)
 
 
 def write_log_footer(logfile):
+    # TODO: THIS
     pass
 
 
@@ -236,8 +250,24 @@ def load_timings():
 # running the GUI on a device and run THIS file. This will allow you
 # to generate and then populate the config file
 
-def main():
-    gen_config()
+# def main():
+#     gen_config()
 
+
+# TEST MAIN
+def main():
+
+    filename = "logfile.txt"
+    read_config()
+
+
+    log_event("DATA", "start data")
+    log_event("FIRE", "we made it")
+    log_event("FIRE", "fire complete")
+
+    lf = open(filename, "w")
+    write_log_header(lf)
+    write_log_events(lf)
+    write_log_footer(lf)
 
 main()

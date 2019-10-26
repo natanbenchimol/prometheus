@@ -37,3 +37,7 @@ FIRING_ACTIONS = ["NCIO_1", "SPRK_1", "NCIF_1", "SPRK_0",               # Initia
 TC_HZ = 150
 PT_HZ = 150
 FM_HZ = 200
+
+# Pre/Post-Fire Stabilisation time (s)
+PRE_FIRE_WAIT = 15
+POST_FIRE_WAIT = 15

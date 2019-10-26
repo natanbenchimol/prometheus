@@ -18,14 +18,9 @@ import abort_sequences as aborts
 # END OF NOTE
 
 #TODO:  LETS GET IT
-#       Write firing function
-#       Draw out an import structure tree
 #       TC/PT Read code
 #       FM code
-
-#TODO:  FUTURE FUNCTIONALITY
 #       Soleniod actuation to actually launch system
-#       Import tree structure documentation
 
 
 MAX_VAL = 700   # example for testing
@@ -66,6 +61,8 @@ def readTC(batch_id, TC_DATA, tc_id):
     res_list[2] = tc_id             # str   - instrument id
     res_list[3] = 224                  # float - data collected from TC
 
+    # TODO: Find best way to measure time
+    # TODO: How are we passing time into our abort gate?
     if (res_list[3] > MAX_VAL):
         TC_DATA.append(res_list)    # So we know what val caused the abort
         raise aborts.TempAbort             # ABORT!!
@@ -121,6 +118,8 @@ def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
 
         # We will only reach here once all the threads are completed
         data_id_count += 1
+
+        # TODO: add varying frequencies for collection
         time.sleep(1 / hz)
 
 
@@ -135,7 +134,7 @@ def timeFire(timer, prom_status):
     print("END FIRE")
 
 
-#TODO: Potentially useless functioN?!?!?!
+#TODO: Revisit this function
 def prefire_checks_and_setup():
 
     # AUTOMATIC PRE-FIRE CHECKS
@@ -169,12 +168,15 @@ def fire(sol):
 
     # Sequence is a data structure with all of the actions and timings required for the firing
     # see the load_timings() func for information about its structure
+    shared.log_event("DATA", "Start data collection")
     sequence = shared.load_timings()
 
     shared.COUNTDOWN_START = time.time()
 
     try:
-        shared.log_event("FIRE", "Start data collection")
+        shared.log_event("FIRE", "Countdown start")
+        time.sleep(CONST.PRE_FIRE_WAIT)          # Recording nominal data pre-fire
+        shared.log_event("FIRE", "Fire sequence start")
         pt_thread.start()
         tc_thread.start()
         fm_thread.start()
@@ -186,7 +188,7 @@ def fire(sol):
 
         shared.log_event("FIRE", "Purge operations start")
         purge(sol, 3)                               # Purge
-        time.sleep(3)                               # Give system a few seconds to stabilize post purge
+        time.sleep(CONST.POST_FIRE_WAIT)            # Give system a few seconds to stabilize post purge
 
         prom_status["should_record_data"] = False   # This stops data recording and begins processing
         shared.log_event("FIRE", "End data collection")
@@ -205,7 +207,7 @@ def fire(sol):
     file_path = data.writeToFile(prom_status, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
 
     # Log file generation
-    data.generate_logfile(file_path)
+    data.generate_logfile(file_path + "logfile.txt", sequence)
 
 
 # Purge ops will remain almost entirely unchanged from firing to firing

@@ -126,6 +126,8 @@ to how multithreading works), then we need to take all the readings of the same 
 so that we can map each instrument to an average time, we also need to turn our timestamp into mission time and 24h time. Spend some time looking at the code and the two file formats and it
 will make more sense.
 
+#### Logfile
+
 ## README TODO:
 - How to add an instrument
 - How to add solenoid

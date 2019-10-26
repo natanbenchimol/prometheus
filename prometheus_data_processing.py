@@ -184,11 +184,11 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
 
 
 # Pretty simple function, mostly just dumps info into a file
-def generate_logfile(file_path):
+def generate_logfile(file_path, sequence):
 
     log = open(file_path + "/logfile.txt", "w")
 
-    shared.write_log_header(log)
+    shared.write_log_header(log, sequence)
     shared.write_log_events(log)
     shared.write_log_footer(log)
 
