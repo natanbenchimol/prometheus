@@ -76,6 +76,7 @@ def liquid_flow(csv_writer, PT_DATA, pt1, pt2, numPTs):
     Cv = 0.8    # Experimentally determined (1.1 is a filler value)
     Gf = 0.82   # Specific gravity (0.82 for Kerosene, 1.0 for water)
     N1 = 1.0    # Used to determine units (1.0 for Gallons/Minute)
+    dP = 0.002  # Uncertainty of the PTs we are using (used to calculate error)
 
     # filtered_pts = []
 
@@ -100,7 +101,7 @@ def liquid_flow(csv_writer, PT_DATA, pt1, pt2, numPTs):
     # TEST THIS FUNCTION
 
     for i in range(len(filtered_pt1)):
-        to_write = [None] * 4  # This is the list that will be written to file
+        to_write = [None] * 6  # This is the list that will be written to file
 
         to_write[0] = i  # Thread batch number
 
@@ -108,8 +109,13 @@ def liquid_flow(csv_writer, PT_DATA, pt1, pt2, numPTs):
         to_write[1] = unix_to_24h(avg_time)  # Avg time of batch
         to_write[2] = unix_to_mission_time(avg_time)  # Mission time
 
-        deltaP = abs(filtered_pt1[i][3] - filtered_pt2[i][3])
-        to_write[3] = N1 * Cv * math.sqrt(deltaP/Gf)
+        delta_p = abs(filtered_pt1[i][3] - filtered_pt2[i][3])              # Calculating ∆P
+        q = N1 * Cv * math.sqrt(delta_p/Gf)                                 # Flow rate
+        error = 0.5 * (N1 * Cv)/math.sqrt(Gf) * 1/math.sqrt(delta_p) * dP   # Absolute error
+
+        to_write[3] = q - error     # Lower bound
+        to_write[4] = q             # Value
+        to_write[5] = q + error     # Upper bound
 
         csv_writer.writerow(to_write)
 
@@ -188,7 +194,7 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     header_row_pt = ["Batch Num","Avg. Time", "Mission Time"] + CONST.PT_NAMES
     header_row_tc = ["Batch Num","Avg. Time", "Mission Time"] + CONST.TC_NAMES
     header_row_fm = ["Batch Num","Avg. Time", "Mission Time"] + CONST.FM_NAMES
-    header_row_lf = ["Batch Num","Avg. Time", "Mission Time", "Fuel Flow Rate"]
+    header_row_lf = ["Batch Num","Avg. Time", "Mission Time", "Lower Bound", "q", "Upper Bound"]
 
     # Opening files, creating csv writers, and writing the header
     clean_tc_file = open(base_file_path + "/promCleanTC_" + formatted_date +".csv", "w")
@@ -219,16 +225,19 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     p1.start()  # Write clean TC data to file
     p2.start()  # Write clean PT data to file
     p3.start()  # Write clean FM data to file
+    p4.start()  # Calculate fuel flow rate and write to file
     
     p1.join()
     p2.join()
     p3.join()
+    p4.join()
     
     # ----------- Finishing ----------- #
 
     clean_tc_file.close()
     clean_pt_file.close()
     clean_fm_file.close()
+    clean_lf_file.close()
 
     print(datetime.datetime.now().time())
     shared.log_event("DATA", "Data processing completed")
