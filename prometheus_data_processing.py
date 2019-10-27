@@ -3,6 +3,7 @@ import datetime
 import os
 import csv
 import multiprocessing
+import math
 
 import prometheus_consts as CONST
 import prometheus_shared as shared
@@ -50,7 +51,7 @@ def write_clean(csv_writer, header, RAW_DATA, INSTRUMENT_NAMES):
     for i in batch_avg_time:
         to_write = [None] * len(header)             # This is the list that will be written to file
         to_write[0] = i                             # Thread batch number
-        to_write[1] = unix_to_24h(batch_avg_time[i])             # Avg time of batch
+        to_write[1] = unix_to_24h(batch_avg_time[i])              # Avg time of batch
         to_write[2] = unix_to_mission_time(batch_avg_time[i])     # Mission time
 
         # I know this for loop is super confusing... sorry
@@ -64,6 +65,53 @@ def write_clean(csv_writer, header, RAW_DATA, INSTRUMENT_NAMES):
         
         if i%1000 is 0:
             print("Processing batch num: " + str(i))
+
+
+# This function calculates our fuel flow rate from the pressure difference of two PTs
+# and an experimentally calculated flow coefficient
+# See page 2: https://www.swagelok.com/downloads/webcatalogs/en/MS-06-84.pdf
+def liquid_flow(csv_writer, PT_DATA, pt1, pt2, numPTs):
+
+    # Defining constants
+    Cv = 0.8    # Experimentally determined (1.1 is a filler value)
+    Gf = 0.82   # Specific gravity (0.82 for Kerosene, 1.0 for water)
+    N1 = 1.0    # Used to determine units (1.0 for Gallons/Minute)
+
+    # filtered_pts = []
+
+    # For each batch number
+    # NOTE: This division could crash program
+    # for i in range(int(len(PT_DATA)/numPTs)):
+    #     # Create place to hold this batches pressure values for our two PTs
+    #     filtered_pts[i] = []
+    #     # Loop through JUST our relevant batch
+    #     for j in range(numPTs*i, numPTs*(i+1)):
+    #         # If we find the PTs we're looking for
+    #         if PT_DATA[j][2] == pt1 or PT_DATA[j][2] == pt2:
+    #             # Add them to our dictionary
+    #             filtered_pts[i].append(PT_DATA[3])
+
+    # Could do it this way too
+    filtered_pt1 = [point for point in PT_DATA if point[2] == pt1]
+    filtered_pt2 = [point for point in PT_DATA if point[2] == pt2]
+
+    #TODO: Benchmark and optimise this code. Could also use filters or generators?
+    # https://stackoverflow.com/questions/3013449/list-comprehension-vs-lambda-filter
+    # TEST THIS FUNCTION
+
+    for i in range(len(filtered_pt1)):
+        to_write = [None] * 4  # This is the list that will be written to file
+
+        to_write[0] = i  # Thread batch number
+
+        avg_time = abs(filtered_pt1[i][1] - filtered_pt2[i][1])
+        to_write[1] = unix_to_24h(avg_time)  # Avg time of batch
+        to_write[2] = unix_to_mission_time(avg_time)  # Mission time
+
+        deltaP = abs(filtered_pt1[i][3] - filtered_pt2[i][3])
+        to_write[3] = N1 * Cv * math.sqrt(deltaP/Gf)
+
+        csv_writer.writerow(to_write)
 
 
 # Handles all data. Saves all to raw files and formats + saves to clean files
@@ -140,6 +188,7 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     header_row_pt = ["Batch Num","Avg. Time", "Mission Time"] + CONST.PT_NAMES
     header_row_tc = ["Batch Num","Avg. Time", "Mission Time"] + CONST.TC_NAMES
     header_row_fm = ["Batch Num","Avg. Time", "Mission Time"] + CONST.FM_NAMES
+    header_row_lf = ["Batch Num","Avg. Time", "Mission Time", "Fuel Flow Rate"]
 
     # Opening files, creating csv writers, and writing the header
     clean_tc_file = open(base_file_path + "/promCleanTC_" + formatted_date +".csv", "w")
@@ -154,13 +203,18 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
     fmWriter = csv.writer(clean_fm_file)
     fmWriter.writerow(header_row_fm)
 
+    clean_lf_file = open(base_file_path + "/promCleanLF_" + formatted_date +".csv", "w")
+    lfWriter = csv.writer(clean_lf_file)
+    lfWriter.writerow(header_row_lf)
+
     print("Writing clean data")
     print(datetime.datetime.now().time())
 
     # Multi-processing functionality cuts our crunch time in half
-    p1 = multiprocessing.Process(target=write_clean, args=((tcWriter, header_row_tc, TC_DATA, CONST.TC_NAMES)))
-    p2 = multiprocessing.Process(target=write_clean, args=((ptWriter, header_row_pt, PT_DATA, CONST.PT_NAMES)))
-    p3 = multiprocessing.Process(target=write_clean, args=((fmWriter, header_row_fm, FM_DATA, CONST.FM_NAMES)))
+    p1 = multiprocessing.Process(target=write_clean, args=(tcWriter, header_row_tc, TC_DATA, CONST.TC_NAMES))
+    p2 = multiprocessing.Process(target=write_clean, args=(ptWriter, header_row_pt, PT_DATA, CONST.PT_NAMES))
+    p3 = multiprocessing.Process(target=write_clean, args=(fmWriter, header_row_fm, FM_DATA, CONST.FM_NAMES))
+    p4 = multiprocessing.Process(target=liquid_flow, args=(lfWriter, PT_DATA))
     
     p1.start()  # Write clean TC data to file
     p2.start()  # Write clean PT data to file
