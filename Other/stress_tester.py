@@ -2,13 +2,14 @@ import math
 import time
 import multiprocessing
 
-# Creates 4 processes, each of which finds the sum of all primes < 2 million
+# Creates 4 processes, each of which finds the sum of all primes < 10 million
 
-def sum_of_primes(proc_num):
+def sum_of_primes(proc_num, max):
     num = 2
     sum = 0
 
-    while num < 2000000:
+    # 10 million
+    while num < max:
         div = 2
         sqrt = math.sqrt(num)
         isPrime = True
@@ -19,8 +20,8 @@ def sum_of_primes(proc_num):
                 break
             div += 1
 
-        if isPrime:             # If isPrime hasnt been set to false, num is a prime
-            sum += num
+        # if isPrime:             # If isPrime hasnt been set to false, num is a prime
+        #     sum += num
 
         num += 1
 
@@ -32,10 +33,13 @@ def sum_of_primes(proc_num):
 
 def main():
 
+    NUM_PROCS = 8
+    MAX_NUM = 4000000
+
     procs = []
 
-    for i in range(8):
-        p1 = multiprocessing.Process(target=sum_of_primes, args=[i+1])
+    for i in range(NUM_PROCS):
+        p1 = multiprocessing.Process(target=sum_of_primes, args=[i+1, MAX_NUM])
         procs.append(p1)
 
     t0 = time.time()
@@ -47,8 +51,9 @@ def main():
         proc.join()
 
     t1 = time.time()
+    total = t1 - t0
 
-    print("Total elapsed time: " + str(t1 - t0))
+    print("Total elapsed time: " + str(int(total//60)) + "m" + str(int(total%60)) + "s")
 
 
 main()
