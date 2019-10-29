@@ -33,7 +33,8 @@ FIRING_ACTIONS = ["NCIO_1", "SPRK_1", "NCIF_1", "SPRK_0",               # Initia
 # ox valve closes (NCIO)
 
 
-# Frequencies at which data needs to be collected (Hz)
+# Frequencies for the REDUCED DAQ rate pre/post fire
+# No frequency specified for OVERDRIVE DAQ rate, just execute as fast as CPU allows
 TC_HZ = 150
 PT_HZ = 150
 FM_HZ = 200

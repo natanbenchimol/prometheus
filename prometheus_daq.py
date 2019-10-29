@@ -119,8 +119,9 @@ def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
         # We will only reach here once all the threads are completed
         data_id_count += 1
 
-        # TODO: add varying frequencies for collection
-        time.sleep(1 / hz)
+        # If we are pre/post fire, don't need max DAQ rate
+        if(prom_status["overdrive"] == False):
+            time.sleep(1 / hz)
 
 
 # ---------------------- END OF DATA ACQUISITION FUNCTIONS ---------------------- #
@@ -158,6 +159,7 @@ def fire(sol):
 
     prom_status = {
         "should_record_data": True,
+        "overdrive": False,
         "did_abort": False,
         "countdown_start": time.time()
     }
@@ -168,26 +170,36 @@ def fire(sol):
 
     # Sequence is a data structure with all of the actions and timings required for the firing
     # see the load_timings() func for information about its structure
-    shared.log_event("DATA", "Start data collection")
     sequence = shared.load_timings()
 
+    shared.log_event("FIRE", "Countdown start")
     shared.COUNTDOWN_START = time.time()
 
     try:
-        shared.log_event("FIRE", "Countdown start")
-        time.sleep(CONST.PRE_FIRE_WAIT)          # Recording nominal data pre-fire
-        shared.log_event("FIRE", "Fire sequence start")
+        # Start the DAQ threads
+        shared.log_event("DATA", "Start data collection")
+        shared.log_event("DATA", "DAQ rate: REDUCED")
         pt_thread.start()
         tc_thread.start()
         fm_thread.start()
-        print("Proceeding with fire")
 
+        time.sleep(CONST.PRE_FIRE_WAIT)          # Recording nominal data pre-fire at reduced rate
+
+        shared.log_event("DATA", "DAQ rate: OVERDRIVE") # Up the DAQ rate
+        prom_status["overdrive"] = True
+
+        shared.log_event("FIRE", "Fire sequence start")
         for action in sequence:                     # All our firing sequence
             time.sleep(action[2])
             sol.solenoid_to_state(action[0], action[1])
 
         shared.log_event("FIRE", "Purge operations start")
         purge(sol, 3)                               # Purge
+        shared.log_event("FIRE", "Purge operations complete")
+
+        shared.log_event("DATA", "DAQ rate: REDUCED")
+        prom_status["overdrive"] = False
+
         time.sleep(CONST.POST_FIRE_WAIT)            # Give system a few seconds to stabilize post purge
 
         prom_status["should_record_data"] = False   # This stops data recording and begins processing
@@ -197,6 +209,7 @@ def fire(sol):
         tc_thread.join()
         fm_thread.join()
 
+    # Handle any aborts that are thrown
     except aborts.Abort:
         print("Handle Abort")
         # Some solenoid state change
