@@ -29,7 +29,7 @@ During development we kept a few priorities of the system in mind when developin
 1. __Data Safety__ - Keeping data safe is the single most important priority. Data is how we measure success, 
 troubleshoot issues, and write papers. At every point in development we must ensure that we find all potential failures
 and account for them. 
-2. __Maximise data collection frequency__ - Code should be efficient so that we can push the data collection frequencies
+2. __Maximize data collection frequency__ - Code should be efficient so that we can push the data collection frequencies
 as high as possible. More data = better!
 
 
