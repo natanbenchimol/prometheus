@@ -31,7 +31,7 @@ class PrometheusGUI:
         parent.title('Prometheus GUI')
         shared.init_live_data()         # Creates int values for all keys
         shared.populate_live_data()     # FILLS WITH FAKE ASS DATA
-        SolManager = SolenoidManager()  # Initialize the solenoid manager
+        self.SolManager = SolenoidManager()  # Initialize the solenoid manager
 
         # load pictures for check list buttons
         self.tog_off = Image.open(r"Assets/toggle_off.png").resize((125, 50), Image.ANTIALIAS)
@@ -193,38 +193,48 @@ class PrometheusGUI:
             self.main_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
             # use const file from repository to shrink this to single loop in the future
+            #TODO: FIX SOLENOID PUSH BUTTON FOR ALL VALVES
+            """self.NC_IO = tk.Button(self.f2, text="NCIO", font=(font, 20), bg='#FF0000', fg='#FFFFFF',  borderwidth=10,
+                                   relief='ridge', command=lambda: self.solenoid(self.NC_IO))"""
+            self.NC_IO = tk.Button(self.f2, text="NCIO", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NCIO"))
 
-            self.NC_IO = tk.Button(self.f2, text="NCIO", font=(font, 20), bg='#FF0000', fg='#FFFFFF',  borderwidth=10,
-                                   relief='ridge', command=lambda: self.solenoid(self.NC_IO))
+
+
+
             self.NC_IO.grid(column=8, row=2, sticky=(N, S, E, W))
 
             self.NC_IF = tk.Button(self.f2, text="NCIF", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
                                    relief='ridge')
-            self.NC_IF.configure(command=lambda: self.solenoid(self.NC_IF))
+            self.NC_IF.configure(command=lambda: self.SolManager.change_valve_state("NCIF"))
             self.NC_IF.grid(column=0, row=2, sticky=(N, S, E, W))
 
             self.NO_IP = tk.Button(self.f2, text="NOIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.solenoid(self.NO_IP))
+                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NOIP"))
             self.NO_IP.grid(column=3, row=2, sticky=(N, S, E, W))
 
             self.NC_IP = tk.Button(self.f2, text="NCIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.solenoid(self.NC_IP))
+                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NCIP"))
             self.NC_IP.grid(column=5, row=2, sticky=(N, S, E, W))
 
             self.NC_3O = tk.Button(self.f2, text="NC3O", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.solenoid(self.NC_3O))
+                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NC3O"))
             self.NC_3O.grid(column=1, row=0, sticky=(N, S, E, W), padx=40, pady=40)
 
+            #self.NC_3O = tk.Button(self.f2, text="NC3O", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+            #                      relief='ridge', command=lambda: self.SolManager.change_valve_state("NC3O"))
+            #self.NC_3O.grid(column=1, row=0, sticky=(N, S, E, W), padx=40, pady=40)
+
             self.NC_3N = tk.Button(self.f2, text="NC3N", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.solenoid(self.NC_3N))
+                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NC3N"))
             self.NC_3N.grid(column=7, row=0, sticky=(N, S, E, W), padx=40, pady=40)
 
             self.NC_OP = tk.Button(self.f2, text="NCOP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.solenoid(self.NC_OP))
+                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NCOP"))
             self.NC_OP.grid(column=4, row=0, sticky=(N, S, E, W), padx=40, pady=40)
 
             self.arm_valves = tk.Button(self.f2, text="ARM Valves", font=(font, 15), bg='#ff7300', fg='#FFFFFF',
-                                        borderwidth=20, relief='raised', command=lambda: self.arm_v())
+                                        borderwidth=20, relief='raised', command=lambda: self.SolManager.change_all_valve_states())
             self.arm_valves.grid(column=4, row=1, sticky=(N, S, E, W), padx=40, pady=40)
 
         # --------------------------- Firing panel options --------------------------- #
@@ -397,7 +407,7 @@ class PrometheusGUI:
     ##########################################################################
 
     # manual switch function
-
+"""
 
     # arm valve function
     def arm_v(self):
@@ -434,7 +444,7 @@ class PrometheusGUI:
             toggle.configure(image=self.toggle_off)
 
 
-
+"""
 ########################################################################################################################
 # -------------------------------------------------- THE END ----------------------------------------------------------#
 ########################################################################################################################
