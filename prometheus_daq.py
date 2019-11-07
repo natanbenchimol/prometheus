@@ -101,14 +101,14 @@ def fm_protocol():
 
 def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
 
-    data_id_count = 0
+    batch_id = 0
     while(prom_status["shouldRecordData"]):
 
         threads = []
 
         # Creates all the threads to be executed, starts them, adds them to a list
         for instrument_name in INSTRUMENT_NAMES:
-            inst_thread = threading.Thread(target=reader_func, args=(data_id_count, DATA, instrument_name))
+            inst_thread = threading.Thread(target=reader_func, args=(batch_id, DATA, instrument_name))
             inst_thread.start()             # Start the thread
             threads.append(inst_thread)     # Add to list
 
@@ -117,7 +117,7 @@ def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
             t.join()
 
         # We will only reach here once all the threads are completed
-        data_id_count += 1
+        batch_id += 1
 
         # If we are pre/post fire, don't need max DAQ rate
         if(prom_status["overdrive"] == False):
