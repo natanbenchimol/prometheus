@@ -246,28 +246,29 @@ def load_timings():
     return seq
 
 
+# TEST MAIN
+# def main():
+#
+#     filename = "logfile.txt"
+#     read_config()
+#
+#
+#     log_event("DATA", "start data")
+#     log_event("FIRE", "we made it")
+#     log_event("FIRE", "fire complete")
+#
+#     lf = open(filename, "w")
+#     write_log_header(lf)
+#     write_log_events(lf)
+#     write_log_footer(lf)
+
+
 # Uncomment the following 4 lines if this is the first time you are
 # running the GUI on a device and run THIS file. This will allow you
 # to generate and then populate the config file
 
-# def main():
-#     gen_config()
-
-
-# TEST MAIN
 def main():
+    gen_config()
 
-    filename = "logfile.txt"
-    read_config()
-
-
-    log_event("DATA", "start data")
-    log_event("FIRE", "we made it")
-    log_event("FIRE", "fire complete")
-
-    lf = open(filename, "w")
-    write_log_header(lf)
-    write_log_events(lf)
-    write_log_footer(lf)
 
 main()

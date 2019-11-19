@@ -1,6 +1,5 @@
 # Prometheus related ignores - Sean
-.idea/workspace.xml
-.idea/prometheus.iml
+.idea/
 /Data
 config.txt
 logfile.txt
