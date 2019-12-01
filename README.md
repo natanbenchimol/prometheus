@@ -40,7 +40,7 @@ as high as possible. More data = better!
 * __Data Acquisition__ - Record all the data produced by the firing. 
 * __Data Processing__ - Crunch and process all of the data immediately following the firing, need to ensure data safety
 by adding redundancies and adding security measures.
-* __Data Visualization (Future)__ - Produce graphs of system state over time immediately after firing.
+* __Data Visualizations__ - Produce graphs of system state over time immediately after firing.
 
 ## Technical Specifications
 #### Hardware:
@@ -63,7 +63,8 @@ Raspberry Pi with pip or homebrew before it can run correctly:
  performance.
    - Install Python3 and the libraries listed above, all of the other libraries we use should be included in the
    installation of Python3.
-   - Remove bloatware on your Pi, we don't need stuff like the wolfram engine taking up space, delete it. Guide here.
+   - Remove bloatware on your Pi, we don't need stuff like the wolfram engine taking up space, delete it. 
+   [Guide here.](https://github.com/raspberrycoulis/remove-bloat)
    - Configure system for overclocking, important to have a stable power supply and CPU fan if you intend to do this. Guide 
    here.
    - Add a system monitoring widget called Conky, tells you state of the Pi during the firing so you can look for
@@ -93,9 +94,20 @@ The style convention chosen for this project can be confusing but we have tried 
 ## Detailed System Description
 This section of the README will discuss the details of each of the modules that make up the system.
 
-#### Control System
+#### Control Systems
 
 #### Abort Handling
+
+#### Fire Sequence Loading
+The code which takes the timings in from the front end and and creates a structure which can be understood by the solenoid 
+manager class can be found in "prometheus_shared.py" in the function called `load_timings()` is unfortunately one of the most
+complex pieces of code in the entire project.
+
+The front end provides the back end with the start and end times for each of the firing actions relative to the 
+countdown start, each of the firing actions are represented in the code with a solenoid actuation. The `load_timings()`
+function takes in the inputs, transforms them into a data structure which can be interpreted by the sol manager. 
+Additionally, for each firing action we need to calculate the time until the next action so we know how long we need the
+system to sleep for.
 
 #### Data Acquisition
 All of the data acquisition for _Prometheus_ is handled inside the 'prometheus_daq.py' file. Here's a brief explanation
@@ -122,11 +134,19 @@ Next we need to format our data, I won't lie this is kinda complicated, sorry ab
 > [batch_num, timestamp, instrument_name, reading]
 
 For each batch of readings we need to find the average time of reading (the individual batch times will be different due
-to how multithreading works), then we need to take all the readings of the same batch number and collect them in one array
+to how multi-threading works), then we need to take all the readings of the same batch number and collect them in one array
 so that we can map each instrument to an average time, we also need to turn our timestamp into mission time and 24h time. Spend some time looking at the code and the two file formats and it
 will make more sense.
 
 #### Logfile
+The logfile is a relatively simple system which records system parameters, system settings, and logs every event that occurs 
+ during the firing. The logfile system is important for post-processing and examining the events of a firing. 
+
+In order to log an event simply write:
+
+`shared.log_event("<EVENT TYPE ACRONYM>", "<EVENT DESCRIPTION>")`
+
+This function adds these events to a global array which gets written to 'logfile.txt' immediately after the firing has completed. 
 
 ## README TODO:
 - How to add an instrument
