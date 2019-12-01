@@ -19,7 +19,6 @@ import abort_sequences as aborts
 
 #TODO:  LETS GET IT
 #       TC/PT Read code
-#       FM code
 #       Soleniod actuation to actually launch system
 
 
@@ -28,7 +27,23 @@ MAX_VAL = 700   # example for testing
 
 # ---------------------- START OF DATA ACQUISITION FUNCTIONS ---------------------- #
 
-def readPT(batch_id, PT_DATA, pt_id):
+# ----------------------  PROTOCOLS FOR DIFFERENT INSTRUMENTS ---------------------- #
+
+def pt_protocol():
+    pass
+
+
+def tc_protocol():
+    pass
+
+
+def fm_protocol():
+    pass
+
+# ----------------------  SINGLE READERS ---------------------- #
+
+
+def readPT(prom_status, batch_id, PT_DATA, pt_id):
     res_list = [None] * 4
 
     # get result from id from TC protocol
@@ -38,20 +53,18 @@ def readPT(batch_id, PT_DATA, pt_id):
     res_list[2] = pt_id         # str   - instrument id
     res_list[3] = 4005             # float - data collected from PT
 
-    if (res_list[3] > MAX_VAL):
-        PT_DATA.append(res_list)  # So we know what val caused the abort
-        raise aborts.PressureAbort       # ABORT!!
+    # Only check for aborts/save data if we are recording data
+    if prom_status["should_record_data"]:
+        if res_list[3] > MAX_VAL:
+            PT_DATA.append(res_list)  # So we know what val caused the abort
+            raise aborts.PressureAbort       # ABORT!!
 
-    PT_DATA.append(res_list)  # Save on stack to write to file later
+        PT_DATA.append(res_list)  # Save on stack to write to file later
 
     shared.LIVE_DATA[pt_id] = res_list[3]  # Send to val to display on GUI
 
 
-def pt_protocol():
-    pass
-
-
-def readTC(batch_id, TC_DATA, tc_id):
+def readTC(prom_status, batch_id, TC_DATA, tc_id):
     res_list = [None] * 4
 
     # get result from id from TC protocol
@@ -63,20 +76,18 @@ def readTC(batch_id, TC_DATA, tc_id):
 
     # TODO: Find best way to measure time
     # TODO: How are we passing time into our abort gate?
-    if (res_list[3] > MAX_VAL):
-        TC_DATA.append(res_list)    # So we know what val caused the abort
-        raise aborts.TempAbort             # ABORT!!
+    # Only check for aborts/save data if we are recording data
+    if prom_status["should_record_data"]:
+        if res_list[3] > MAX_VAL:
+            TC_DATA.append(res_list)    # So we know what val caused the abort
+            raise aborts.TempAbort             # ABORT!!
 
-    TC_DATA.append(res_list)        # Save on stack to write to file later
+        TC_DATA.append(res_list)        # Save on stack to write to file later
 
     shared.LIVE_DATA[tc_id] = res_list[3]   # Send to val to display on GUI
 
 
-def tc_protocol():
-    pass
-
-
-def readFM(batch_id, FM_DATA, fm_id):
+def readFM(prom_status, batch_id, FM_DATA, fm_id):
     res_list = [None] * 4
 
     # get result from id from FM protocol
@@ -86,29 +97,58 @@ def readFM(batch_id, FM_DATA, fm_id):
     res_list[2] = fm_id             # str   - instrument id
     res_list[3] = 6.02              # float - data collected from FM
 
-    if (res_list[3] > MAX_VAL):
-        FM_DATA.append(res_list)    # So we know what val caused the abort
-        raise aborts.TempAbort             # ABORT!!
+    # Only check for aborts/save data if we are recording data
+    if prom_status["should_record_data"]:
+        if res_list[3] > MAX_VAL:
+            FM_DATA.append(res_list)    # So we know what val caused the abort
+            raise aborts.TempAbort             # ABORT!!
 
-    FM_DATA.append(res_list)        # Save on stack to write to file later
+        FM_DATA.append(res_list)        # Save on stack to write to file later
 
     shared.LIVE_DATA[fm_id] = res_list[3]   # Send to val to display on GUI
 
 
-def fm_protocol():
-    pass
+# Not sure if this is feasible yet, but would be cool to abstract this to a single function
+# instead of having one for each instrument type
+def single_reader(prom_status, batch_id, DATA, instrument_id, protocol):
+    res_list = [None] * 4
+
+    # get result from id from instrument protocol
+
+    res_list[0] = batch_id          # int   - this is the nth time we are collecting data from here
+    res_list[1] = time.time()       # float - time data point collected (unix time)
+    res_list[2] = instrument_id             # str   - instrument id
+    # TODO: 'protocol()' depends on type, could screw up this idea
+    res_list[3] = protocol()              # float - data collected from FM
+
+    # Only check for aborts/save data if we are recording data
+    if prom_status["should_record_data"]:
+
+        # TODO: 'aborts' not really defined, need a way to pass thru which abort gate we want
+        if aborts[instrument_id].should_abort(res_list[1]-prom_status["countdown_start"],
+                                              res_list[3]):
+            DATA.append(res_list)  # So we know what val caused the abort
+            raise aborts.TempAbort  # ABORT!!
+
+        DATA.append(res_list)  # Save on stack to write to file later
+
+
+    shared.LIVE_DATA[instrument_id] = res_list[3]  # Send to val to display on GUI
+
+
+# ---------------------- END OF DATA ACQUISITION FUNCTIONS ---------------------- #
 
 
 def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
 
     batch_id = 0
-    while(prom_status["shouldRecordData"]):
+    while prom_status["is_running"]:
 
         threads = []
 
         # Creates all the threads to be executed, starts them, adds them to a list
         for instrument_name in INSTRUMENT_NAMES:
-            inst_thread = threading.Thread(target=reader_func, args=(batch_id, DATA, instrument_name))
+            inst_thread = threading.Thread(target=reader_func, args=(prom_status, batch_id, DATA, instrument_name))
             inst_thread.start()             # Start the thread
             threads.append(inst_thread)     # Add to list
 
@@ -119,8 +159,11 @@ def batch_reader(hz, prom_status, DATA, INSTRUMENT_NAMES, reader_func):
         # We will only reach here once all the threads are completed
         batch_id += 1
 
+        # If we just want to show data on front end, super low freq
+        if prom_status["should_record_data"] == False:
+            time.sleep(1 / 2)
         # If we are pre/post fire, don't need max DAQ rate
-        if(prom_status["overdrive"] == False):
+        elif prom_status["overdrive"] == False:
             time.sleep(1 / hz)
 
 
@@ -135,7 +178,7 @@ def timeFire(timer, prom_status):
     print("END FIRE")
 
 
-#TODO: Revisit this function
+# TODO: Revisit this function
 def prefire_checks_and_setup():
 
     # AUTOMATIC PRE-FIRE CHECKS
@@ -154,34 +197,49 @@ def prefire_checks_and_setup():
     shared.init_live_data()
 
 
-# Fire function
-def fire(sol):
+# Run/Fire function
+def run_daq(sol):
 
+    # TODO: We can't initialise 'prom_status' here, need to use this to communicate with front-end -> init on front end
     prom_status = {
-        "should_record_data": True,
-        "overdrive": False,
-        "did_abort": False,
-        "countdown_start": time.time()
+        "is_running": True,                 # Variable read by batch_reader func
+        "all_systems_go": False,            # Variable read by this function
+        "should_record_data": False,        # Variable read by single_reader func
+        "overdrive": False,                 # Variable read by batch_reader func
+        "did_abort": False,                 # Variable read by logfile
+        "countdown_start": None             # Variable read by logfile + reader funcs, set when we start recording
     }
 
     pt_thread = threading.Thread(target=batch_reader, args=(CONST.PT_HZ, prom_status, shared.PT_DATA, CONST.PT_NAMES, readPT))
     tc_thread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, shared.TC_DATA, CONST.TC_NAMES, readTC))
     fm_thread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, shared.FM_DATA, CONST.FM_NAMES, readFM))
 
-    # Sequence is a data structure with all of the actions and timings required for the firing
-    # see the load_timings() func for information about its structure
-    sequence = shared.load_timings()
-
-    shared.log_event("FIRE", "Countdown start")
-    shared.COUNTDOWN_START = time.time()
-
     try:
-        # Start the DAQ threads
-        shared.log_event("DATA", "Start data collection")
-        shared.log_event("DATA", "DAQ rate: REDUCED")
+        # Start the DAQ threads,  not recording data at first, only showing front end
+        shared.log_event("SYSTEM", "Start batch reader threads")
         pt_thread.start()
         tc_thread.start()
         fm_thread.start()
+
+        # This is the loop we will sit in in the time before the fire
+        # Data goes to the front end but is NOT recorded
+        # Check this every second
+        # Firing is initiated by a button press on the front end which sets "all_systems_go" to true
+        # and begins whole firing sequence
+        while prom_status["all_systems_go"] == False:
+            time.sleep(1)
+
+        shared.log_event("DATA", "Start data collection")
+        shared.log_event("DATA", "DAQ rate: REDUCED")
+        prom_status["should_record_data"] = True
+
+        # Sequence is a data structure with all of the actions and timings required for the firing
+        # see the load_timings() func for information about its structure
+        sequence = shared.load_timings()
+
+        shared.log_event("FIRE", "Countdown start")
+        shared.COUNTDOWN_START = time.time()
+        prom_status["countdown_start"] = shared.COUNTDOWN_START
 
         time.sleep(CONST.PRE_FIRE_WAIT)          # Recording nominal data pre-fire at reduced rate
 
@@ -189,12 +247,13 @@ def fire(sol):
         prom_status["overdrive"] = True
 
         shared.log_event("FIRE", "Fire sequence start")
-        for action in sequence:                     # All our firing sequence
+        for action in sequence:                     # Loop thru all our firing sequence
             time.sleep(action[2])
             sol.solenoid_to_state(action[0], action[1])
 
+        # POST FIRE PURGE
         shared.log_event("FIRE", "Purge operations start")
-        purge(sol, 3)                               # Purge
+        purge(sol, 3)
         shared.log_event("FIRE", "Purge operations complete")
 
         shared.log_event("DATA", "DAQ rate: REDUCED")
@@ -203,7 +262,10 @@ def fire(sol):
         time.sleep(CONST.POST_FIRE_WAIT)            # Give system a few seconds to stabilize post purge
 
         prom_status["should_record_data"] = False   # This stops data recording and begins processing
-        shared.log_event("FIRE", "End data collection")
+        shared.log_event("DATA", "End data collection")
+
+        prom_status["is_running"] = False
+        shared.log_event("SYSTEM", "Kill all batch reader threads")
 
         pt_thread.join()    # Wait for our threads to finish
         tc_thread.join()
@@ -212,12 +274,21 @@ def fire(sol):
     # Handle any aborts that are thrown
     except aborts.Abort:
         print("Handle Abort")
+        shared.log_event("ABORT", "ABORT: reason - ????")
+
         # Some solenoid state change
-        prom_status["shouldRecordData"] = False # stop spawning the reader threads
+        prom_status["is_running"] = False # stop spawning the reader threads
         prom_status["did_abort"] = True         # Info for logfile
 
     # Data processing
-    file_path = data.writeToFile(prom_status, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
+    file_path = data.writeToFile(shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
+
+    # There's a chance that sequence isn't generated, this try/except block stops it from breaking our logfile
+    try:
+        foo = sequence
+    except NameError:
+        # No sequence initalized, create empty list so we don't crash when we write to log
+        sequence = []
 
     # Log file generation
     data.generate_logfile(file_path + "logfile.txt", sequence)
@@ -272,7 +343,7 @@ def main():
         print("Handle Abort")
         prom_status["isFiring"] = False
 
-    data.writeToFile(shared.COUNTDOWN_START, shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
+    data.writeToFile(shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
 
 
 main()

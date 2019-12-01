@@ -29,7 +29,7 @@ FRONT_END_TIMINGS = {}  # Contains solenoid/spark plug timings inputted on front
 # ----------- NOT THREAD SAFE ----------- #
 
 COUNTDOWN_START = None  # Saves the timestamp for start of countdown for
-                        # calculating relative mission time
+                        # calculating relative mission time in our write_clean() data processing function
 
 
 # ---------------------- START OF LOGFILE FUNCTIONS ---------------------- #

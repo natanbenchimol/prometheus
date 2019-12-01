@@ -2,6 +2,8 @@ import threading
 import random
 import time
 
+# File is just used to test different validity/speeds of different syntaxes
+# Used during development and during code optimisation
 
 def printNum(num):
     time.sleep(random.randint(0, 5))
@@ -9,14 +11,7 @@ def printNum(num):
 
 def main():
 
-    list = [1,3,5,6]
-
-    for i in range(len(list)):
-        if list[i] is 3:
-            list[i] = 4
-
-    print(list)
-
+    # Test here
 
     print("All done")
 

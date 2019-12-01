@@ -123,7 +123,7 @@ def liquid_flow(csv_writer, PT_DATA, pt1, pt2, numPTs):
 # Handles all data. Saves all to raw files and formats + saves to clean files
 # Designed to account for failures and exceptions
 # Returns base location
-def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
+def writeToFile(TC_DATA, PT_DATA, FM_DATA):
     
     print("Begin data processing")
     print(datetime.datetime.now().time())
@@ -188,6 +188,7 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
 
     if did_throw:   # We don't want to write the clean files if we almost crashed creating dirs
         # Returns the root directory so that the log file knows where to write to
+        shared.log_event("DATA", "ERROR: Dumping all raw data to file")
         return cwd
 
     # Headers of our CSV files
@@ -250,6 +251,7 @@ def writeToFile(COUNTDOWN_START, TC_DATA, PT_DATA, FM_DATA):
 def generate_logfile(file_path, sequence):
 
     log = open(file_path + "/logfile.txt", "w")
+    shared.log_event("LOG", "Begin writing log file")
 
     shared.write_log_header(log, sequence)
     shared.write_log_events(log)
