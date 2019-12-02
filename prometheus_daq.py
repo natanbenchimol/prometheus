@@ -198,100 +198,105 @@ def prefire_checks_and_setup():
 
 
 # Run/Fire function
-def run_daq(sol):
+def run_daq(sol, prom_status):
 
-    # TODO: We can't initialise 'prom_status' here, need to use this to communicate with front-end -> init on front end
-    prom_status = {
-        "is_running": True,                 # Variable read by batch_reader func
-        "all_systems_go": False,            # Variable read by this function
-        "should_record_data": False,        # Variable read by single_reader func
-        "overdrive": False,                 # Variable read by batch_reader func
-        "did_abort": False,                 # Variable read by logfile
-        "countdown_start": None             # Variable read by logfile + reader funcs, set when we start recording
-    }
+    # This loop should keep running until the GUI is terminated
+    while True:
 
-    pt_thread = threading.Thread(target=batch_reader, args=(CONST.PT_HZ, prom_status, shared.PT_DATA, CONST.PT_NAMES, readPT))
-    tc_thread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, shared.TC_DATA, CONST.TC_NAMES, readTC))
-    fm_thread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, shared.FM_DATA, CONST.FM_NAMES, readFM))
+        # prom_status = {
+        #     "is_running": True,                 # Variable read by batch_reader func
+        #     "all_systems_go": False,            # Variable read by this function
+        #     "should_record_data": False,        # Variable read by single_reader func
+        #     "overdrive": False,                 # Variable read by batch_reader func
+        #     "did_abort": False,                 # Variable read by logfile
+        #     "countdown_start": None             # Variable read by logfile + reader funcs, set when we start recording
+        # }
 
-    try:
-        # Start the DAQ threads,  not recording data at first, only showing front end
-        shared.log_event("SYSTEM", "Start batch reader threads")
-        pt_thread.start()
-        tc_thread.start()
-        fm_thread.start()
+        pt_thread = threading.Thread(target=batch_reader, args=(CONST.PT_HZ, prom_status, shared.PT_DATA, CONST.PT_NAMES, readPT))
+        tc_thread = threading.Thread(target=batch_reader, args=(CONST.TC_HZ, prom_status, shared.TC_DATA, CONST.TC_NAMES, readTC))
+        fm_thread = threading.Thread(target=batch_reader, args=(CONST.FM_HZ, prom_status, shared.FM_DATA, CONST.FM_NAMES, readFM))
 
-        # This is the loop we will sit in in the time before the fire
-        # Data goes to the front end but is NOT recorded
-        # Check this every second
-        # Firing is initiated by a button press on the front end which sets "all_systems_go" to true
-        # and begins whole firing sequence
-        while prom_status["all_systems_go"] == False:
-            time.sleep(1)
+        try:
+            # Start the DAQ threads,  not recording data at first, only showing front end
+            shared.log_event("SYSTEM", "Start batch reader threads")
+            pt_thread.start()
+            tc_thread.start()
+            fm_thread.start()
 
-        shared.log_event("DATA", "Start data collection")
-        shared.log_event("DATA", "DAQ rate: REDUCED")
-        prom_status["should_record_data"] = True
+            # This is the loop we will sit in in the time before the fire
+            # Data goes to the front end but is NOT recorded
+            # Check this every second
+            # Firing is initiated by a button press on the front end which sets "all_systems_go" to true
+            # and begins whole firing sequence
+            while prom_status["all_systems_go"] == False:
+                time.sleep(1)
 
-        # Sequence is a data structure with all of the actions and timings required for the firing
-        # see the load_timings() func for information about its structure
-        sequence = shared.load_timings()
+            shared.log_event("DATA", "Start data collection")
+            shared.log_event("DATA", "DAQ rate: REDUCED")
+            prom_status["should_record_data"] = True
 
-        shared.log_event("FIRE", "Countdown start")
-        shared.COUNTDOWN_START = time.time()
-        prom_status["countdown_start"] = shared.COUNTDOWN_START
+            # Sequence is a data structure with all of the actions and timings required for the firing
+            # see the load_timings() func for information about its structure
+            sequence = shared.load_timings()
 
-        time.sleep(CONST.PRE_FIRE_WAIT)          # Recording nominal data pre-fire at reduced rate
+            shared.log_event("FIRE", "Countdown start")
+            shared.COUNTDOWN_START = time.time()
+            prom_status["countdown_start"] = shared.COUNTDOWN_START
 
-        shared.log_event("DATA", "DAQ rate: OVERDRIVE") # Up the DAQ rate
-        prom_status["overdrive"] = True
+            time.sleep(CONST.PRE_FIRE_WAIT)          # Recording nominal data pre-fire at reduced rate
 
-        shared.log_event("FIRE", "Fire sequence start")
-        for action in sequence:                     # Loop thru all our firing sequence
-            time.sleep(action[2])
-            sol.solenoid_to_state(action[0], action[1])
+            shared.log_event("DATA", "DAQ rate: OVERDRIVE") # Up the DAQ rate
+            prom_status["overdrive"] = True
 
-        # POST FIRE PURGE
-        shared.log_event("FIRE", "Purge operations start")
-        purge(sol, 3)
-        shared.log_event("FIRE", "Purge operations complete")
+            shared.log_event("FIRE", "Fire sequence start")
+            for action in sequence:                     # Loop thru all our firing sequence
+                time.sleep(action[2])
+                sol.solenoid_to_state(action[0], action[1])
 
-        shared.log_event("DATA", "DAQ rate: REDUCED")
-        prom_status["overdrive"] = False
+            # POST FIRE PURGE
+            shared.log_event("FIRE", "Purge operations start")
+            purge(sol, 3)
+            shared.log_event("FIRE", "Purge operations complete")
 
-        time.sleep(CONST.POST_FIRE_WAIT)            # Give system a few seconds to stabilize post purge
+            shared.log_event("DATA", "DAQ rate: REDUCED")
+            prom_status["overdrive"] = False
 
-        prom_status["should_record_data"] = False   # This stops data recording and begins processing
-        shared.log_event("DATA", "End data collection")
+            time.sleep(CONST.POST_FIRE_WAIT)            # Give system a few seconds to stabilize post purge
 
-        prom_status["is_running"] = False
-        shared.log_event("SYSTEM", "Kill all batch reader threads")
+            prom_status["should_record_data"] = False   # This stops data recording and begins processing
+            shared.log_event("DATA", "End data collection")
 
-        pt_thread.join()    # Wait for our threads to finish
-        tc_thread.join()
-        fm_thread.join()
+            prom_status["is_running"] = False
+            shared.log_event("SYSTEM", "Kill all batch reader threads")
 
-    # Handle any aborts that are thrown
-    except aborts.Abort:
-        print("Handle Abort")
-        shared.log_event("ABORT", "ABORT: reason - ????")
+            pt_thread.join()    # Wait for our threads to finish
+            tc_thread.join()
+            fm_thread.join()
 
-        # Some solenoid state change
-        prom_status["is_running"] = False # stop spawning the reader threads
-        prom_status["did_abort"] = True         # Info for logfile
+        # Handle any aborts that are thrown
+        except aborts.Abort:
+            print("Handle Abort")
+            shared.log_event("ABORT", "ABORT: reason - ????")
 
-    # Data processing
-    file_path = data.writeToFile(shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
+            # Some solenoid state change
+            prom_status["is_running"] = False # stop spawning the reader threads
+            prom_status["did_abort"] = True         # Info for logfile
 
-    # There's a chance that sequence isn't generated, this try/except block stops it from breaking our logfile
-    try:
-        foo = sequence
-    except NameError:
-        # No sequence initalized, create empty list so we don't crash when we write to log
-        sequence = []
+        # Data processing
+        file_path = data.writeToFile(shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
 
-    # Log file generation
-    data.generate_logfile(file_path + "logfile.txt", sequence)
+        # There's a chance that sequence isn't generated, this try/except block stops it from breaking our logfile
+        try:
+            foo = sequence
+        except NameError:
+            # No sequence initalized, create empty list so we don't crash when we write to log
+            sequence = []
+
+        # Log file generation
+        data.generate_logfile(file_path + "logfile.txt", sequence)
+
+        # Reset/Clear all locals so that we can fire again (hypothetically)
+        shared.reset(prom_status)
 
 
 # Purge ops will remain almost entirely unchanged from firing to firing
@@ -309,6 +314,7 @@ def purge(sol, purge_duration):
     sol.solenoid_to_state("NCIO", 0)            # Close ox valve
 
 
+# JUST FOR TESTING DATA FLOW
 def main():
 
     prom_status = {}
@@ -316,6 +322,7 @@ def main():
 
     STATUS = "PREFIRE"
     firingTime = 15
+    print("TEST MAIN in PROM DAQ")
 
     while(STATUS.upper() != "FIRE"):
         STATUS = input("> ")
@@ -346,4 +353,4 @@ def main():
     data.writeToFile(shared.TC_DATA, shared.PT_DATA, shared.FM_DATA)
 
 
-main()
+# main()

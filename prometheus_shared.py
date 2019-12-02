@@ -246,6 +246,24 @@ def load_timings():
     return seq
 
 
+# Clears our local, volatile data structures sot hat we are ready for another firing
+def reset(prom_status):
+
+    # Clearing all of our buffers as they have been written to files
+    LOGGED_EVENTS.clear()
+    TC_DATA.clear()  # data to be written to files
+    PT_DATA.clear()
+    FM_DATA.clear()
+
+    # Reset contents of prom_status to prepare for a firing
+    prom_status["is_running"] = True,                 # Variable read by batch_reader func
+    prom_status["all_systems_go"] = False,            # Variable read by this function
+    prom_status["should_record_data"] = False,        # Variable read by single_reader func
+    prom_status["overdrive"] = False,                 # Variable read by batch_reader func
+    prom_status["did_abort"] = False,                 # Variable read by logfile
+    prom_status["countdown_start"] = None             # Variable read by logfile + reader funcs, set when we start recording
+
+
 # TEST MAIN
 # def main():
 #

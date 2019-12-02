@@ -2,15 +2,16 @@
 # By Atticus Vadera
 # 7/23/2019
 
+# Library Imports
 from tkinter import *
 import tkinter as tk
 from PIL import Image, ImageTk
-#import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 
+# Internal Imports
 import prometheus_shared as shared
-import prometheus_consts as CONST
+import prometheus_daq as daq
 from SolenoidManagerClass import SolenoidManager
-import time
 
 # ------------------------------------------ initialize setup values --------------------------------------------------#
 # set up input out put pin numbering system on Pi (BCM = broadcom chip specific)
@@ -29,9 +30,22 @@ class PrometheusGUI:
 
         self.parent = parent
         parent.title('Prometheus GUI')
+
         shared.init_live_data()         # Creates int values for all keys
         shared.populate_live_data()     # FILLS WITH FAKE ASS DATA
         self.SolManager = SolenoidManager()  # Initialize the solenoid manager
+
+        self.prom_status = {
+            "is_running": True,                 # Variable read by batch_reader func
+            "all_systems_go": False,            # Variable read by this function
+            "should_record_data": False,        # Variable read by single_reader func
+            "overdrive": False,                 # Variable read by batch_reader func
+            "did_abort": False,                 # Variable read by logfile
+            "countdown_start": None             # Variable read by logfile + reader funcs, set when we start recording
+        }
+
+        # START THE BACKEND CODE, BEGIN SHOWING LIVE VALS
+        # daq.run_daq(sol, prom_status)
 
         # load pictures for check list buttons
         self.tog_off = Image.open(r"Assets/toggle_off.png").resize((125, 50), Image.ANTIALIAS)
