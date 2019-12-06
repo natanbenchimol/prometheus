@@ -243,7 +243,10 @@ def run_daq(sol, prom_status):
             shared.COUNTDOWN_START = time.time()
             prom_status["countdown_start"] = shared.COUNTDOWN_START
 
-            time.sleep(CONST.PRE_FIRE_WAIT)          # Recording nominal data pre-fire at reduced rate
+            for i in range(CONST.PRE_FIRE_WAIT, 0, -1):    # Recording nominal data pre-fire at reduced rate
+                time.sleep(1)
+                prom_status["display"] = str(i)
+            prom_status["display"] = "IGNITION"
 
             shared.log_event("DATA", "DAQ rate: OVERDRIVE") # Up the DAQ rate
             prom_status["overdrive"] = True
@@ -255,13 +258,17 @@ def run_daq(sol, prom_status):
 
             # POST FIRE PURGE
             shared.log_event("FIRE", "Purge operations start")
+            prom_status["display"] = "PURGE"
             purge(sol, 3)
             shared.log_event("FIRE", "Purge operations complete")
 
             shared.log_event("DATA", "DAQ rate: REDUCED")
             prom_status["overdrive"] = False
 
-            time.sleep(CONST.POST_FIRE_WAIT)            # Give system a few seconds to stabilize post purge
+            for i in range(CONST.POST_FIRE_WAIT, 0, -1):    # Give system a few seconds to stabilize post purge
+                time.sleep(1)
+                prom_status["display"] = str(i)
+            prom_status["display"] = "DATA CRUNCH START"
 
             prom_status["should_record_data"] = False   # This stops data recording and begins processing
             shared.log_event("DATA", "End data collection")
@@ -291,6 +298,8 @@ def run_daq(sol, prom_status):
         except NameError:
             # No sequence initalized, create empty list so we don't crash when we write to log
             sequence = []
+
+        prom_status["display"] = "DATA CRUNCH COMPLETE"
 
         # Log file generation
         data.generate_logfile(file_path + "logfile.txt", sequence)
