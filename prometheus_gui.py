@@ -171,241 +171,249 @@ class PrometheusGUI:
                                       fg='#FFFFFF', borderwidth=10, relief='groove')
         self.NCIF_prog.grid(column=3, row=6, columnspan=2, sticky=(N, S, W, E))
 
-    # -------------------------------- frame 2 (manual ops and firing ops) -----------------------------------------#
-    # this function controls the switch for frame2
+    # -------------------------------- frame 2 -----------------------------------------#
+    # Toggles frame 2 between Manual/Firing Ops
     def switch_2(self, desired_display):
-        global font
-
-        # --------------------------- Manual panel options --------------------------- #
+        
         if desired_display == 'manual':
-
-            # set grid size on frame 2 (mostly for debugging and convenience of rearranging widgets)
-
-            f2arow = 4
-            f2acolumn = 9
-            self.f2 = tk.Frame(self.f1, background='#000000', borderwidth=1, relief="sunken", width=100, height=80)
-            self.f2.grid(row=1, columnspan=3, rowspan=2, sticky=(N, S, E, W))
-
-            for column in range(f2acolumn):
-                for row in range(f2arow):
-                    self.f2_grid = tk.Label(self.f2, bg='#000000')
-                    self.f2_grid.grid(column=column, row=row, sticky=(N, S, E, W))
-
-            # scaling factor for frame2
-            for x in range(f2acolumn):
-                self.f2.columnconfigure(x, weight=1)
-            for x in range(f2arow):
-                 self.f2.rowconfigure(x, weight=1)
-
-            # place widgets
-            self.main_ops = tk.Label(self.f1, text="Manual Mode", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
-            self.main_ops.grid(column=1, row='0', sticky=(N, S, W, E))
-
-            # use const file from repository to shrink this to single loop in the future
-            #TODO: FIX SOLENOID PUSH BUTTON FOR ALL VALVES
-                        
-            self.NC_IO = tk.Button(self.f2, text="NCIO", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.manual_sol_actuate("NCIO"))
-            self.NC_IO.grid(column=8, row=2, sticky=(N, S, E, W))
-
-            self.NC_IF = tk.Button(self.f2, text="NCIF", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge')
-            self.NC_IF.configure(command=lambda: self.manual_sol_actuate("NCIF"))
-            self.NC_IF.grid(column=0, row=2, sticky=(N, S, E, W))
-
-            self.NO_IP = tk.Button(self.f2, text="NOIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.manual_sol_actuate("NOIP"))
-            self.NO_IP.grid(column=3, row=2, sticky=(N, S, E, W))
-
-            self.NC_IP = tk.Button(self.f2, text="NCIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.manual_sol_actuate("NCIP"))
-            self.NC_IP.grid(column=5, row=2, sticky=(N, S, E, W))
-
-            self.NC_3O = tk.Button(self.f2, text="NC3O", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.manual_sol_actuate("NC3O"))
-            self.NC_3O.grid(column=1, row=0, sticky=(N, S, E, W), padx=40, pady=40)
-
-            self.NC_3N = tk.Button(self.f2, text="NC3N", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.manual_sol_actuate("NC3N"))
-            self.NC_3N.grid(column=7, row=0, sticky=(N, S, E, W), padx=40, pady=40)
-
-            self.NC_OP = tk.Button(self.f2, text="NCOP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.manual_sol_actuate("NCOP"))
-            self.NC_OP.grid(column=4, row=0, sticky=(N, S, E, W), padx=40, pady=40)
-
-            self.arm_valves = tk.Button(self.f2, text="ARM Valves", font=(font, 15), bg='#ff7300', fg='#FFFFFF',
-                                        borderwidth=20, relief='raised', command=self.enable_all)
-            self.arm_valves.grid(column=4, row=1, sticky=(N, S, E, W), padx=40, pady=40)
+            self.init_manual()
             
-            self.all_manual_btns = [self.NC_IO, self.NC_IF, self.NO_IP, self.NC_IP,
-                                    self.NC_3O, self.NC_3N, self.NC_OP]
-            
-            self.disable_all()
-
-        # --------------------------- Firing panel options --------------------------- #
-
         elif desired_display == 'fire':
-            # set grid size on frame 2 (mostly for debugging and convenience of rearranging widgets)
-            f2brow = 10
-            f2bcolumn = 9
-            self.f2 = tk.Frame(self.f1, background='#000000', borderwidth=1, relief="sunken", width=100, height=80)
-            self.f2.grid(row=1, columnspan=3, rowspan=2, sticky=(N, S, E, W))
-
-            for column in range(f2bcolumn):
-                for row in range(f2brow):
-                    self.f2_grid = tk.Label(self.f2, bg='#000000')
-                    self.f2_grid.grid(column=column, row=row, sticky=(N, S, E, W))
-            # scaling factor for frame2
-            for x in range(f2bcolumn):
-                self.f2.columnconfigure(x, weight=1)
-            for x in range(f2brow):
-                self.f2.rowconfigure(x, weight=1)
-
-            # place widgets
-            self.fire_ops = tk.Label(self.f1, text="Firing Mode", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
-            self.fire_ops.grid(column=1, row='0', sticky=(N, S, W, E))
-
-            self.abort_butt = tk.Button(self.f2, text="ABORT", font=(font, 18), bg='#FF0000', fg='#FFFFFF')
-            self.abort_butt.grid(column=7, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
-
-            self.fire_butt = tk.Button(self.f2, text="FIRE", font=(font, 20), bg='#ff7300', fg='#FFFFFF')
-            self.fire_butt.grid(column=1, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
-
-            self.prefire_1 = tk.Label(self.f2, text="Valves in correct states", font=(font, 15),
-                                       bg='#000000', fg='#FFFFFF')
-            self.prefire_1.grid(column=4, row=2, sticky=(N, S, E, W))
-
-            self.prefire_2 = tk.Label(self.f2, text="Sensor readings nominal"
-                                                     ,  bg='#000000', font=(font, 15), fg='#FFFFFF')
-            self.prefire_2.grid(column=4, row=3, sticky=(N, S, E, W))
-
-            self.prefire_3 = tk.Label(self.f2,
-                                       text="Range admin notified",
-                                       bg='#000000', font=(font, 15), fg='#FFFFFF')
-            self.prefire_3.grid(column=4, row=4, sticky=(N, S, E, W))
-
-            self.prefire_4 = tk.Label(self.f2,
-                                       text="Range is clear",
-                                       bg='#000000', font=(font, 15), fg='#FFFFFF')
-            self.prefire_4.grid(column=4, row=5, sticky=(N, S, E, W))
-
-            self.prefire_5 = tk.Label(self.f2,
-                                       text="Go/No go",
-                                       bg='#000000', font=(font, 15), fg='#FFFFFF')
-            self.prefire_5.grid(column=4, row=6, sticky=(N, S, E, W))
-
-            self.prefire_6 = tk.Label(self.f2,
-                                       text="Send it",
-                                       bg='#000000', font=(font, 15), fg='#FFFFFF')
-            self.prefire_6.grid(column=4, row=7, sticky=(N, S, E, W))
-
-            # pre fire toggle switches, put this in a loop when you get better at python
-
-            self.name1 = tk.Button(self.f2,  bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                                 width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name1))
-            self.name1.grid(column=5, row=2, sticky=(N, S, E, W))
-
-            self.name2 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                           width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name2))
-            self.name2.grid(column=5, row=3, sticky=(N, S, E, W))
-
-            self.name3 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name3))
-            self.name3.grid(column=5, row=4, sticky=(N, S, E, W))
-
-            self.name4 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name4))
-            self.name4.grid(column=5, row=5, sticky=(N, S, E, W))
-
-            self.name5 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name5))
-            self.name5.grid(column=5, row=6, sticky=(N, S, E, W))
-
-            self.name6 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name6))
-            self.name6.grid(column=5, row=7, sticky=(N, S, E, W))
-
-
+            self.init_fire()
+        
     # --------------------------- frame 3 (read outs, a and aborts. b) ---------------------------#
-    # this function controls the switch for frame3
+    # Toggles frame 3 between Readouts and Aborts
     def switch_3(self, desired_display):
 
-        # --------------------------- Sensor Readout Panel --------------------------- #
-
         if desired_display == 'readouts':
-
-            # set grid size on frame 3a (mostly for debugging and convenience of rearranging widgets)
-            f3arow = 21
-            f3acolumn = 3
-
-            for column in range(f3acolumn):
-                for row in range(f3arow):
-                    self.f3_grid = tk.Label(self.f3, bg='#000000')
-                    self.f3_grid.grid(column=column, row=row, sticky=(N, S, E, W))
-
-            # scaling factor for frame2
-            for x in range(f3acolumn):
-                self.f3.columnconfigure(x, weight=1)
-            for x in range(f3arow):
-                self.f3.rowconfigure(x, weight=1)
-
-            # place widgets
-            self.sense_ops = tk.Label(self.f3, text="Sensor Readouts ", font=(font, 25), bg='#000000', fg='#FFFFFF')
-            self.sense_ops.grid(column=0, row='0', columnspan=3, sticky=(N, S, E, W))
-
-            self.FM_O = tk.Label(self.f3, text="Oxygen Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
-            self.FM_O.grid(column=0, row='1', sticky=(N, S, E, W))
-
-            FM_O_live = IntVar(value=shared.LIVE_DATA["FM_IO"])
-
-            self.FM_O_read = tk.Label(self.f3, textvariable=FM_O_live, font=(font, 15), bg='#000000', fg='#FFFFFF')
-
-            self.FM_O_read.grid(column=1, row=1, sticky=(N, S, E, W))
-
-            self.FM_O_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF')
-            self.FM_O_unit.grid(column=2, row='1', sticky=(N, S, E, W))
-
-            self.FM_F = tk.Label(self.f3, text="Fuel Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
-            self.FM_F.grid(column=0, row='2', sticky=(N, S, E, W))
-
-            FM_F_live = IntVar(value=shared.LIVE_DATA["FM_IF"])
-
-            self.FM_F_read = tk.Label(self.f3, textvariable=FM_F_live, font=(font, 15), bg='#000000', fg='#FFFFFF')
-            self.FM_F_read.grid(column=1, row='2', sticky=(N, S, E, W))
-
-            self.FM_F_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF')
-            self.FM_F_unit.grid(column=2, row='2', sticky=(N, S, E, W))
-
-        
-        # --------------------------- Set Aborts panel --------------------------- #
-        
+            self.init_readouts()
+                
         elif desired_display == 'aborts':
+            self.init_aborts()
             
-            # set grid size on frame 3 b (mostly for debugging and convenience of rearranging widgets)
-            f3brow = 10
-            f3bcolumn = 3
-            for column in range(f3bcolumn):
-                for row in range(f3brow):
-                    self.f3_grid = tk.Label(self.f3, bg='#000000')
-                    self.f3_grid.grid(column=column, row=row, sticky=(N, S, E, W))
-
-            # scaling factor for frame2
-            for x in range(f3bcolumn):
-                self.f3.columnconfigure(x, weight=1)
-            for x in range(f3brow):
-                self.f3.rowconfigure(x, weight=1)
-
-            # place widgets
-            self.abort_ops = tk.Label(self.f3, text="Abort Gates ", font=(font, 25), bg='#000000', fg='#FFFFFF')
-            self.abort_ops.grid(column=0, row='0', columnspan=3, sticky=(N, S, E, W))
-
-            self.FM_O = tk.Label(self.f3, text="Oxygen Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
-            self.FM_O.grid(column=0, row='1', sticky=(N, S, E, W))
             
     ##########################################################################
     # --------- GUI functionality, setup widgets functions ------------------#
     #---------- here see below section to add/subtract widgets --------------#
     ##########################################################################
+    
+    # --------------------------- Setup Aborts panel --------------------------- #
+    def init_aborts(self):
+        # set grid size on frame 3 b (mostly for debugging and convenience of rearranging widgets)
+        f3brow = 10
+        f3bcolumn = 3
+        for column in range(f3bcolumn):
+            for row in range(f3brow):
+                self.f3_grid = tk.Label(self.f3, bg='#000000')
+                self.f3_grid.grid(column=column, row=row, sticky=(N, S, E, W))
+
+        # scaling factor for frame2
+        for x in range(f3bcolumn):
+            self.f3.columnconfigure(x, weight=1)
+        for x in range(f3brow):
+            self.f3.rowconfigure(x, weight=1)
+
+        # place widgets
+        self.abort_ops = tk.Label(self.f3, text="Abort Gates ", font=(font, 25), bg='#000000', fg='#FFFFFF')
+        self.abort_ops.grid(column=0, row='0', columnspan=3, sticky=(N, S, E, W))
+
+        self.FM_O = tk.Label(self.f3, text="Oxygen Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
+        self.FM_O.grid(column=0, row='1', sticky=(N, S, E, W))
+    
+
+    # --------------------------- Setup Readouts panel --------------------------- #
+    def init_readouts(self):
+        # set grid size on frame 3a (mostly for debugging and convenience of rearranging widgets)
+        f3arow = 21
+        f3acolumn = 3
+
+        for column in range(f3acolumn):
+            for row in range(f3arow):
+                self.f3_grid = tk.Label(self.f3, bg='#000000')
+                self.f3_grid.grid(column=column, row=row, sticky=(N, S, E, W))
+
+        # scaling factor for frame2
+        for x in range(f3acolumn):
+            self.f3.columnconfigure(x, weight=1)
+        for x in range(f3arow):
+            self.f3.rowconfigure(x, weight=1)
+
+        # place widgets
+        self.sense_ops = tk.Label(self.f3, text="Sensor Readouts ", font=(font, 25), bg='#000000', fg='#FFFFFF')
+        self.sense_ops.grid(column=0, row='0', columnspan=3, sticky=(N, S, E, W))
+
+        self.FM_O = tk.Label(self.f3, text="Oxygen Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
+        self.FM_O.grid(column=0, row='1', sticky=(N, S, E, W))
+
+        FM_O_live = IntVar(value=shared.LIVE_DATA["FM_IO"])
+
+        self.FM_O_read = tk.Label(self.f3, textvariable=FM_O_live, font=(font, 15), bg='#000000', fg='#FFFFFF')
+
+        self.FM_O_read.grid(column=1, row=1, sticky=(N, S, E, W))
+
+        self.FM_O_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF')
+        self.FM_O_unit.grid(column=2, row='1', sticky=(N, S, E, W))
+
+        self.FM_F = tk.Label(self.f3, text="Fuel Flow Meter ", font=(font, 15), bg='#000000', fg='#FFFFFF')
+        self.FM_F.grid(column=0, row='2', sticky=(N, S, E, W))
+
+        FM_F_live = IntVar(value=shared.LIVE_DATA["FM_IF"])
+
+        self.FM_F_read = tk.Label(self.f3, textvariable=FM_F_live, font=(font, 15), bg='#000000', fg='#FFFFFF')
+        self.FM_F_read.grid(column=1, row='2', sticky=(N, S, E, W))
+
+        self.FM_F_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF')
+        self.FM_F_unit.grid(column=2, row='2', sticky=(N, S, E, W))    
+
+
+    # --------------------------- Setup Manual panel --------------------------- #
+    def init_manual(self):
+        # set grid size on frame 2 (mostly for debugging and convenience of rearranging widgets)
+        f2arow = 4
+        f2acolumn = 9
+        self.f2 = tk.Frame(self.f1, background='#000000', borderwidth=1, relief="sunken", width=100, height=80)
+        self.f2.grid(row=1, columnspan=3, rowspan=2, sticky=(N, S, E, W))
+
+        for column in range(f2acolumn):
+            for row in range(f2arow):
+                self.f2_grid = tk.Label(self.f2, bg='#000000')
+                self.f2_grid.grid(column=column, row=row, sticky=(N, S, E, W))
+
+        # scaling factor for frame2
+        for x in range(f2acolumn):
+            self.f2.columnconfigure(x, weight=1)
+        for x in range(f2arow):
+             self.f2.rowconfigure(x, weight=1)
+
+        # place widgets
+        self.main_ops = tk.Label(self.f1, text="Manual Mode", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
+        self.main_ops.grid(column=1, row='0', sticky=(N, S, W, E))
+
+        # use const file from repository to shrink this to single loop in the future
+        #TODO: FIX SOLENOID PUSH BUTTON FOR ALL VALVES
+                    
+        self.NC_IO = tk.Button(self.f2, text="NCIO", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                               relief='ridge', command=lambda: self.manual_sol_actuate("NCIO"))
+        self.NC_IO.grid(column=8, row=2, sticky=(N, S, E, W))
+
+        self.NC_IF = tk.Button(self.f2, text="NCIF", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                               relief='ridge')
+        self.NC_IF.configure(command=lambda: self.manual_sol_actuate("NCIF"))
+        self.NC_IF.grid(column=0, row=2, sticky=(N, S, E, W))
+
+        self.NO_IP = tk.Button(self.f2, text="NOIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                               relief='ridge', command=lambda: self.manual_sol_actuate("NOIP"))
+        self.NO_IP.grid(column=3, row=2, sticky=(N, S, E, W))
+
+        self.NC_IP = tk.Button(self.f2, text="NCIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                               relief='ridge', command=lambda: self.manual_sol_actuate("NCIP"))
+        self.NC_IP.grid(column=5, row=2, sticky=(N, S, E, W))
+
+        self.NC_3O = tk.Button(self.f2, text="NC3O", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                               relief='ridge', command=lambda: self.manual_sol_actuate("NC3O"))
+        self.NC_3O.grid(column=1, row=0, sticky=(N, S, E, W), padx=40, pady=40)
+
+        self.NC_3N = tk.Button(self.f2, text="NC3N", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                               relief='ridge', command=lambda: self.manual_sol_actuate("NC3N"))
+        self.NC_3N.grid(column=7, row=0, sticky=(N, S, E, W), padx=40, pady=40)
+
+        self.NC_OP = tk.Button(self.f2, text="NCOP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
+                               relief='ridge', command=lambda: self.manual_sol_actuate("NCOP"))
+        self.NC_OP.grid(column=4, row=0, sticky=(N, S, E, W), padx=40, pady=40)
+
+        self.arm_valves = tk.Button(self.f2, text="ARM Valves", font=(font, 15), bg='#ff7300', fg='#FFFFFF',
+                                    borderwidth=20, relief='raised', command=self.enable_all)
+        self.arm_valves.grid(column=4, row=1, sticky=(N, S, E, W), padx=40, pady=40)
+        
+        self.all_manual_btns = [self.NC_IO, self.NC_IF, self.NO_IP, self.NC_IP,
+                                self.NC_3O, self.NC_3N, self.NC_OP]
+        
+        self.disable_all()
+    
+
+    # --------------------------- Setup Fire panel --------------------------- #
+    def init_fire(self):
+        # set grid size on frame 2 (mostly for debugging and convenience of rearranging widgets)
+        f2brow = 10
+        f2bcolumn = 9
+        self.f2 = tk.Frame(self.f1, background='#000000', borderwidth=1, relief="sunken", width=100, height=80)
+        self.f2.grid(row=1, columnspan=3, rowspan=2, sticky=(N, S, E, W))
+
+        for column in range(f2bcolumn):
+            for row in range(f2brow):
+                self.f2_grid = tk.Label(self.f2, bg='#000000')
+                self.f2_grid.grid(column=column, row=row, sticky=(N, S, E, W))
+        # scaling factor for frame2
+        for x in range(f2bcolumn):
+            self.f2.columnconfigure(x, weight=1)
+        for x in range(f2brow):
+            self.f2.rowconfigure(x, weight=1)
+
+        # place widgets
+        self.fire_ops = tk.Label(self.f1, text="Firing Mode", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
+        self.fire_ops.grid(column=1, row='0', sticky=(N, S, W, E))
+
+        self.abort_butt = tk.Button(self.f2, text="ABORT", font=(font, 18), bg='#FF0000', fg='#FFFFFF')
+        self.abort_butt.grid(column=7, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
+
+        self.fire_butt = tk.Button(self.f2, text="FIRE", font=(font, 20), bg='#ff7300', fg='#FFFFFF')
+        self.fire_butt.grid(column=1, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
+
+        self.prefire_1 = tk.Label(self.f2, text="Valves in correct states", font=(font, 15),
+                                   bg='#000000', fg='#FFFFFF')
+        self.prefire_1.grid(column=4, row=2, sticky=(N, S, E, W))
+
+        self.prefire_2 = tk.Label(self.f2, text="Sensor readings nominal"
+                                                 ,  bg='#000000', font=(font, 15), fg='#FFFFFF')
+        self.prefire_2.grid(column=4, row=3, sticky=(N, S, E, W))
+
+        self.prefire_3 = tk.Label(self.f2,
+                                   text="Range admin notified",
+                                   bg='#000000', font=(font, 15), fg='#FFFFFF')
+        self.prefire_3.grid(column=4, row=4, sticky=(N, S, E, W))
+
+        self.prefire_4 = tk.Label(self.f2,
+                                   text="Range is clear",
+                                   bg='#000000', font=(font, 15), fg='#FFFFFF')
+        self.prefire_4.grid(column=4, row=5, sticky=(N, S, E, W))
+
+        self.prefire_5 = tk.Label(self.f2,
+                                   text="Go/No go",
+                                   bg='#000000', font=(font, 15), fg='#FFFFFF')
+        self.prefire_5.grid(column=4, row=6, sticky=(N, S, E, W))
+
+        self.prefire_6 = tk.Label(self.f2,
+                                   text="Send it",
+                                   bg='#000000', font=(font, 15), fg='#FFFFFF')
+        self.prefire_6.grid(column=4, row=7, sticky=(N, S, E, W))
+
+        # pre fire toggle switches, put this in a loop when you get better at python
+
+        self.name1 = tk.Button(self.f2,  bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                             width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name1))
+        self.name1.grid(column=5, row=2, sticky=(N, S, E, W))
+
+        self.name2 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                       width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name2))
+        self.name2.grid(column=5, row=3, sticky=(N, S, E, W))
+
+        self.name3 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                               width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name3))
+        self.name3.grid(column=5, row=4, sticky=(N, S, E, W))
+
+        self.name4 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                               width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name4))
+        self.name4.grid(column=5, row=5, sticky=(N, S, E, W))
+
+        self.name5 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                               width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name5))
+        self.name5.grid(column=5, row=6, sticky=(N, S, E, W))
+
+        self.name6 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                               width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name6))
+        self.name6.grid(column=5, row=7, sticky=(N, S, E, W))
+
+    
     
     # Toggle/Untoggle functions for manual solenoid OPS
     def enable_all(self):
@@ -419,20 +427,11 @@ class PrometheusGUI:
     def manual_sol_actuate(self, sol_name):
         self.SolManager.change_valve_state(sol_name)
         self.disable_all()
+
+    
     
     # manual switch function
 """
-
-    # arm valve function
-    def arm_v(self):
-
-        if self.arm_valves.cget('bg') == '#ff7300':
-            self.arm_valves.configure(bg='#00FF00', relief='sunken')
-            global arm
-            arm = 1
-        elif self.arm_valves.cget('bg') == '#00FF00':
-            self.arm_valves.configure(bg='#ff7300', relief='raised')
-            arm = 2
 
     # this function actuates solenoids and changes button color based on previous state
     def solenoid(self, solbutton):
@@ -462,8 +461,6 @@ class PrometheusGUI:
 ########################################################################################################################
 # -------------------------------------------------- THE END ----------------------------------------------------------#
 ########################################################################################################################
-# loop this shit tho
 root = Tk()
 my_gui = PrometheusGUI(root)
 root.mainloop()
-
