@@ -90,16 +90,16 @@ class PrometheusGUI:
         #########################################################################################
 
         # --------------------------- frame 1 (main labels and panel switches) ---------------------------#
-        self.main_ops = tk.Button(self.f1, text="Manual Mode", font=(font, 20), bg='#FFD700', command=lambda: self.switch_2('Man'))
+        self.main_ops = tk.Button(self.f1, text="Manual Mode", font=(font, 20), bg='#FFD700', command=lambda: self.switch_2('manual'))
         self.main_ops.grid(column=0, row=0, sticky=(N, S, E, W))
 
-        self.fire_ops = tk.Button(self.f1, text="Firing Mode", font=(font, 20), bg='#c41e3a', command=lambda: self.switch_2('Fire'))
+        self.fire_ops = tk.Button(self.f1, text="Firing Mode", font=(font, 20), bg='#c41e3a', command=lambda: self.switch_2('fire'))
         self.fire_ops.grid(column=2, row=0, sticky=(N, S, E, W))
 
         self.abort_ops = tk.Button(self.f1, text="Aborts Values", font=(font, 15), bg='#bc13fe', borderwidth='5', relief='ridge', command=lambda: self.switch_3('aborts'))
         self.abort_ops.grid(column=4, row=0, sticky=(N+E + S + W), padx=30, pady=10)
 
-        self.sense_ops = tk.Button(self.f1, text="Readouts", font=(font, 15), bg='#fe019a', borderwidth='5', relief='ridge', command=lambda: self.switch_3('sense'))
+        self.sense_ops = tk.Button(self.f1, text="Readouts", font=(font, 15), bg='#fe019a', borderwidth='5', relief='ridge', command=lambda: self.switch_3('readouts'))
         self.sense_ops.grid(column=3, row=0, sticky=(N + E+ W + S), padx=30, pady=10)
 
         # --------------------------- frame 4 (set firing parameters) ---------------------------#
@@ -173,16 +173,11 @@ class PrometheusGUI:
 
     # -------------------------------- frame 2 (manual ops and firing ops) -----------------------------------------#
     # this function controls the switch for frame2
-    def switch_2(self, s2):
+    def switch_2(self, desired_display):
         global font
 
-        if s2 == 'Man':
-            switch2 = 'a'
-        elif s2 == 'Fire':
-            switch2 = 'b'
-
         # --------------------------- Manual panel options --------------------------- #
-        if switch2 == 'a':
+        if desired_display == 'manual':
 
             # set grid size on frame 2 (mostly for debugging and convenience of rearranging widgets)
 
@@ -208,52 +203,48 @@ class PrometheusGUI:
 
             # use const file from repository to shrink this to single loop in the future
             #TODO: FIX SOLENOID PUSH BUTTON FOR ALL VALVES
-            """self.NC_IO = tk.Button(self.f2, text="NCIO", font=(font, 20), bg='#FF0000', fg='#FFFFFF',  borderwidth=10,
-                                   relief='ridge', command=lambda: self.solenoid(self.NC_IO))"""
+                        
             self.NC_IO = tk.Button(self.f2, text="NCIO", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NCIO"))
-
-
-
-
+                                   relief='ridge', command=lambda: self.manual_sol_actuate("NCIO"))
             self.NC_IO.grid(column=8, row=2, sticky=(N, S, E, W))
 
             self.NC_IF = tk.Button(self.f2, text="NCIF", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
                                    relief='ridge')
-            self.NC_IF.configure(command=lambda: self.SolManager.change_valve_state("NCIF"))
+            self.NC_IF.configure(command=lambda: self.manual_sol_actuate("NCIF"))
             self.NC_IF.grid(column=0, row=2, sticky=(N, S, E, W))
 
             self.NO_IP = tk.Button(self.f2, text="NOIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NOIP"))
+                                   relief='ridge', command=lambda: self.manual_sol_actuate("NOIP"))
             self.NO_IP.grid(column=3, row=2, sticky=(N, S, E, W))
 
             self.NC_IP = tk.Button(self.f2, text="NCIP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NCIP"))
+                                   relief='ridge', command=lambda: self.manual_sol_actuate("NCIP"))
             self.NC_IP.grid(column=5, row=2, sticky=(N, S, E, W))
 
             self.NC_3O = tk.Button(self.f2, text="NC3O", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NC3O"))
+                                   relief='ridge', command=lambda: self.manual_sol_actuate("NC3O"))
             self.NC_3O.grid(column=1, row=0, sticky=(N, S, E, W), padx=40, pady=40)
 
-            #self.NC_3O = tk.Button(self.f2, text="NC3O", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-            #                      relief='ridge', command=lambda: self.SolManager.change_valve_state("NC3O"))
-            #self.NC_3O.grid(column=1, row=0, sticky=(N, S, E, W), padx=40, pady=40)
-
             self.NC_3N = tk.Button(self.f2, text="NC3N", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NC3N"))
+                                   relief='ridge', command=lambda: self.manual_sol_actuate("NC3N"))
             self.NC_3N.grid(column=7, row=0, sticky=(N, S, E, W), padx=40, pady=40)
 
             self.NC_OP = tk.Button(self.f2, text="NCOP", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
-                                   relief='ridge', command=lambda: self.SolManager.change_valve_state("NCOP"))
+                                   relief='ridge', command=lambda: self.manual_sol_actuate("NCOP"))
             self.NC_OP.grid(column=4, row=0, sticky=(N, S, E, W), padx=40, pady=40)
 
             self.arm_valves = tk.Button(self.f2, text="ARM Valves", font=(font, 15), bg='#ff7300', fg='#FFFFFF',
-                                        borderwidth=20, relief='raised', command=lambda: self.SolManager.change_all_valve_states())
+                                        borderwidth=20, relief='raised', command=self.enable_all)
             self.arm_valves.grid(column=4, row=1, sticky=(N, S, E, W), padx=40, pady=40)
+            
+            self.all_manual_btns = [self.NC_IO, self.NC_IF, self.NO_IP, self.NC_IP,
+                                    self.NC_3O, self.NC_3N, self.NC_OP]
+            
+            self.disable_all()
 
         # --------------------------- Firing panel options --------------------------- #
 
-        elif switch2 == 'b':
+        elif desired_display == 'fire':
             # set grid size on frame 2 (mostly for debugging and convenience of rearranging widgets)
             f2brow = 10
             f2bcolumn = 9
@@ -337,18 +328,11 @@ class PrometheusGUI:
 
     # --------------------------- frame 3 (read outs, a and aborts. b) ---------------------------#
     # this function controls the switch for frame3
-    def switch_3(self, s3):
-
-        global font
-
-        if s3 == 'sense':
-            switch3 = 'a'
-        elif s3 == 'aborts':
-            switch3 = 'b'
+    def switch_3(self, desired_display):
 
         # --------------------------- Sensor Readout Panel --------------------------- #
 
-        if switch3 == 'a':
+        if desired_display == 'readouts':
 
             # set grid size on frame 3a (mostly for debugging and convenience of rearranging widgets)
             f3arow = 21
@@ -392,8 +376,11 @@ class PrometheusGUI:
             self.FM_F_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF')
             self.FM_F_unit.grid(column=2, row='2', sticky=(N, S, E, W))
 
+        
         # --------------------------- Set Aborts panel --------------------------- #
-        elif switch3 == 'b':
+        
+        elif desired_display == 'aborts':
+            
             # set grid size on frame 3 b (mostly for debugging and convenience of rearranging widgets)
             f3brow = 10
             f3bcolumn = 3
@@ -419,7 +406,20 @@ class PrometheusGUI:
     # --------- GUI functionality, setup widgets functions ------------------#
     #---------- here see below section to add/subtract widgets --------------#
     ##########################################################################
-
+    
+    # Toggle/Untoggle functions for manual solenoid OPS
+    def enable_all(self):
+        for btn in self.all_manual_btns:
+            btn["state"] = "normal"
+    
+    def disable_all(self): 
+        for btn in self.all_manual_btns:
+            btn["state"] = "disabled"
+            
+    def manual_sol_actuate(self, sol_name):
+        self.SolManager.change_valve_state(sol_name)
+        self.disable_all()
+    
     # manual switch function
 """
 

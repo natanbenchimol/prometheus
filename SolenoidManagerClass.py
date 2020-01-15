@@ -55,6 +55,7 @@ class SolenoidManager:
         for name in self.raspberryPi_pin_mapping:
             GPIO.setup(self.raspberryPi_pin_mapping[name], GPIO.OUT, initial=GPIO.LOW)
 
+
     def __energize_state(self, name):
         """changes the valve state to an Energized state
             name - name of valve
@@ -64,6 +65,7 @@ class SolenoidManager:
         self.valve_current_state[name] = self.ENERGIZED_STATE
         self.All_valve_deEnergized = False
 
+
     def __non_energized_state(self, name):
         """changes the valve state to an Non-Energized state
            name - name of valve
@@ -71,13 +73,14 @@ class SolenoidManager:
         GPIO.output(self.raspberryPi_pin_mapping[name], GPIO.LOW)
         self.valve_current_state[name] = self.NON_ENERGIZED_STATE
 
+
     def change_valve_state(self, name):
         """ changes the current state of the solenoid valve. States are either open or close
             :param name - name of the valve to change its state
         """
         current_state = self.valve_current_state[name]
 
-        if not self.isEnergized(name):
+        if not self.__isEnergized(name):
             # log state change
             shared.log_event("SOL", name + " transitioning from state " + str(current_state) + " to " + str(
                 self.ENERGIZED_STATE))
@@ -89,12 +92,14 @@ class SolenoidManager:
                 self.NON_ENERGIZED_STATE))
             self.__non_energized_state(name)
 
+
     def reverse_all_state(self):
         """ Reverses all current vale states. If a valve is energized then this method changes it to a
         non-energized state. If a valve is non-energized then it state is changed to an energized state."""
 
         for name in self.raspberryPi_pin_mapping:
             self.change_valve_state(name)
+
 
     def __energize_all_valves(self):
         """ Changes all valve states to an energized state"""
@@ -105,6 +110,7 @@ class SolenoidManager:
                 self.ENERGIZED_STATE))
             self.__energize_state(name)
 
+
     def __deEnergize_all_valves(self):
         """ Changes all valve states to a Non-Energized state"""
         for name in self.raspberryPi_pin_mapping:
@@ -112,6 +118,7 @@ class SolenoidManager:
             shared.log_event("SOL", name + " transitioning from state " + str(current_state) + " to " + str(
                 self.NON_ENERGIZED_STATE))
             self.__non_energized_state(name)
+
 
     def change_all_valve_states(self):
         """ changes the valves state to either all energized or all deEnergized"""
@@ -122,11 +129,13 @@ class SolenoidManager:
             self.__deEnergize_all_valves()
             self.All_valve_deEnergized = True
 
+
     def current_state(self, name):
         """ returns the current state of a valve"""
 
         current_state = self.valve_current_state[name]
         return current_state
+
 
     def __isEnergized(self, name):
         """returns true if valve isEnergized otherwise returns false"""
