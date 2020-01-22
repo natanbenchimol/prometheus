@@ -58,118 +58,18 @@ class PrometheusGUI:
         ###################################################################################
 
         # initialize frame 1 (static panel, includes title, panel change buttons)
-        self.f1 = tk.Frame(parent, background='#000000')
-        self.f1.grid(sticky=(N, S, E, W))
+        self.init_wireframe()
 
-        # initialize frame 2 (central panel side a - manual ops with valve control, side b - fire ops)
-        self.f2 = tk.Frame(self.f1, background='#000000', borderwidth=1, relief="sunken", width=100, height=80)
-        self.f2.grid(row=1, columnspan=3, rowspan=2, sticky=(N, S, E, W))
-
-        # initialize frame 3 (right side panel side A readouts side B set aborts)
-        self.f3 = tk.Frame(self.f1, background='#000000', relief="sunken", width=80)
-        self.f3.grid(column=3, row=1, columnspan=2, rowspan=3, sticky=(N, S, E, W))  # added sticky
-
-        # initialize frame 4 (static panel at bottom for firing parameters)
-        self.f4 = tk.Frame(self.f1, background='#000000', relief="sunken", width=100)
-        self.f4.grid(column=0, row=3, columnspan=3, sticky=(N, S, E, W))  # added sticky
-
-        # ------------------ scaling factors for static frames, (non static frame scaling set below) ------------------#
-        # parent (root)
-        self.parent.columnconfigure(0, weight=1)
-        self.parent.rowconfigure(0, weight=1)
-
-        # f1 (branch of root)
-        for x in range(5):
-            self.f1.columnconfigure(x, weight=1)
-        self.f1.rowconfigure(0, weight=1)
-        for x in range(1, 4):
-            self.f1.rowconfigure(x, weight=4)
 
         #########################################################################################
         # --------------------------- GUI LAYOUT, setup widgets here ---------------------------#
         #########################################################################################
 
         # --------------------------- frame 1 (main labels and panel switches) ---------------------------#
-        self.main_ops = tk.Button(self.f1, text="Manual Mode", font=(font, 20), bg='#FFD700', command=lambda: self.switch_2('manual'))
-        self.main_ops.grid(column=0, row=0, sticky=(N, S, E, W))
-
-        self.fire_ops = tk.Button(self.f1, text="Firing Mode", font=(font, 20), bg='#c41e3a', command=lambda: self.switch_2('fire'))
-        self.fire_ops.grid(column=2, row=0, sticky=(N, S, E, W))
-
-        self.abort_ops = tk.Button(self.f1, text="Aborts Values", font=(font, 15), bg='#bc13fe', borderwidth='5', relief='ridge', command=lambda: self.switch_3('aborts'))
-        self.abort_ops.grid(column=4, row=0, sticky=(N+E + S + W), padx=30, pady=10)
-
-        self.sense_ops = tk.Button(self.f1, text="Readouts", font=(font, 15), bg='#fe019a', borderwidth='5', relief='ridge', command=lambda: self.switch_3('readouts'))
-        self.sense_ops.grid(column=3, row=0, sticky=(N + E+ W + S), padx=30, pady=10)
 
         # --------------------------- frame 4 (set firing parameters) ---------------------------#
         # set grid size on frame 3 b (mostly for debugging and convenience of rearranging widgets)
-        f4brow = 7
-        f4bcolumn = 5
-
-        for column in range(f4bcolumn):
-            for row in range(f4brow):
-                self.f4_grid = tk.Label(self.f4, bg='#000000')
-                self.f4_grid.grid(column=column, row=row, sticky=(N, S, E, W))
-
-        # scaling factor for frame4
-        for x in range(f4bcolumn):
-            self.f4.columnconfigure(x, weight=1)
-        for x in range(f4brow):
-            self.f4.rowconfigure(x, weight=1)
-
-        # add widgets
-        self.fire_param = tk.Label(self.f4, text="Firing Parameters", font=(font, 20, 'bold', 'underline'), bg='#000000',
-                                   fg='#FFFFFF')
-        self.fire_param.grid(column=0, row='0', sticky=(N, S, E, W))
-
-        self.start_param = tk.Label(self.f4, text="Start", font=(font, 20, 'bold'), bg='#000000',
-                                   fg='#FFFFFF')
-        self.start_param.grid(column=1, row=1, sticky=(N, S, E, W))
-
-        self.stop_param = tk.Label(self.f4, text="Stop", font=(font, 20, 'bold'), bg='#000000',
-                                    fg='#FFFFFF')
-        self.stop_param.grid(column=2, row=1, sticky=(N, S, E, W))
-
-        self.progress_param = tk.Label(self.f4, text="Progress Bar", font=(font, 20, 'bold'), bg='#000000',
-                                   fg='#FFFFFF')
-        self.progress_param.grid(column=3, row=1,columnspan=2, sticky=(N, S, E, W))
-
-
-        self.sequence_time = tk.Label(self.f4, text='Total Sequence Time', font=(font, 15, 'bold'), bg='#000000', fg='#FFFFFF')
-        self.sequence_time.grid(column=0, row=2)
-
-        self.sequence_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-                                      fg='#FFFFFF', borderwidth=10, relief='groove')
-        self.sequence_prog.grid(column=3, row=2, columnspan=2, sticky=(N, S, W, E))
-
-        self.spark_frequency = tk.Label(self.f4, text="Spark Frequency", font=(font, 15, 'bold'), bg='#000000',
-                                      fg='#FFFFFF')
-        self.spark_frequency.grid(column=0, row=3)
-
-        self.spark_timing = tk.Label(self.f4, text="Spark Timing", font=(font, 15, 'bold'), bg='#000000',
-                                        fg='#FFFFFF')
-        self.spark_timing.grid(column=0, row=4)
-
-        self.spark_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-                                      fg='#FFFFFF', borderwidth=10, relief='groove')
-        self.spark_prog.grid(column=3, row=4, columnspan=2, sticky=(N, S, W, E))
-
-        self.NC_IO_timing = tk.Label(self.f4, text="NCIO Timing", font=(font, 15, 'bold'), bg='#000000',
-                                     fg='#FFFFFF')
-        self.NC_IO_timing.grid(column=0, row=5)
-
-        self.NCIO_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-                                      fg='#FFFFFF', borderwidth=10, relief='groove')
-        self.NCIO_prog.grid(column=3, row=5, columnspan=2, sticky=(N, S, W, E))
-
-        self.NC_IF_timing = tk.Label(self.f4, text="NCIF Timing", font=(font, 15, 'bold'), bg='#000000',
-                                     fg='#FFFFFF')
-        self.NC_IF_timing.grid(column=0, row=6)
-
-        self.NCIF_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-                                      fg='#FFFFFF', borderwidth=10, relief='groove')
-        self.NCIF_prog.grid(column=3, row=6, columnspan=2, sticky=(N, S, W, E))
+        self.init_firing_params()
 
     # -------------------------------- frame 2 -----------------------------------------#
     # Toggles frame 2 between Manual/Firing Ops
@@ -196,6 +96,35 @@ class PrometheusGUI:
     # --------- GUI functionality, setup widgets functions ------------------#
     #---------- here see below section to add/subtract widgets --------------#
     ##########################################################################
+
+    def init_wireframe(self):
+        self.main_ops = tk.Button(self.f1, text="Manual Mode", font=(font, 20), bg='#FFD700',
+                                  command=lambda: self.switch_2('manual'))
+        self.main_ops.grid(column=0, row=0, sticky=(N, S, E, W))
+
+        self.fire_ops = tk.Button(self.f1, text="Firing Mode", font=(font, 20), bg='#c41e3a',
+                                  command=lambda: self.switch_2('fire'))
+        self.fire_ops.grid(column=2, row=0, sticky=(N, S, E, W))
+
+        self.abort_ops = tk.Button(self.f1, text="Aborts Values", font=(font, 15), bg='#bc13fe', borderwidth='5',
+                                   relief='ridge', command=lambda: self.switch_3('aborts'))
+        self.abort_ops.grid(column=4, row=0, sticky=(N + E + S + W), padx=30, pady=10)
+
+        self.sense_ops = tk.Button(self.f1, text="Readouts", font=(font, 15), bg='#fe019a', borderwidth='5',
+                                   relief='ridge', command=lambda: self.switch_3('readouts'))
+        self.sense_ops.grid(column=3, row=0, sticky=(N + E + W + S), padx=30, pady=10)
+
+        # ------------------ scaling factors for static frames, (non static frame scaling set below) ------------------#
+        # parent (root)
+        self.parent.columnconfigure(0, weight=1)
+        self.parent.rowconfigure(0, weight=1)
+
+        # f1 (branch of root)
+        for x in range(5):
+            self.f1.columnconfigure(x, weight=1)
+        self.f1.rowconfigure(0, weight=1)
+        for x in range(1, 4):
+            self.f1.rowconfigure(x, weight=4)
     
     # --------------------------- Setup Aborts panel --------------------------- #
     def init_aborts(self):
@@ -413,6 +342,74 @@ class PrometheusGUI:
                                width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name6))
         self.name6.grid(column=5, row=7, sticky=(N, S, E, W))
 
+
+    def init_firing_params(self):
+        f4brow = 7
+        f4bcolumn = 5
+
+        for column in range(f4bcolumn):
+            for row in range(f4brow):
+                self.f4_grid = tk.Label(self.f4, bg='#000000')
+                self.f4_grid.grid(column=column, row=row, sticky=(N, S, E, W))
+
+        # scaling factor for frame4
+        for x in range(f4bcolumn):
+            self.f4.columnconfigure(x, weight=1)
+        for x in range(f4brow):
+            self.f4.rowconfigure(x, weight=1)
+
+        # add widgets
+        self.fire_param = tk.Label(self.f4, text="Firing Parameters", font=(font, 20, 'bold', 'underline'), bg='#000000',
+                                   fg='#FFFFFF')
+        self.fire_param.grid(column=0, row='0', sticky=(N, S, E, W))
+
+        self.start_param = tk.Label(self.f4, text="Start", font=(font, 20, 'bold'), bg='#000000',
+                                   fg='#FFFFFF')
+        self.start_param.grid(column=1, row=1, sticky=(N, S, E, W))
+
+        self.stop_param = tk.Label(self.f4, text="Stop", font=(font, 20, 'bold'), bg='#000000',
+                                    fg='#FFFFFF')
+        self.stop_param.grid(column=2, row=1, sticky=(N, S, E, W))
+
+        self.progress_param = tk.Label(self.f4, text="Progress Bar", font=(font, 20, 'bold'), bg='#000000',
+                                   fg='#FFFFFF')
+        self.progress_param.grid(column=3, row=1,columnspan=2, sticky=(N, S, E, W))
+
+
+        self.sequence_time = tk.Label(self.f4, text='Total Sequence Time', font=(font, 15, 'bold'), bg='#000000', fg='#FFFFFF')
+        self.sequence_time.grid(column=0, row=2)
+
+        self.sequence_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
+                                      fg='#FFFFFF', borderwidth=10, relief='groove')
+        self.sequence_prog.grid(column=3, row=2, columnspan=2, sticky=(N, S, W, E))
+
+        self.spark_frequency = tk.Label(self.f4, text="Spark Frequency", font=(font, 15, 'bold'), bg='#000000',
+                                      fg='#FFFFFF')
+        self.spark_frequency.grid(column=0, row=3)
+
+        self.spark_timing = tk.Label(self.f4, text="Spark Timing", font=(font, 15, 'bold'), bg='#000000',
+                                        fg='#FFFFFF')
+        self.spark_timing.grid(column=0, row=4)
+
+        self.spark_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
+                                      fg='#FFFFFF', borderwidth=10, relief='groove')
+        self.spark_prog.grid(column=3, row=4, columnspan=2, sticky=(N, S, W, E))
+
+        self.NC_IO_timing = tk.Label(self.f4, text="NCIO Timing", font=(font, 15, 'bold'), bg='#000000',
+                                     fg='#FFFFFF')
+        self.NC_IO_timing.grid(column=0, row=5)
+
+        self.NCIO_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
+                                      fg='#FFFFFF', borderwidth=10, relief='groove')
+        self.NCIO_prog.grid(column=3, row=5, columnspan=2, sticky=(N, S, W, E))
+
+        self.NC_IF_timing = tk.Label(self.f4, text="NCIF Timing", font=(font, 15, 'bold'), bg='#000000',
+                                     fg='#FFFFFF')
+        self.NC_IF_timing.grid(column=0, row=6)
+
+        self.NCIF_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
+                                      fg='#FFFFFF', borderwidth=10, relief='groove')
+        self.NCIF_prog.grid(column=3, row=6, columnspan=2, sticky=(N, S, W, E))
     
     
     # Toggle/Untoggle functions for manual solenoid OPS
