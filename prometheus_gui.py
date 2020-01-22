@@ -46,6 +46,16 @@ class PrometheusGUI:
             "countdown_start": None  # Variable read by logfile + reader funcs, set when we start recording
         }
 
+        self.toggle_states = {
+            "toggle_1": True,
+            "toggle_2": False,
+            "toggle_3": False,
+            "toggle_4": False,
+            "toggle_5": False,
+            "toggle_6": False,
+            "fire": False,
+        }
+
         # START THE BACKEND CODE, BEGIN SHOWING LIVE VALS
         # daq.run_daq(sol, prom_status)
 
@@ -393,29 +403,31 @@ class PrometheusGUI:
 
         # pre fire toggle switches, put this in a loop when you get better at python
 
-        self.name1 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                               width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name1))
-        self.name1.grid(column=5, row=2, sticky=(N, S, E, W))
+        self.toggle_1 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_1))
+        self.toggle_1.grid(column=5, row=2, sticky=(N, S, E, W))
 
-        self.name2 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                               width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name2))
-        self.name2.grid(column=5, row=3, sticky=(N, S, E, W))
+        self.toggle_2 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_2))
+        self.toggle_2.grid(column=5, row=3, sticky=(N, S, E, W))
 
-        self.name3 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                               width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name3))
-        self.name3.grid(column=5, row=4, sticky=(N, S, E, W))
+        self.toggle_3 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_3))
+        self.toggle_3.grid(column=5, row=4, sticky=(N, S, E, W))
 
-        self.name4 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                               width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name4))
-        self.name4.grid(column=5, row=5, sticky=(N, S, E, W))
+        self.toggle_4 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_4))
+        self.toggle_4.grid(column=5, row=5, sticky=(N, S, E, W))
 
-        self.name5 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                               width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name5))
-        self.name5.grid(column=5, row=6, sticky=(N, S, E, W))
+        self.toggle_5 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_5))
+        self.toggle_5.grid(column=5, row=6, sticky=(N, S, E, W))
 
-        self.name6 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                               width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.name6))
-        self.name6.grid(column=5, row=7, sticky=(N, S, E, W))
+        self.toggle_6 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_6))
+        self.toggle_6.grid(column=5, row=7, sticky=(N, S, E, W))
+
+        toggle_list = [self.toggle_1, self.toggle_2, self.toggle_3, self.toggle_4, self.toggle_5, self.toggle_6, self.fire_butt]
 
     # Toggle/Untoggle functions for manual solenoid OPS
     def enable_all(self):
