@@ -425,7 +425,14 @@ class PrometheusGUI:
         self.SolManager.change_valve_state(sol_name)
         self.disable_all()
 
-    
+    # Prefire toggle
+    def prefire_toggle(self, toggle):
+        bck = str(toggle.cget('image'))
+        if bck == "pyimage1":
+            toggle.configure(image=self.toggle_on)
+        elif bck == "pyimage2":
+            toggle.configure(image=self.toggle_off)
+
     
     # manual switch function
 """
@@ -445,13 +452,6 @@ class PrometheusGUI:
         elif arm == 0:
             return
 
-    # Prefire toggle
-    def prefire_toggle(self, toggle):
-        bck = str(toggle.cget('image'))
-        if bck == "pyimage1":
-            toggle.configure(image=self.toggle_on)
-        elif bck == "pyimage2":
-            toggle.configure(image=self.toggle_off)
 
 
 """
