@@ -28,8 +28,7 @@ class PrometheusGUI:
 
     def __init__(self, parent):
 
-        self.parent = parent
-        parent.title('Prometheus GUI')
+        self.parent.title('Prometheus GUI')
 
         shared.init_live_data()         # Creates int values for all keys
         shared.populate_live_data()     # FILLS WITH FAKE ASS DATA
@@ -98,6 +97,37 @@ class PrometheusGUI:
     ##########################################################################
 
     def init_wireframe(self):
+
+        # initialize frame 1 (static panel, includes title, panel change buttons)
+        self.f1 = tk.Frame(self.parent, background='#000000')
+        self.f1.grid(sticky=(N, S, E, W))
+
+        # initialize frame 2 (central panel side a - manual ops with valve control, side b - fire ops)
+        self.f2 = tk.Frame(self.f1, background='#000000', borderwidth=1, relief="sunken", width=100, height=80)
+        self.f2.grid(row=1, columnspan=3, rowspan=2, sticky=(N, S, E, W))
+
+        # initialize frame 3 (right side panel side A readouts side B set aborts)
+        self.f3 = tk.Frame(self.f1, background='#000000', relief="sunken", width=80)
+        self.f3.grid(column=3, row=1, columnspan=2, rowspan=3, sticky=(N, S, E, W))  # added sticky
+
+        # initialize frame 4 (static panel at bottom for firing parameters)
+        self.f4 = tk.Frame(self.f1, background='#000000', relief="sunken", width=100)
+        self.f4.grid(column=0, row=3, columnspan=3, sticky=(N, S, E, W))  # added sticky
+
+        # ------------------ scaling factors for static frames, (non static frame scaling set below) ------------------#
+        # parent (root)
+        self.parent.columnconfigure(0, weight=1)
+        self.parent.rowconfigure(0, weight=1)
+
+        # f1 (branch of root)
+        for x in range(5):
+            self.f1.columnconfigure(x, weight=1)
+        self.f1.rowconfigure(0, weight=1)
+        for x in range(1, 4):
+            self.f1.rowconfigure(x, weight=4)
+
+
+
         self.main_ops = tk.Button(self.f1, text="Manual Mode", font=(font, 20), bg='#FFD700',
                                   command=lambda: self.switch_2('manual'))
         self.main_ops.grid(column=0, row=0, sticky=(N, S, E, W))
@@ -114,17 +144,7 @@ class PrometheusGUI:
                                    relief='ridge', command=lambda: self.switch_3('readouts'))
         self.sense_ops.grid(column=3, row=0, sticky=(N + E + W + S), padx=30, pady=10)
 
-        # ------------------ scaling factors for static frames, (non static frame scaling set below) ------------------#
-        # parent (root)
-        self.parent.columnconfigure(0, weight=1)
-        self.parent.rowconfigure(0, weight=1)
 
-        # f1 (branch of root)
-        for x in range(5):
-            self.f1.columnconfigure(x, weight=1)
-        self.f1.rowconfigure(0, weight=1)
-        for x in range(1, 4):
-            self.f1.rowconfigure(x, weight=4)
     
     # --------------------------- Setup Aborts panel --------------------------- #
     def init_aborts(self):
