@@ -47,14 +47,25 @@ class PrometheusGUI:
         }
 
         self.toggle_states = {
-            "toggle_1": True,
-            "toggle_2": False,
-            "toggle_3": False,
-            "toggle_4": False,
-            "toggle_5": False,
-            "toggle_6": False,
-            "fire": False,
+            # TOG_NAME: (isEnabled, isOn)
+            "toggle_1": [True, False],
+            "toggle_2": [True, False],
+            "toggle_3": [True, False],
+            "toggle_4": [True, False],
+            "toggle_5": [True, False],
+            "toggle_6": [True, False],
+            "fire": [False, False],
         }
+        
+        self.next_toggle = {
+            "toggle_1": "toggle_2",
+            "toggle_2": "toggle_3",
+            "toggle_3": "toggle_4",
+            "toggle_4": "toggle_5",
+            "toggle_5": "toggle_6",
+            "toggle_6": "fire",
+        }
+            
 
         # START THE BACKEND CODE, BEGIN SHOWING LIVE VALS
         # daq.run_daq(sol, prom_status)
@@ -404,32 +415,39 @@ class PrometheusGUI:
         # pre fire toggle switches, put this in a loop when you get better at python
 
         self.toggle_1 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_1))
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_1, "toggle_1"))
         self.toggle_1.grid(column=5, row=2, sticky=(N, S, E, W))
 
         self.toggle_2 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_2))
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_2, "toggle_2"))
         self.toggle_2.grid(column=5, row=3, sticky=(N, S, E, W))
 
         self.toggle_3 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_3))
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_3, "toggle_3"))
         self.toggle_3.grid(column=5, row=4, sticky=(N, S, E, W))
 
         self.toggle_4 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_4))
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_4, "toggle_4"))
         self.toggle_4.grid(column=5, row=5, sticky=(N, S, E, W))
 
         self.toggle_5 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_5))
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_5, "toggle_5"))
         self.toggle_5.grid(column=5, row=6, sticky=(N, S, E, W))
 
         self.toggle_6 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
-                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_6))
+                                  width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_6, "toggle_6"))
         self.toggle_6.grid(column=5, row=7, sticky=(N, S, E, W))
 
         # Set toggles to what had been set previously
-        toggle_list = [self.toggle_1, self.toggle_2, self.toggle_3, self.toggle_4, self.toggle_5, self.toggle_6, self.fire_butt]
-        self.set_toggles(toggle_list)
+        toggle_dict = {"toggle_1": self.toggle_1,
+                       "toggle_2": self.toggle_2,
+                       "toggle_3": self.toggle_3,
+                       "toggle_4": self.toggle_4,
+                       "toggle_5": self.toggle_5,
+                       "toggle_6": self.toggle_6,
+                       "fire": self.fire_butt}
+        self.set_toggles(toggle_dict)
+        
 
     # Enable all solenoids when ARM VALVES is pressed
     def enable_all(self):
@@ -447,22 +465,34 @@ class PrometheusGUI:
         self.disable_all()
 
     # Loops through dictionary
-    def set_toggles(self, toggle_list):
-        count = 0
-        for toggle in self.toggle_states:
-            if self.toggle_states[toggle] is True:
-                toggle_list[count]["state"] = "enabled"
+    def set_toggles(self, toggle_dict):
+        for toggle_name in self.toggle_states:
+            print(toggle_name, self.toggle_states[toggle_name])
+            
+            # Enables/Disables toggle
+            if self.toggle_states[toggle_name][0] is True:
+                toggle_dict[toggle_name]["state"] = "normal"
             else:
-                toggle_list[count]["state"] = "disabled"
+                toggle_dict[toggle_name]["state"] = "disabled"
+            
+            # Sets toggle to on/off
+            if self.toggle_states[toggle_name][1] is True:
+                toggle_dict[toggle_name].configure(image=self.toggle_on)
+            else:
+                toggle_dict[toggle_name].configure(image=self.toggle_off)
 
 
     # manual switch function
     # Prefire toggle
-    def prefire_toggle(self, toggle):
+    def prefire_toggle(self, toggle, name):
         bck = str(toggle.cget('image'))
+        # Transition from off -> on
         if bck == "pyimage1":
+            self.toggle_states[name] = True
             toggle.configure(image=self.toggle_on)
-        elif bck == "pyimage2":
+        # Transition from on -> off
+        else:
+            self.toggle_states[name] = False
             toggle.configure(image=self.toggle_off)
 
 """
