@@ -427,23 +427,43 @@ class PrometheusGUI:
                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_6))
         self.toggle_6.grid(column=5, row=7, sticky=(N, S, E, W))
 
+        # Set toggles to what had been set previously
         toggle_list = [self.toggle_1, self.toggle_2, self.toggle_3, self.toggle_4, self.toggle_5, self.toggle_6, self.fire_butt]
+        self.set_toggles(toggle_list)
 
-    # Toggle/Untoggle functions for manual solenoid OPS
+    # Enable all solenoids when ARM VALVES is pressed
     def enable_all(self):
         for btn in self.all_manual_btns:
             btn["state"] = "normal"
 
+    # Disable all solenoids when ARM VALVES is pressed
     def disable_all(self):
         for btn in self.all_manual_btns:
             btn["state"] = "disabled"
 
+    # Manually actuating a solenoid after valves ARMED
     def manual_sol_actuate(self, sol_name):
         self.SolManager.change_valve_state(sol_name)
         self.disable_all()
 
-    # manual switch function
+    # Loops through dictionary
+    def set_toggles(self, toggle_list):
+        count = 0
+        for toggle in self.toggle_states:
+            if self.toggle_states[toggle] is True:
+                toggle_list[count]["state"] = "enabled"
+            else:
+                toggle_list[count]["state"] = "disabled"
 
+
+    # manual switch function
+    # Prefire toggle
+    def prefire_toggle(self, toggle):
+        bck = str(toggle.cget('image'))
+        if bck == "pyimage1":
+            toggle.configure(image=self.toggle_on)
+        elif bck == "pyimage2":
+            toggle.configure(image=self.toggle_off)
 
 """
     # this function actuates solenoids and changes button color based on previous state
@@ -459,14 +479,8 @@ class PrometheusGUI:
                 print(GPIO.input(10))
         elif arm == 0:
             return
-    # Prefire toggle
-    def prefire_toggle(self, toggle):
-        bck = str(toggle.cget('image'))
-        if bck == "pyimage1":
-            toggle.configure(image=self.toggle_on)
-        elif bck == "pyimage2":
-            toggle.configure(image=self.toggle_off)
 """
+
 ########################################################################################################################
 # -------------------------------------------------- THE END ----------------------------------------------------------#
 ########################################################################################################################
