@@ -11,8 +11,23 @@ def printNum(num):
 
 def main():
 
-    # Test here
+    toggle_states = {
+        # TOG_NAME: (isEnabled, isOn)
+        "toggle_1": [True, False],
+        "toggle_2": [True, False],
+        "toggle_3": [True, False],
+        "toggle_4": [True, False],
+        "toggle_5": [True, False],
+        "toggle_6": [True, False],
+        "fire": [False, False],
+    }
 
-    print("All done")
+
+
+    for key in toggle_states:
+        toggle_states[key][0] = False
+        print(key, toggle_states[key][0])
+
+
 
 main()

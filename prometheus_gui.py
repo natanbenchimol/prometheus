@@ -49,12 +49,12 @@ class PrometheusGUI:
         self.toggle_states = {
             # TOG_NAME: (isEnabled, isOn)
             "toggle_1": [True, False],
-            "toggle_2": [True, False],
-            "toggle_3": [True, False],
-            "toggle_4": [True, False],
-            "toggle_5": [True, False],
-            "toggle_6": [True, False],
-            "fire": [False, False],
+            "toggle_2": [False, False],
+            "toggle_3": [False, False],
+            "toggle_4": [False, False],
+            "toggle_5": [False, False],
+            "toggle_6": [False, False],
+            "fire": [False, False]
         }
         
         self.next_toggle = {
@@ -63,9 +63,8 @@ class PrometheusGUI:
             "toggle_3": "toggle_4",
             "toggle_4": "toggle_5",
             "toggle_5": "toggle_6",
-            "toggle_6": "fire",
+            "toggle_6": "fire"
         }
-            
 
         # START THE BACKEND CODE, BEGIN SHOWING LIVE VALS
         # daq.run_daq(sol, prom_status)
@@ -291,8 +290,7 @@ class PrometheusGUI:
         self.FM_F_unit = tk.Label(self.f3, text="g/s", font=(font, 15), bg='#000000', fg='#FFFFFF')
         self.FM_F_unit.grid(column=2, row='2', sticky=(N, S, E, W))
 
-        # --------------------------- Setup Manual panel --------------------------- #
-
+    # --------------------------- Setup Manual panel --------------------------- #
     def init_manual(self):
         # set grid size on frame 2 (mostly for debugging and convenience of rearranging widgets)
         f2arow = 4
@@ -316,8 +314,6 @@ class PrometheusGUI:
         self.main_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
         # use const file from repository to shrink this to single loop in the future
-        # TODO: FIX SOLENOID PUSH BUTTON FOR ALL VALVES
-
         self.NC_IO = tk.Button(self.f2, text="NCIO", font=(font, 20), bg='#FF0000', fg='#FFFFFF', borderwidth=10,
                                relief='ridge', command=lambda: self.manual_sol_actuate("NCIO"))
         self.NC_IO.grid(column=8, row=2, sticky=(N, S, E, W))
@@ -353,10 +349,41 @@ class PrometheusGUI:
 
         self.all_manual_btns = [self.NC_IO, self.NC_IF, self.NO_IP, self.NC_IP,
                                 self.NC_3O, self.NC_3N, self.NC_OP]
-
         self.disable_all()
 
+    # --------------------------- Manual Panel Logic Functions --------------------------- #
+
+    # Enable all solenoids when ARM VALVES is pressed
+    def enable_all(self):
+        for btn in self.all_manual_btns:
+            btn["state"] = "normal"
+
+    # Disable all solenoids when ARM VALVES is pressed
+    def disable_all(self):
+        for btn in self.all_manual_btns:
+            btn["state"] = "disabled"
+
+    # Manually actuating a solenoid after valves ARMED
+    def manual_sol_actuate(self, sol_name):
+        self.SolManager.change_valve_state(sol_name)
+        self.disable_all()
+
+    # # this function actuates solenoids and changes button color based on previous state
+    # def solenoid(self, solbutton):
+    #     if arm == 1:
+    #         if solbutton.cget('bg') == '#FF0000':
+    #             GPIO.output(17, GPIO.HIGH)
+    #             solbutton.configure(bg='#00FF00', relief='ridge')
+    #             print(GPIO.input(10))
+    #         elif solbutton.cget('bg') == '#00FF00':
+    #             GPIO.output(17, GPIO.LOW)
+    #             solbutton.configure(bg='#FF0000', relief='ridge')
+    #             print(GPIO.input(10))
+    #     elif arm == 0:
+    #         return
+
     # --------------------------- Setup Fire panel --------------------------- #
+
     def init_fire(self):
         # set grid size on frame 2 (mostly for debugging and convenience of rearranging widgets)
         f2brow = 10
@@ -374,46 +401,29 @@ class PrometheusGUI:
         for x in range(f2brow):
             self.f2.rowconfigure(x, weight=1)
 
-        # place widgets
+        # place labels describing each of the toggles
         self.fire_ops = tk.Label(self.f1, text="Firing Mode", font=(font, 35, 'bold'), bg='#000000', fg='#FFFFFF')
         self.fire_ops.grid(column=1, row='0', sticky=(N, S, W, E))
 
-        self.abort_butt = tk.Button(self.f2, text="ABORT", font=(font, 18), bg='#FF0000', fg='#FFFFFF')
-        self.abort_butt.grid(column=7, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
-
-        self.fire_butt = tk.Button(self.f2, text="FIRE", font=(font, 20), bg='#ff7300', fg='#FFFFFF')
-        self.fire_butt.grid(column=1, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
-
-        self.prefire_1 = tk.Label(self.f2, text="Valves in correct states", font=(font, 15),
-                                  bg='#000000', fg='#FFFFFF')
+        self.prefire_1 = tk.Label(self.f2, text="Valves in correct states", font=(font, 15), bg='#000000', fg='#FFFFFF')
         self.prefire_1.grid(column=4, row=2, sticky=(N, S, E, W))
 
-        self.prefire_2 = tk.Label(self.f2, text="Sensor readings nominal"
-                                  , bg='#000000', font=(font, 15), fg='#FFFFFF')
+        self.prefire_2 = tk.Label(self.f2, text="Sensor readings nominal", bg='#000000', font=(font, 15), fg='#FFFFFF')
         self.prefire_2.grid(column=4, row=3, sticky=(N, S, E, W))
 
-        self.prefire_3 = tk.Label(self.f2,
-                                  text="Range admin notified",
-                                  bg='#000000', font=(font, 15), fg='#FFFFFF')
+        self.prefire_3 = tk.Label(self.f2, text="Range admin notified", bg='#000000', font=(font, 15), fg='#FFFFFF')
         self.prefire_3.grid(column=4, row=4, sticky=(N, S, E, W))
 
-        self.prefire_4 = tk.Label(self.f2,
-                                  text="Range is clear",
-                                  bg='#000000', font=(font, 15), fg='#FFFFFF')
+        self.prefire_4 = tk.Label(self.f2, text="Range is clear", bg='#000000', font=(font, 15), fg='#FFFFFF')
         self.prefire_4.grid(column=4, row=5, sticky=(N, S, E, W))
 
-        self.prefire_5 = tk.Label(self.f2,
-                                  text="Go/No go",
-                                  bg='#000000', font=(font, 15), fg='#FFFFFF')
+        self.prefire_5 = tk.Label(self.f2, text="Go/No go", bg='#000000', font=(font, 15), fg='#FFFFFF')
         self.prefire_5.grid(column=4, row=6, sticky=(N, S, E, W))
 
-        self.prefire_6 = tk.Label(self.f2,
-                                  text="Send it",
-                                  bg='#000000', font=(font, 15), fg='#FFFFFF')
+        self.prefire_6 = tk.Label(self.f2, text="Send it", bg='#000000', font=(font, 15), fg='#FFFFFF')
         self.prefire_6.grid(column=4, row=7, sticky=(N, S, E, W))
 
-        # pre fire toggle switches, put this in a loop when you get better at python
-
+        # Place the toggles themselves
         self.toggle_1 = tk.Button(self.f2, bg='#000000', activebackground="#000000", image=self.toggle_off, height=60,
                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_1, "toggle_1"))
         self.toggle_1.grid(column=5, row=2, sticky=(N, S, E, W))
@@ -438,36 +448,29 @@ class PrometheusGUI:
                                   width=135, highlightthickness=0, bd=0, command=lambda: self.prefire_toggle(self.toggle_6, "toggle_6"))
         self.toggle_6.grid(column=5, row=7, sticky=(N, S, E, W))
 
-        # Set toggles to what had been set previously
-        toggle_dict = {"toggle_1": self.toggle_1,
-                       "toggle_2": self.toggle_2,
-                       "toggle_3": self.toggle_3,
-                       "toggle_4": self.toggle_4,
-                       "toggle_5": self.toggle_5,
-                       "toggle_6": self.toggle_6,
-                       "fire": self.fire_butt}
-        self.set_toggles(toggle_dict)
-        
+        self.abort_butt = tk.Button(self.f2, text="ABORT", font=(font, 18), bg='#FF0000', fg='#FFFFFF')
+        self.abort_butt.grid(column=7, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
 
-    # Enable all solenoids when ARM VALVES is pressed
-    def enable_all(self):
-        for btn in self.all_manual_btns:
-            btn["state"] = "normal"
+        self.fire_butt = tk.Button(self.f2, text="FIRE", font=(font, 20), bg='#ff7300', fg='#FFFFFF')
+        self.fire_butt.grid(column=1, row=3, columnspan=1, rowspan=2, sticky=(N, S, E, W))
 
-    # Disable all solenoids when ARM VALVES is pressed
-    def disable_all(self):
-        for btn in self.all_manual_btns:
-            btn["state"] = "disabled"
+        # Relate names to objects
+        self.toggle_dict = {"toggle_1": self.toggle_1,
+                           "toggle_2": self.toggle_2,
+                           "toggle_3": self.toggle_3,
+                           "toggle_4": self.toggle_4,
+                           "toggle_5": self.toggle_5,
+                           "toggle_6": self.toggle_6,
+                           "fire": self.fire_butt}
+        # Set the toggles to whatever is stored in self.toggle_states
+        self.set_toggles(self.toggle_dict)
 
-    # Manually actuating a solenoid after valves ARMED
-    def manual_sol_actuate(self, sol_name):
-        self.SolManager.change_valve_state(sol_name)
-        self.disable_all()
+    # --------------------------- Fire Panel Logic Functions --------------------------- #
 
     # Loops through dictionary
     def set_toggles(self, toggle_dict):
         for toggle_name in self.toggle_states:
-            print(toggle_name, self.toggle_states[toggle_name])
+            # print(toggle_name, self.toggle_states[toggle_name])
             
             # Enables/Disables toggle
             if self.toggle_states[toggle_name][0] is True:
@@ -476,7 +479,7 @@ class PrometheusGUI:
                 toggle_dict[toggle_name]["state"] = "disabled"
             
             # Sets toggle to on/off
-            if self.toggle_states[toggle_name][1] is True:
+            if self.toggle_states[toggle_name][1] is True and toggle_name is not "fire":
                 toggle_dict[toggle_name].configure(image=self.toggle_on)
             else:
                 toggle_dict[toggle_name].configure(image=self.toggle_off)
@@ -488,28 +491,36 @@ class PrometheusGUI:
         bck = str(toggle.cget('image'))
         # Transition from off -> on
         if bck == "pyimage1":
-            self.toggle_states[name] = True
+            # Set curr toggle to ON
+            self.toggle_states[name][1] = True
             toggle.configure(image=self.toggle_on)
+
+            # Enable next toggle
+            next_tog_name = self.next_toggle[name]
+            self.toggle_states[next_tog_name][0] = True
+            self.toggle_dict[next_tog_name]["state"] = "normal"
+
         # Transition from on -> off
         else:
-            self.toggle_states[name] = False
+            # Set curr toggle to OFF
+            self.toggle_states[name][1] = False
             toggle.configure(image=self.toggle_off)
 
-"""
-    # this function actuates solenoids and changes button color based on previous state
-    def solenoid(self, solbutton):
-        if arm == 1:
-            if solbutton.cget('bg') == '#FF0000':
-                GPIO.output(17, GPIO.HIGH)
-                solbutton.configure(bg='#00FF00', relief='ridge')
-                print(GPIO.input(10))
-            elif solbutton.cget('bg') == '#00FF00':
-                GPIO.output(17, GPIO.LOW)
-                solbutton.configure(bg='#FF0000', relief='ridge')
-                print(GPIO.input(10))
-        elif arm == 0:
-            return
-"""
+            # Need to disable all the bottons after curr toggle in sequence
+            next_tog_name = self.next_toggle[name]
+            while self.toggle_states[next_tog_name][0] is True:    # Body executes until we reach a disabled button
+                # Disable next toggle
+                self.toggle_states[next_tog_name][0] = False
+                self.toggle_dict[next_tog_name]["state"] = "disabled"
+
+                # Change photo of next toggle
+                if next_tog_name is not "fire":
+                    self.toggle_states[next_tog_name][1] = False
+                    self.toggle_dict[next_tog_name].configure(image=self.toggle_off)
+
+                # Get next toggle to check
+                next_tog_name = self.next_toggle[next_tog_name]
+
 
 ########################################################################################################################
 # -------------------------------------------------- THE END ----------------------------------------------------------#
