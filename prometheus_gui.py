@@ -478,8 +478,10 @@ class PrometheusGUI:
             else:
                 toggle_dict[toggle_name]["state"] = "disabled"
             
-            # Sets toggle to on/off
-            if self.toggle_states[toggle_name][1] is True and toggle_name is not "fire":
+            # Sets toggle image to on/off
+            if toggle_name is "fire":
+                pass
+            elif self.toggle_states[toggle_name][1] is True:
                 toggle_dict[toggle_name].configure(image=self.toggle_on)
             else:
                 toggle_dict[toggle_name].configure(image=self.toggle_off)
@@ -508,7 +510,9 @@ class PrometheusGUI:
 
             # Need to disable all the bottons after curr toggle in sequence
             next_tog_name = self.next_toggle[name]
-            while self.toggle_states[next_tog_name][0] is True:    # Body executes until we reach a disabled button
+            # Body executes until we reach a disabled button
+            while self.toggle_states[next_tog_name][0] is True:
+
                 # Disable next toggle
                 self.toggle_states[next_tog_name][0] = False
                 self.toggle_dict[next_tog_name]["state"] = "disabled"
@@ -519,7 +523,8 @@ class PrometheusGUI:
                     self.toggle_dict[next_tog_name].configure(image=self.toggle_off)
 
                 # Get next toggle to check
-                next_tog_name = self.next_toggle[next_tog_name]
+                if next_tog_name is not "fire":
+                    next_tog_name = self.next_toggle[next_tog_name]
 
 
 ########################################################################################################################
