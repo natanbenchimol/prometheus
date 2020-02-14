@@ -130,7 +130,7 @@ class PrometheusGUI:
 
         # --------------------------- frame 4 (set firing parameters) ---------------------------#
         # set grid size on frame 3 b (mostly for debugging and convenience of rearranging widgets)
-        f4brow = 7
+        f4brow = 6
         f4bcolumn = 5
 
         for column in range(f4bcolumn):
@@ -148,11 +148,14 @@ class PrometheusGUI:
         self.fire_param = tk.Label(self.f4, text="Firing Parameters", font=(font, 20, 'bold', 'underline'),
                                    bg='#000000',
                                    fg='#FFFFFF')
-        self.fire_param.grid(column=0, row='0', sticky=(N, S, E, W))
+        self.fire_param.grid(column=0, row=0, sticky=(N, S, E, W))
 
         self.start_param = tk.Label(self.f4, text="Start", font=(font, 20, 'bold'), bg='#000000',
                                     fg='#FFFFFF')
         self.start_param.grid(column=1, row=1, sticky=(N, S, E, W))
+        
+        self.start_spark = tk.Entry(self.f4, width=10, font=(font, 9))
+        self.start_spark.grid(row=2, column=2)
 
         self.stop_param = tk.Label(self.f4, text="Stop", font=(font, 20, 'bold'), bg='#000000',
                                    fg='#FFFFFF')
@@ -161,10 +164,6 @@ class PrometheusGUI:
         self.progress_param = tk.Label(self.f4, text="Progress Bar", font=(font, 20, 'bold'), bg='#000000',
                                        fg='#FFFFFF')
         self.progress_param.grid(column=3, row=1, columnspan=2, sticky=(N, S, E, W))
-
-        self.sequence_time = tk.Label(self.f4, text='Total Sequence Time', font=(font, 15, 'bold'), bg='#000000',
-                                      fg='#FFFFFF')
-        self.sequence_time.grid(column=0, row=2)
 
         self.sequence_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
                                       fg='#FFFFFF', borderwidth=10, relief='groove')
