@@ -150,52 +150,52 @@ class PrometheusGUI:
                                    fg='#FFFFFF')
         self.fire_param.grid(column=0, row=0, sticky=(N, S, E, W))
 
-        self.start_param = tk.Label(self.f4, text="Start", font=(font, 20, 'bold'), bg='#000000',
-                                    fg='#FFFFFF')
-        self.start_param.grid(column=1, row=1, sticky=(N, S, E, W))
-        
-        self.start_spark = tk.Entry(self.f4, width=10, font=(font, 9))
-        self.start_spark.grid(row=2, column=2)
+        self.start_header = tk.Label(self.f4, text="Start", font=(font, 20, 'bold'), bg='#000000',fg='#FFFFFF')
+        self.start_header.grid(column=1, row=2, sticky=(N, S, E, W))
 
-        self.stop_param = tk.Label(self.f4, text="Stop", font=(font, 20, 'bold'), bg='#000000',
-                                   fg='#FFFFFF')
-        self.stop_param.grid(column=2, row=1, sticky=(N, S, E, W))
+        self.stop_header = tk.Label(self.f4, text="Stop", font=(font, 20, 'bold'), bg='#000000', fg='#FFFFFF')
+        self.stop_header.grid(column=2, row=2, sticky=(N, S, E, W))
 
-        self.progress_param = tk.Label(self.f4, text="Progress Bar", font=(font, 20, 'bold'), bg='#000000',
-                                       fg='#FFFFFF')
-        self.progress_param.grid(column=3, row=1, columnspan=2, sticky=(N, S, E, W))
+        self.spark_frequency_lbl = tk.Label(self.f4, text="Spark Frequency", font=(font, 15, 'bold'), bg='#000000',
+                                            fg='#FFFFFF')
+        self.spark_frequency_lbl.grid(column=0, row=1)
 
-        self.sequence_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-                                      fg='#FFFFFF', borderwidth=10, relief='groove')
-        self.sequence_prog.grid(column=3, row=2, columnspan=2, sticky=(N, S, W, E))
-
-        self.spark_frequency = tk.Label(self.f4, text="Spark Frequency", font=(font, 15, 'bold'), bg='#000000',
-                                        fg='#FFFFFF')
-        self.spark_frequency.grid(column=0, row=3)
+        self.spark_freq_input = tk.Entry(self.f4, width=10, font=(font, 9))
+        self.spark_freq_input.grid(row=1, column=1)
 
         self.spark_timing = tk.Label(self.f4, text="Spark Timing", font=(font, 15, 'bold'), bg='#000000',
                                      fg='#FFFFFF')
         self.spark_timing.grid(column=0, row=4)
 
-        self.spark_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-                                   fg='#FFFFFF', borderwidth=10, relief='groove')
-        self.spark_prog.grid(column=3, row=4, columnspan=2, sticky=(N, S, W, E))
-
         self.NC_IO_timing = tk.Label(self.f4, text="NCIO Timing", font=(font, 15, 'bold'), bg='#000000',
                                      fg='#FFFFFF')
         self.NC_IO_timing.grid(column=0, row=5)
-
-        self.NCIO_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-                                  fg='#FFFFFF', borderwidth=10, relief='groove')
-        self.NCIO_prog.grid(column=3, row=5, columnspan=2, sticky=(N, S, W, E))
 
         self.NC_IF_timing = tk.Label(self.f4, text="NCIF Timing", font=(font, 15, 'bold'), bg='#000000',
                                      fg='#FFFFFF')
         self.NC_IF_timing.grid(column=0, row=6)
 
-        self.NCIF_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-                                  fg='#FFFFFF', borderwidth=10, relief='groove')
-        self.NCIF_prog.grid(column=3, row=6, columnspan=2, sticky=(N, S, W, E))
+
+        # self.progress_param = tk.Label(self.f4, text="Progress Bar", font=(font, 20, 'bold'), bg='#000000',
+        #                                fg='#FFFFFF')
+        # self.progress_param.grid(column=3, row=1, columnspan=2, sticky=(N, S, E, W))
+        #
+        # self.sequence_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
+        #                               fg='#FFFFFF', borderwidth=10, relief='groove')
+        # self.sequence_prog.grid(column=3, row=2, columnspan=2, sticky=(N, S, W, E))
+        #
+        # self.spark_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
+        #                            fg='#FFFFFF', borderwidth=10, relief='groove')
+        # self.spark_prog.grid(column=3, row=4, columnspan=2, sticky=(N, S, W, E))
+        #
+        # self.NCIO_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
+        #                           fg='#FFFFFF', borderwidth=10, relief='groove')
+        # self.NCIO_prog.grid(column=3, row=5, columnspan=2, sticky=(N, S, W, E))
+        #
+        # self.NCIF_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
+        #                           fg='#FFFFFF', borderwidth=10, relief='groove')
+        # self.NCIF_prog.grid(column=3, row=6, columnspan=2, sticky=(N, S, W, E))
+
 
     # -------------------------------- frame 2 -----------------------------------------#
     # Toggles frame 2 between Manual/Firing Ops
