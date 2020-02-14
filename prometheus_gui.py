@@ -150,31 +150,34 @@ class PrometheusGUI:
                                    fg='#FFFFFF')
         self.fire_param.grid(column=0, row=0, sticky=(N, S, E, W))
 
-        self.start_header = tk.Label(self.f4, text="Start", font=(font, 20, 'bold'), bg='#000000',fg='#FFFFFF')
+        self.start_header = tk.Label(self.f4, text="Start", font=(font, 20, 'bold', 'underline'), bg='#000000',fg='#FFFFFF')
         self.start_header.grid(column=1, row=2, sticky=(N, S, E, W))
 
-        self.stop_header = tk.Label(self.f4, text="Stop", font=(font, 20, 'bold'), bg='#000000', fg='#FFFFFF')
+        self.stop_header = tk.Label(self.f4, text="Stop", font=(font, 20, 'bold', 'underline'), bg='#000000', fg='#FFFFFF')
         self.stop_header.grid(column=2, row=2, sticky=(N, S, E, W))
 
-        self.spark_frequency_lbl = tk.Label(self.f4, text="Spark Frequency", font=(font, 15, 'bold'), bg='#000000',
+        self.spark_frequency_lbl = tk.Label(self.f4, text="Spark Frequency (Hz)", font=(font, 15, 'bold'), bg='#000000',
                                             fg='#FFFFFF')
         self.spark_frequency_lbl.grid(column=0, row=1)
 
         self.spark_freq_input = tk.Entry(self.f4, width=10, font=(font, 9))
         self.spark_freq_input.grid(row=1, column=1)
 
-        self.spark_timing = tk.Label(self.f4, text="Spark Timing", font=(font, 15, 'bold'), bg='#000000',
-                                     fg='#FFFFFF')
-        self.spark_timing.grid(column=0, row=4)
+        self.spark_timing_lbl = tk.Label(self.f4, text="Spark Timing", font=(font, 15, 'bold'), bg='#000000',
+                                         fg='#FFFFFF')
+        self.spark_timing_lbl.grid(column=0, row=3)
 
-        self.NC_IO_timing = tk.Label(self.f4, text="NCIO Timing", font=(font, 15, 'bold'), bg='#000000',
-                                     fg='#FFFFFF')
-        self.NC_IO_timing.grid(column=0, row=5)
+        self.NC_IO_timing_lbl = tk.Label(self.f4, text="NCIO Timing", font=(font, 15, 'bold'), bg='#000000',
+                                         fg='#FFFFFF')
+        self.NC_IO_timing_lbl.grid(column=0, row=4)
 
-        self.NC_IF_timing = tk.Label(self.f4, text="NCIF Timing", font=(font, 15, 'bold'), bg='#000000',
-                                     fg='#FFFFFF')
-        self.NC_IF_timing.grid(column=0, row=6)
+        self.NC_IF_timing_lbl = tk.Label(self.f4, text="NCIF Timing", font=(font, 15, 'bold'), bg='#000000',
+                                         fg='#FFFFFF')
+        self.NC_IF_timing_lbl.grid(column=0, row=5)
 
+        self.load_vals = tk.Button(self.f4, text="Load Values", font=(font, 15), borderwidth='5',
+                                   relief='ridge')
+        self.load_vals.grid(column=3, row=3)
 
         # self.progress_param = tk.Label(self.f4, text="Progress Bar", font=(font, 20, 'bold'), bg='#000000',
         #                                fg='#FFFFFF')
