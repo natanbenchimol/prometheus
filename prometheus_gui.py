@@ -195,29 +195,27 @@ class PrometheusGUI:
         self.stop_NCIF = tk.Entry(self.f4, width=10, font=(font, 9))
         self.stop_NCIF.grid(row=5, column=2)
 
+        self.entry_list = [self.start_spark, self.stop_spark,
+                           self.start_NCIO, self.stop_NCIO,
+                           self.start_NCIF, self.stop_NCIF]
+
         self.load_vals = tk.Button(self.f4, text="Load Values", font=(font, 15), borderwidth='5',
-                                   relief='ridge')
+                                   relief='ridge',command=lambda: self.save_timings())
         self.load_vals.grid(column=3, row=3)
 
-        # self.progress_param = tk.Label(self.f4, text="Progress Bar", font=(font, 20, 'bold'), bg='#000000',
-        #                                fg='#FFFFFF')
-        # self.progress_param.grid(column=3, row=1, columnspan=2, sticky=(N, S, E, W))
-        #
-        # self.sequence_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-        #                               fg='#FFFFFF', borderwidth=10, relief='groove')
-        # self.sequence_prog.grid(column=3, row=2, columnspan=2, sticky=(N, S, W, E))
-        #
-        # self.spark_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-        #                            fg='#FFFFFF', borderwidth=10, relief='groove')
-        # self.spark_prog.grid(column=3, row=4, columnspan=2, sticky=(N, S, W, E))
-        #
-        # self.NCIO_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-        #                           fg='#FFFFFF', borderwidth=10, relief='groove')
-        # self.NCIO_prog.grid(column=3, row=5, columnspan=2, sticky=(N, S, W, E))
-        #
-        # self.NCIF_prog = tk.Label(self.f4, font=(font, 15, 'bold'), bg='#FFFFFF',
-        #                           fg='#FFFFFF', borderwidth=10, relief='groove')
-        # self.NCIF_prog.grid(column=3, row=6, columnspan=2, sticky=(N, S, W, E))
+
+    # Goes through the values inputted on the frontend and saves them to backend data structures
+    def save_timings(self):
+        print("YUH")
+
+        shared.set_timing(self.start_spark.get(), "SPARK_1")
+        shared.set_timing(self.stop_spark.get(), "SPARK_0")
+
+        shared.set_timing(self.start_NCIO.get(), "NCIO_1")
+        shared.set_timing(self.stop_NCIO.get(), "NCIO_0")
+
+        shared.set_timing(self.start_NCIF.get(), "NCIF_1")
+        shared.set_timing(self.stop_NCIF.get(), "NCIF_0")
 
 
     # -------------------------------- frame 2 -----------------------------------------#
