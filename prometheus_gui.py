@@ -144,7 +144,7 @@ class PrometheusGUI:
         for x in range(f4brow):
             self.f4.rowconfigure(x, weight=1)
 
-        # add widgets
+        # add Labels/Headers
         self.fire_param = tk.Label(self.f4, text="Firing Parameters", font=(font, 20, 'bold', 'underline'),
                                    bg='#000000',
                                    fg='#FFFFFF')
@@ -160,9 +160,6 @@ class PrometheusGUI:
                                             fg='#FFFFFF')
         self.spark_frequency_lbl.grid(column=0, row=1)
 
-        self.spark_freq_input = tk.Entry(self.f4, width=10, font=(font, 9))
-        self.spark_freq_input.grid(row=1, column=1)
-
         self.spark_timing_lbl = tk.Label(self.f4, text="Spark Timing", font=(font, 15, 'bold'), bg='#000000',
                                          fg='#FFFFFF')
         self.spark_timing_lbl.grid(column=0, row=3)
@@ -174,6 +171,30 @@ class PrometheusGUI:
         self.NC_IF_timing_lbl = tk.Label(self.f4, text="NCIF Timing", font=(font, 15, 'bold'), bg='#000000',
                                          fg='#FFFFFF')
         self.NC_IF_timing_lbl.grid(column=0, row=5)
+
+        # Inputs
+        self.default_input = tk.Entry(self.f4, width=10, font=(font, 9))
+
+        self.spark_freq_input = self.default_input
+        self.spark_freq_input.grid(row=1, column=1)
+
+        self.start_spark = self.default_input
+        self.start_spark.grid(row=3, column=1)
+
+        self.stop_spark = self.default_input
+        self.stop_spark.grid(row=3, column=2)
+
+        self.start_NCIO = self.default_input
+        self.start_NCIO.grid(row=4, column=1)
+
+        self.stop_NCIO = self.default_input
+        self.stop_NCIO.grid(row=4, column=2)
+
+        self.start_NCIF = self.default_input
+        self.start_NCIF.grid(row=5, column=1)
+
+        self.stop_NCIF = self.default_input
+        self.stop_NCIF.grid(row=5, column=2)
 
         self.load_vals = tk.Button(self.f4, text="Load Values", font=(font, 15), borderwidth='5',
                                    relief='ridge')
