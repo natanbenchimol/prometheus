@@ -173,27 +173,26 @@ class PrometheusGUI:
         self.NC_IF_timing_lbl.grid(column=0, row=5)
 
         # Inputs
-        self.default_input = tk.Entry(self.f4, width=10, font=(font, 9))
 
-        self.spark_freq_input = self.default_input
+        self.spark_freq_input = tk.Entry(self.f4, width=10, font=(font, 9))
         self.spark_freq_input.grid(row=1, column=1)
 
-        self.start_spark = self.default_input
+        self.start_spark = tk.Entry(self.f4, width=10, font=(font, 9))
         self.start_spark.grid(row=3, column=1)
 
-        self.stop_spark = self.default_input
+        self.stop_spark = tk.Entry(self.f4, width=10, font=(font, 9))
         self.stop_spark.grid(row=3, column=2)
 
-        self.start_NCIO = self.default_input
+        self.start_NCIO = tk.Entry(self.f4, width=10, font=(font, 9))
         self.start_NCIO.grid(row=4, column=1)
 
-        self.stop_NCIO = self.default_input
+        self.stop_NCIO = tk.Entry(self.f4, width=10, font=(font, 9))
         self.stop_NCIO.grid(row=4, column=2)
 
-        self.start_NCIF = self.default_input
+        self.start_NCIF = tk.Entry(self.f4, width=10, font=(font, 9))
         self.start_NCIF.grid(row=5, column=1)
 
-        self.stop_NCIF = self.default_input
+        self.stop_NCIF = tk.Entry(self.f4, width=10, font=(font, 9))
         self.stop_NCIF.grid(row=5, column=2)
 
         self.load_vals = tk.Button(self.f4, text="Load Values", font=(font, 15), borderwidth='5',
